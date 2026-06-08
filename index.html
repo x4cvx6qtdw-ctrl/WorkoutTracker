@@ -746,6 +746,35 @@
   }
   .admin-refresh-btn:active { opacity: 0.7; }
 
+  /* ── Admin Delete ── */
+  .delete-user-btn {
+    width: 100%; margin-top: 16px; padding: 12px; border-radius: 12px;
+    background: rgba(255,59,48,0.1); border: 1px solid rgba(255,59,48,0.25);
+    color: #FF375F; font-size: 14px; font-weight: 600; font-family: inherit;
+    cursor: pointer; transition: all 0.2s;
+  }
+  .delete-user-btn:active { background: rgba(255,59,48,0.25); }
+  .delete-user-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+  .delete-confirm-bar {
+    display: none; margin-top: 10px; padding: 12px; border-radius: 12px;
+    background: rgba(255,59,48,0.08); border: 1px solid rgba(255,59,48,0.2);
+    text-align: center;
+  }
+  .delete-confirm-bar.visible { display: block; animation: slideIn 0.2s ease; }
+  .delete-confirm-text { font-size: 13px; color: #FF375F; margin-bottom: 10px; font-weight: 500; }
+  .delete-confirm-actions { display: flex; gap: 10px; }
+  .delete-confirm-yes {
+    flex: 1; padding: 10px; border-radius: 10px;
+    background: #FF375F; color: #fff; font-size: 14px; font-weight: 700;
+    font-family: inherit; cursor: pointer; border: none;
+  }
+  .delete-confirm-yes:active { opacity: 0.8; }
+  .delete-confirm-no {
+    flex: 1; padding: 10px; border-radius: 10px;
+    background: rgba(255,255,255,0.08); color: var(--text-secondary);
+    font-size: 14px; font-weight: 600; font-family: inherit; cursor: pointer; border: none;
+  }
+
   /* ── Animations ── */
   @keyframes popIn {
     from { opacity: 0; transform: scale(0.95) translateY(8px); }
@@ -1051,10 +1080,17 @@ async function handleAuth() {
   btn.textContent = authMode === 'login' ? 'Logging in...' : 'Creating account...';
 
   let result;
-  if (authMode === 'login') {
-    result = await sb.auth.signInWithPassword({ email, password: pw });
-  } else {
-    result = await sb.auth.signUp({ email, password: pw });
+  try {
+    if (authMode === 'login') {
+      result = await sb.auth.signInWithPassword({ email, password: pw });
+    } else {
+      result = await sb.auth.signUp({ email, password: pw });
+    }
+  } catch(e) {
+    btn.disabled = false;
+    btn.textContent = authMode === 'login' ? 'Log In' : 'Sign Up';
+    errEl.textContent = 'Network error: ' + (e.message || 'Could not reach server. Check your connection or try disabling ad blockers.');
+    return;
   }
 
   btn.disabled = false;
@@ -2319,6 +2355,17 @@ async function loadAdminData() {
               </table>
             </div>
           </div>
+          ${uid !== 'f815eed6-f723-4658-81af-77528378361b' ? `
+          <div class="user-detail-section">
+            <button class="delete-user-btn" onclick="confirmDeleteUser(this, '${uid}', '${email}')">🗑 Delete User</button>
+            <div class="delete-confirm-bar" id="confirm-${uid}">
+              <div class="delete-confirm-text">Delete <strong>${email}</strong> and all their data?</div>
+              <div class="delete-confirm-actions">
+                <button class="delete-confirm-yes" onclick="executeDeleteUser('${uid}')">Yes, Delete</button>
+                <button class="delete-confirm-no" onclick="cancelDeleteUser('${uid}')">Cancel</button>
+              </div>
+            </div>
+          </div>` : '<div style="margin-top:12px;font-size:12px;color:var(--text-tertiary);text-align:center;">👑 This is you</div>'}
         </div>
       `;
       listEl.appendChild(card);
@@ -2327,6 +2374,62 @@ async function loadAdminData() {
   } catch(e) {
     console.warn('Admin load error:', e);
     listEl.innerHTML = '<div class="admin-loading">Error loading data</div>';
+  }
+}
+
+// ── Admin: Delete User ──────────────────────────────────────────────────────
+function confirmDeleteUser(btn, uid, email) {
+  const bar = document.getElementById('confirm-' + uid);
+  bar.classList.add('visible');
+  btn.disabled = true;
+}
+
+function cancelDeleteUser(uid) {
+  const bar = document.getElementById('confirm-' + uid);
+  bar.classList.remove('visible');
+  const btn = bar.previousElementSibling;
+  if (btn) btn.disabled = false;
+}
+
+async function executeDeleteUser(uid) {
+  const bar = document.getElementById('confirm-' + uid);
+  const yesBtn = bar.querySelector('.delete-confirm-yes');
+  yesBtn.textContent = 'Deleting...';
+  yesBtn.disabled = true;
+
+  try {
+    const res = await sbFetch('/rest/v1/rpc/delete_user', {
+      method: 'POST',
+      headers: { 'Prefer': 'return=minimal' },
+      body: JSON.stringify({ target_user_id: uid })
+    });
+
+    if (res && res.ok) {
+      // Remove the card with animation
+      const card = bar.closest('.user-card');
+      card.style.transition = 'all 0.3s';
+      card.style.opacity = '0';
+      card.style.transform = 'scale(0.95)';
+      setTimeout(() => {
+        card.remove();
+        loadAdminData(); // Refresh stats
+      }, 300);
+    } else {
+      const err = res ? await res.text() : 'Network error';
+      yesBtn.textContent = 'Failed';
+      console.warn('Delete error:', err);
+      setTimeout(() => {
+        yesBtn.textContent = 'Yes, Delete';
+        yesBtn.disabled = false;
+      }, 2000);
+    }
+  } catch(e) {
+    console.warn('Delete error:', e);
+    yesBtn.textContent = 'Error';
+    setTimeout(() => {
+      yesBtn.textContent = 'Yes, Delete';
+      yesBtn.disabled = false;
+    }, 2000);
   }
 }
 
