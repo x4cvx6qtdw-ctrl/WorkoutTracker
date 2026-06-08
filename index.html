@@ -1040,15 +1040,16 @@ async function sbFetch(path, opts = {}) {
     if (isGuest) return null;
     const { data: { session } } = await sb.auth.getSession();
     const token = session?.access_token || SB_KEY;
+    const { headers: extraHeaders, ...restOpts } = opts;
     const res = await fetch(SB_URL + path, {
+      ...restOpts,
       headers: {
         'apikey': SB_KEY,
         'Authorization': 'Bearer ' + token,
         'Content-Type': 'application/json',
         'Prefer': 'resolution=merge-duplicates,return=minimal',
-        ...(opts.headers || {})
-      },
-      ...opts
+        ...(extraHeaders || {})
+      }
     });
     return res;
   } catch(e) { console.warn('sbFetch error:', e); return null; }
