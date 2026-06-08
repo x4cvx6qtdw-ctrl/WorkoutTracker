@@ -1277,6 +1277,20 @@ async function loadAllData() {
 
     const { data: bw } = await sb.from('body_weights').select('*');
     if (bw) bw.forEach(r => lsSet(bwKey(r.week), r.weight));
+
+    const { data: food } = await sb.from('food_logs').select('*');
+    if (food) food.forEach(r => {
+      lsSet(foodKey(r.day_key, r.meal_idx), JSON.stringify({
+        name: r.food_name, cal: r.calories, protein: r.protein,
+        carbs: r.carbs, fats: r.fats, deviation: r.deviation, dev_note: r.dev_note
+      }));
+    });
+
+    const { data: water } = await sb.from('water_logs').select('*');
+    if (water) water.forEach(r => lsSet(waterKey(r.day_key), r.cups));
+
+    const { data: targets } = await sb.from('macro_targets').select('*');
+    if (targets) targets.forEach(r => lsSet('target_' + r.day_type, JSON.stringify(r)));
   } catch(e) { console.warn('Load error:', e); }
   hideSyncIndicator();
 }
