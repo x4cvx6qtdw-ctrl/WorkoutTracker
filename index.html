@@ -2214,25 +2214,25 @@ async function loadAdminData() {
 
   try {
     // Fetch all profiles
-    const pRes = await sbFetch('/rest/v1/profiles?select=*&order=last_login.desc');
-    const profiles = pRes && pRes.ok ? await pRes.json() : [];
+    const { data: profiles, error: pErr } = await sb.from('profiles').select('*').order('last_login', { ascending: false });
+    if (pErr) console.warn('Profiles error:', pErr);
 
     // Fetch all workout data
-    const wRes = await sbFetch('/rest/v1/workout_sets?select=user_id,workout_id,exercise_index,set_index,week,weight,reps_done');
-    const allSets = wRes && wRes.ok ? await wRes.json() : [];
+    const { data: allSets, error: wErr } = await sb.from('workout_sets').select('user_id,workout_id,exercise_index,set_index,week,weight,reps_done');
+    if (wErr) console.warn('Sets error:', wErr);
 
     // Fetch all body weights
-    const bRes = await sbFetch('/rest/v1/body_weights?select=user_id,week,weight');
-    const allBW = bRes && bRes.ok ? await bRes.json() : [];
+    const { data: allBW, error: bErr } = await sb.from('body_weights').select('user_id,week,weight');
+    if (bErr) console.warn('BW error:', bErr);
 
     // Fetch all food logs
-    const fRes = await sbFetch('/rest/v1/food_logs?select=user_id,day_key,meal_idx,calories,protein');
-    const allFood = fRes && fRes.ok ? await fRes.json() : [];
+    const { data: allFood, error: fErr } = await sb.from('food_logs').select('user_id,day_key,meal_idx,calories,protein');
+    if (fErr) console.warn('Food error:', fErr);
 
     // Stats
-    const totalUsers = profiles.length;
-    const totalSetsLogged = allSets.filter(s => s.weight).length;
-    const totalMeals = allFood.filter(f => f.calories).length;
+    const totalUsers = (profiles || []).length;
+    const totalSetsLogged = (allSets || []).filter(s => s.weight).length;
+    const totalMeals = (allFood || []).filter(f => f.calories).length;
 
     statsEl.innerHTML = `
       <div class="admin-stat">
@@ -2250,13 +2250,13 @@ async function loadAdminData() {
     `;
 
     // Build user cards
-    if (!profiles.length) {
+    if (!(profiles || []).length) {
       listEl.innerHTML = '<div class="admin-loading">No registered users yet</div>';
       return;
     }
 
     listEl.innerHTML = '';
-    profiles.forEach((profile, idx) => {
+    (profiles || []).forEach((profile, idx) => {
       const uid = profile.id;
       const email = profile.email || 'Unknown';
       const initial = email.charAt(0).toUpperCase();
@@ -2264,9 +2264,9 @@ async function loadAdminData() {
       const lastLogin = profile.last_login ? new Date(profile.last_login).toLocaleDateString() : '—';
 
       // Per-user stats
-      const userSets   = allSets.filter(s => s.user_id === uid);
-      const userBW     = allBW.filter(b => b.user_id === uid);
-      const userFood   = allFood.filter(f => f.user_id === uid);
+      const userSets   = (allSets || []).filter(s => s.user_id === uid);
+      const userBW     = (allBW || []).filter(b => b.user_id === uid);
+      const userFood   = (allFood || []).filter(f => f.user_id === uid);
       const setsLogged = userSets.filter(s => s.weight).length;
       const weeksActive = [...new Set(userSets.map(s => s.week))].length;
       const workoutsHit = [...new Set(userSets.map(s => s.workout_id))].length;
@@ -2399,26 +2399,20 @@ async function executeDeleteUser(uid) {
   yesBtn.disabled = true;
 
   try {
-    const res = await sbFetch('/rest/v1/rpc/delete_user', {
-      method: 'POST',
-      headers: { 'Prefer': 'return=minimal' },
-      body: JSON.stringify({ target_user_id: uid })
-    });
+    const { error } = await sb.rpc('delete_user', { target_user_id: uid });
 
-    if (res && res.ok) {
-      // Remove the card with animation
+    if (!error) {
       const card = bar.closest('.user-card');
       card.style.transition = 'all 0.3s';
       card.style.opacity = '0';
       card.style.transform = 'scale(0.95)';
       setTimeout(() => {
         card.remove();
-        loadAdminData(); // Refresh stats
+        loadAdminData();
       }, 300);
     } else {
-      const err = res ? await res.text() : 'Network error';
       yesBtn.textContent = 'Failed';
-      console.warn('Delete error:', err);
+      console.warn('Delete error:', error);
       setTimeout(() => {
         yesBtn.textContent = 'Yes, Delete';
         yesBtn.disabled = false;
