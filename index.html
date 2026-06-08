@@ -835,6 +835,17 @@
   .lookup-btn:disabled { opacity: 0.4; cursor: not-allowed; }
   .lookup-btn.loading { animation: pulse 1s ease infinite; }
 
+  /* ── Weight Save Button ── */
+  .wt-save-btn {
+    width: 28px; height: 28px; border-radius: 8px;
+    background: rgba(48,209,88,0.12); border: 1px solid rgba(48,209,88,0.3);
+    color: #30D158; font-size: 14px; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0; transition: all 0.2s;
+  }
+  .wt-save-btn:active { background: rgba(48,209,88,0.3); transform: scale(0.9); }
+  .wt-save-btn.saved { background: #30D158; color: #000; }
+
   /* ── Animations ── */
   @keyframes popIn {
     from { opacity: 0; transform: scale(0.95) translateY(8px); }
@@ -1755,9 +1766,9 @@ function buildWeightTracker() {
       <input type="number" inputmode="decimal" class="wt-input"
         placeholder="— lbs" value="${val}"
         data-week="${w}"
-        onchange="saveBodyWeight(this)"
-        onblur="saveBodyWeight(this)"
+        oninput="saveBodyWeight(this)"
       >
+      <button class="wt-save-btn" onclick="confirmSaveWeight(this, ${w})">↑</button>
       ${deltaStr ? `<div class="wt-delta" style="color:${deltaColor}">${deltaStr}</div>` : '<div class="wt-delta"></div>'}
     `;
     el.appendChild(row);
@@ -1765,12 +1776,48 @@ function buildWeightTracker() {
 }
 
 function saveBodyWeight(input) {
+  // Only update cache on input, don't rebuild or save yet
   const w   = parseInt(input.getAttribute('data-week'));
+  lsSet(bwKey(w), input.value);
+}
+
+function confirmSaveWeight(btn, weekIdx) {
+  const row = document.getElementById('wt-row-' + weekIdx);
+  const input = row.querySelector('.wt-input');
   const val = input.value;
-  lsSet(bwKey(w), val);
-  saveBodyWeightRemote(w, val);
-  buildWeightTracker();
+  lsSet(bwKey(weekIdx), val);
+  saveBodyWeightRemote(weekIdx, val);
+
+  // Visual feedback
+  btn.textContent = '✓';
+  btn.classList.add('saved');
+  setTimeout(function() {
+    btn.textContent = '↑';
+    btn.classList.remove('saved');
+  }, 1500);
+
+  // Update deltas and stats without rebuilding inputs
+  updateWeightDeltas();
   updateWeightStats();
+}
+
+function updateWeightDeltas() {
+  for (var w = 0; w < getWeeks(); w++) {
+    var row = document.getElementById('wt-row-' + w);
+    if (!row) continue;
+    var deltaEl = row.querySelector('.wt-delta');
+    if (!deltaEl) continue;
+    var val = lsGet(bwKey(w));
+    var prev = w > 0 ? lsGet(bwKey(w - 1)) : null;
+    if (val && prev) {
+      var delta = (parseFloat(val) - parseFloat(prev)).toFixed(1);
+      var color = parseFloat(delta) < 0 ? '#30D158' : parseFloat(delta) > 0 ? '#FF9F0A' : 'rgba(255,255,255,0.3)';
+      deltaEl.textContent = (parseFloat(delta) > 0 ? '+' : '') + delta;
+      deltaEl.style.color = color;
+    } else {
+      deltaEl.textContent = '';
+    }
+  }
 }
 
 function updateWeightStats() {
