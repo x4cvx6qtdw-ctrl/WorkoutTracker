@@ -1195,14 +1195,11 @@ async function showApp() {
 
   // Upsert profile for registered users
   if (!isGuest && currentUser?.id) {
-    sbFetch('/rest/v1/profiles', {
-      method: 'POST',
-      body: JSON.stringify({
-        id: currentUser.id,
-        email: currentUser.email,
-        last_login: new Date().toISOString()
-      })
-    });
+    sb.from('profiles').upsert({
+      id: currentUser.id,
+      email: currentUser.email,
+      last_login: new Date().toISOString()
+    }, { onConflict: 'id' });
   }
 
   // Show profile badge
@@ -1247,21 +1244,14 @@ async function loadAllData() {
   if (isGuest) return;
   showSyncIndicator('loading');
   try {
-    const [r1, r2] = await Promise.all([
-      sbFetch('/rest/v1/workout_sets?select=*'),
-      sbFetch('/rest/v1/body_weights?select=*')
-    ]);
-    if (r1 && r1.ok) {
-      const rows = await r1.json();
-      rows.forEach(r => {
-        lsSet(wKey(r.workout_id, r.exercise_index, r.set_index, r.week), r.weight || '');
-        lsSet(rKey(r.workout_id, r.exercise_index, r.set_index, r.week), r.reps_done || '');
-      });
-    }
-    if (r2 && r2.ok) {
-      const rows = await r2.json();
-      rows.forEach(r => lsSet(bwKey(r.week), r.weight));
-    }
+    const { data: sets } = await sb.from('workout_sets').select('*');
+    if (sets) sets.forEach(r => {
+      lsSet(wKey(r.workout_id, r.exercise_index, r.set_index, r.week), r.weight || '');
+      lsSet(rKey(r.workout_id, r.exercise_index, r.set_index, r.week), r.reps_done || '');
+    });
+
+    const { data: bw } = await sb.from('body_weights').select('*');
+    if (bw) bw.forEach(r => lsSet(bwKey(r.week), r.weight));
   } catch(e) { console.warn('Load error:', e); }
   hideSyncIndicator();
 }
@@ -1269,20 +1259,19 @@ async function loadAllData() {
 // ── Save workout set weight + reps ───────────────────────────────────────────
 async function saveSetRemote(workout_id, exercise_index, set_index, week, weight, reps_done) {
   showSyncIndicator('saving');
-  await sbFetch('/rest/v1/workout_sets', {
-    method: 'POST',
-    body: JSON.stringify({ workout_id, exercise_index, set_index, week, weight, reps_done, user_id: currentUser?.id, updated_at: new Date().toISOString() })
-  });
+  await sb.from('workout_sets').upsert({
+    workout_id, exercise_index, set_index, week, weight, reps_done,
+    user_id: currentUser?.id, updated_at: new Date().toISOString()
+  }, { onConflict: 'user_id,workout_id,exercise_index,set_index,week' });
   hideSyncIndicator();
 }
 
 // ── Save body weight ──────────────────────────────────────────────────────────
 async function saveBodyWeightRemote(week, weight) {
   showSyncIndicator('saving');
-  await sbFetch('/rest/v1/body_weights', {
-    method: 'POST',
-    body: JSON.stringify({ week, weight, updated_at: new Date().toISOString() })
-  });
+  await sb.from('body_weights').upsert({
+    week, weight, user_id: currentUser?.id, updated_at: new Date().toISOString()
+  }, { onConflict: 'user_id,week' });
   hideSyncIndicator();
 }
 
@@ -2099,21 +2088,18 @@ function saveMealFieldByIndex(mi) {
 
 async function saveFoodLogRemote(day_key, meal_idx, data) {
   showSyncIndicator('saving');
-  await sbFetch('/rest/v1/food_logs', {
-    method: 'POST',
-    body: JSON.stringify({
-      day_key, meal_idx,
-      food_name: data.name,
-      calories: data.cal || null,
-      protein: data.protein || null,
-      carbs: data.carbs || null,
-      fats: data.fats || null,
-      deviation: data.deviation,
-      dev_note: data.dev_note,
-      user_id: currentUser?.id,
-      updated_at: new Date().toISOString()
-    })
-  });
+  await sb.from('food_logs').upsert({
+    day_key, meal_idx,
+    food_name: data.name,
+    calories: data.cal || null,
+    protein: data.protein || null,
+    carbs: data.carbs || null,
+    fats: data.fats || null,
+    deviation: data.deviation,
+    dev_note: data.dev_note,
+    user_id: currentUser?.id,
+    updated_at: new Date().toISOString()
+  }, { onConflict: 'user_id,day_key,meal_idx' });
   hideSyncIndicator();
 }
 
@@ -2190,10 +2176,9 @@ function setWater(dayKey, cups, total) {
 
 async function saveWaterRemote(day_key, cups) {
   showSyncIndicator('saving');
-  await sbFetch('/rest/v1/water_logs', {
-    method: 'POST',
-    body: JSON.stringify({ day_key, cups, user_id: currentUser?.id, updated_at: new Date().toISOString() })
-  });
+  await sb.from('water_logs').upsert({
+    day_key, cups, user_id: currentUser?.id, updated_at: new Date().toISOString()
+  }, { onConflict: 'user_id,day_key' });
   hideSyncIndicator();
 }
 
@@ -2242,10 +2227,9 @@ function saveTargets() {
 }
 async function saveTargetsRemote(t) {
   showSyncIndicator('saving');
-  await sbFetch('/rest/v1/macro_targets', {
-    method: 'POST',
-    body: JSON.stringify({ ...t, user_id: currentUser?.id, updated_at: new Date().toISOString() })
-  });
+  await sb.from('macro_targets').upsert({
+    ...t, user_id: currentUser?.id, updated_at: new Date().toISOString()
+  }, { onConflict: 'user_id,day_type' });
   hideSyncIndicator();
 }
 
