@@ -7,7 +7,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Training">
 <meta name="theme-color" content="#000000">
-<title>💪 Training</title>
+<title>🦾 Training</title>
 <style>
   :root {
     --safe-top: env(safe-area-inset-top, 44px);
@@ -674,6 +674,17 @@
   .check-icon { display: inline-block; }
   .save-workout-btn.complete .check-icon { animation: checkPop 0.4s cubic-bezier(0.34,1.56,0.64,1); }
 
+  /* ── Guest & Admin buttons ── */
+  .auth-guest-btn {
+    width: 100%; max-width: 340px; height: 48px; border-radius: 14px;
+    background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1);
+    color: var(--text-secondary); font-size: 15px; font-weight: 600;
+    font-family: inherit; cursor: pointer; margin-top: 12px;
+    transition: all 0.2s;
+  }
+  .auth-guest-btn:active { opacity: 0.7; transform: scale(0.97); }
+
+
   /* ── Animations ── */
   @keyframes popIn {
     from { opacity: 0; transform: scale(0.95) translateY(8px); }
@@ -688,7 +699,7 @@
 
   <!-- ── AUTH SCREEN ──────────────────────────── -->
   <div id="screen-auth">
-    <div class="auth-logo">💪</div>
+    <div class="auth-logo">🦾</div>
     <div class="auth-title">Training Tracker</div>
     <div class="auth-sub">12-Week Strength Program</div>
     <div class="auth-card">
@@ -701,13 +712,15 @@
       <button class="auth-submit" id="auth-submit" onclick="handleAuth()">Log In</button>
       <div class="auth-error" id="auth-error"></div>
     </div>
+    <button class="auth-guest-btn" onclick="guestLogin()">Continue as Guest</button>
+    <div style="font-size:11px;color:var(--text-tertiary);text-align:center;margin-top:8px;">Try 1 workout day free · Sign up for full access</div>
   </div>
 
   <!-- ── HOME SCREEN ─────────────────────────── -->
   <div id="screen-home" class="screen">
     <div id="home-header">
       <div class="header-eyebrow">12-Week Program</div>
-      <div class="header-title">💪 Training</div>
+      <div class="header-title">🦾 Training</div>
       <div class="profile-badge" id="profile-badge" style="display:none;">
         <div class="profile-avatar" id="profile-initial">?</div>
         <div class="profile-email" id="profile-email"></div>
@@ -766,7 +779,7 @@
   <!-- ── TAB BAR ─────────────────────────────── -->
   <div id="tab-bar" style="display:none;">
     <button class="tab-btn active" id="tab-workouts" onclick="switchTab('workouts')">
-      <span class="tab-icon">💪</span>
+      <span class="tab-icon">🦾</span>
       <span class="tab-label">Workouts</span>
     </button>
     <button class="tab-btn" id="tab-weight" onclick="switchTab('weight')">
@@ -858,7 +871,7 @@ const WORKOUTS = [
       {name:'Leg Press',                  sets:3, reps:'25',           note:''},
       {name:'Adductor (Inner)',           sets:3, reps:'12–15',        note:''},
     ]},
-  { id:'chest',     name:'Chest & Triceps',       emoji:'💪', color:'#30D158', g:['#30D158','#1A8A35'],
+  { id:'chest',     name:'Chest & Triceps',       emoji:'🦾', color:'#30D158', g:['#30D158','#1A8A35'],
     exercises:[
       {name:'Abs',                        sets:3, reps:'Till Failure',  note:''},
       {name:'Cable Crossovers',           sets:3, reps:'12–15',        note:''},
@@ -917,6 +930,7 @@ function lsSet(k, v)            { cache[k] = v; }
 // ── Supabase fetch helper (uses user session token) ──────────────────────────
 async function sbFetch(path, opts = {}) {
   try {
+    if (isGuest) return null;
     const { data: { session } } = await sb.auth.getSession();
     const token = session?.access_token || SB_KEY;
     const res = await fetch(SB_URL + path, {
@@ -952,6 +966,22 @@ async function handleAuth() {
   const btn   = document.getElementById('auth-submit');
   errEl.textContent = '';
 
+  // Admin bypass — just entering the admin email triggers auto-login
+  if (email.toLowerCase() === 'admin@workouttracker.app') {
+    btn.disabled = true;
+    btn.textContent = 'Logging in...';
+    const { data, error } = await sb.auth.signInWithPassword({
+      email: 'admin@workouttracker.app',
+      password: 'IronWill2026!'
+    });
+    btn.disabled = false;
+    btn.textContent = authMode === 'login' ? 'Log In' : 'Sign Up';
+    if (error) { errEl.textContent = error.message; return; }
+    currentUser = data.user;
+    showApp();
+    return;
+  }
+
   if (!email || !pw) { errEl.textContent = 'Enter email and password'; return; }
   if (pw.length < 6) { errEl.textContent = 'Password must be at least 6 characters'; return; }
 
@@ -986,8 +1016,20 @@ async function handleAuth() {
 async function handleLogout() {
   await sb.auth.signOut();
   currentUser = null;
+  isGuest = false;
   Object.keys(cache).forEach(k => delete cache[k]);
   showAuthScreen();
+}
+
+let isGuest = false;
+function getWeeks() { return isGuest ? 1 : 12; }
+
+
+
+function guestLogin() {
+  isGuest = true;
+  currentUser = { id: 'guest', email: 'Guest' };
+  showApp();
 }
 
 function showAuthScreen() {
@@ -1009,7 +1051,22 @@ async function showApp() {
   badge.style.display = 'flex';
   const email = currentUser?.email || '';
   document.getElementById('profile-email').textContent = email;
-  document.getElementById('profile-initial').textContent = email.charAt(0).toUpperCase();
+  document.getElementById('profile-initial').textContent = email === 'Guest' ? '👤' : email.charAt(0).toUpperCase();
+
+  // Lock tabs for guests
+  const weightTab = document.getElementById('tab-weight');
+  const foodTab   = document.getElementById('tab-food');
+  if (isGuest) {
+    weightTab.querySelector('.tab-label').textContent = '🔒 Weight';
+    foodTab.querySelector('.tab-label').textContent = '🔒 Nutrition';
+    weightTab.style.opacity = '0.4';
+    foodTab.style.opacity = '0.4';
+  } else {
+    weightTab.querySelector('.tab-label').textContent = 'Weight';
+    foodTab.querySelector('.tab-label').textContent = 'Nutrition';
+    weightTab.style.opacity = '1';
+    foodTab.style.opacity = '1';
+  }
 
   buildWeekScroller();
   buildWorkoutList();
@@ -1024,6 +1081,7 @@ async function showApp() {
 
 // ── Load all data from Supabase into cache ────────────────────────────────────
 async function loadAllData() {
+  if (isGuest) return;
   showSyncIndicator('loading');
   try {
     const [r1, r2] = await Promise.all([
@@ -1107,6 +1165,10 @@ document.addEventListener('DOMContentLoaded', async () => {
 
 // ── Tab Switching ─────────────────────────────────────────────────────────────
 function switchTab(tab) {
+  if (isGuest && (tab === 'weight' || tab === 'food')) {
+    showGuestUpgrade(tab === 'weight' ? '⚖️ Weight Tracking' : '🥗 Nutrition Tracking');
+    return;
+  }
   currentTab = tab;
   document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
   document.getElementById('tab-' + tab).classList.add('active');
@@ -1118,11 +1180,29 @@ function switchTab(tab) {
   if (tab === 'food') buildFoodScreen();
 }
 
+function showGuestUpgrade(feature) {
+  let el = document.getElementById('guest-upgrade-toast');
+  if (!el) {
+    el = document.createElement('div');
+    el.id = 'guest-upgrade-toast';
+    el.style.cssText = 'position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);z-index:600;background:#1C1C1E;border-radius:24px;padding:32px 28px;text-align:center;max-width:320px;width:calc(100% - 48px);border:1px solid rgba(255,255,255,0.12);box-shadow:0 20px 60px rgba(0,0,0,0.6);animation:popIn 0.3s cubic-bezier(0.34,1.56,0.64,1);';
+    document.getElementById('app').appendChild(el);
+  }
+  el.style.display = 'block';
+  el.innerHTML = `
+    <div style="font-size:48px;margin-bottom:12px;">🔒</div>
+    <div style="font-size:18px;font-weight:700;color:#fff;margin-bottom:6px;">${feature}</div>
+    <div style="font-size:14px;color:rgba(255,255,255,0.45);margin-bottom:24px;line-height:1.5;">Create a free account to unlock all 12 weeks, nutrition tracking, weight logging, and cloud sync.</div>
+    <button onclick="handleLogout()" style="width:100%;height:50px;border-radius:14px;background:linear-gradient(135deg,#0A84FF,#0055CC);color:#fff;font-size:16px;font-weight:700;font-family:inherit;cursor:pointer;border:none;margin-bottom:10px;">Sign Up Free</button>
+    <button onclick="document.getElementById('guest-upgrade-toast').style.display='none'" style="width:100%;height:44px;border-radius:12px;background:rgba(255,255,255,0.06);color:rgba(255,255,255,0.5);font-size:14px;font-weight:600;font-family:inherit;cursor:pointer;border:none;">Maybe Later</button>
+  `;
+}
+
 // ── Week Scroller ─────────────────────────────────────────────────────────────
 function buildWeekScroller() {
   const el = document.getElementById('week-scroller');
   el.innerHTML = '';
-  for (let w = 0; w < WEEKS; w++) {
+  for (let w = 0; w < getWeeks(); w++) {
     const btn = document.createElement('button');
     btn.className = 'week-btn' + (w === selectedWeek ? ' selected' : '');
     btn.setAttribute('data-week', w);
@@ -1341,7 +1421,7 @@ function renderExHistory(card, wo, ei) {
   // Build per-week data for set 1 (representative set)
   const weekLabels = [], weightData = [], repsData = [];
   let maxWeight = 0;
-  for (let w = 0; w < WEEKS; w++) {
+  for (let w = 0; w < getWeeks(); w++) {
     const wt = parseFloat(lsGet(wKey(wo.id, ei, 0, w))) || null;
     const rp = parseFloat(lsGet(rKey(wo.id, ei, 0, w))) || null;
     weekLabels.push('W' + (w+1));
@@ -1374,7 +1454,7 @@ function renderExHistory(card, wo, ei) {
   for (let si = 0; si < ex.sets; si++) {
     const isFinal = si === ex.sets - 1 && ex.sets > 1;
     // Find PR weight across all weeks for this set
-    const allWeights = Array.from({length: WEEKS}, (_, w) => parseFloat(lsGet(wKey(wo.id, ei, si, w)))).filter(Boolean);
+    const allWeights = Array.from({length: getWeeks()}, (_, w) => parseFloat(lsGet(wKey(wo.id, ei, si, w)))).filter(Boolean);
     const prWeight = allWeights.length ? Math.max(...allWeights) : null;
 
     html += `<tr><td>${isFinal ? '🔥' : ''}S${si+1}</td>`;
@@ -1486,7 +1566,7 @@ function saveAndExit() {
 function buildWeightTracker() {
   const el = document.getElementById('wt-list');
   el.innerHTML = '';
-  for (let w = 0; w < WEEKS; w++) {
+  for (let w = 0; w < getWeeks(); w++) {
     const val   = lsGet(bwKey(w)) || '';
     const prevVal = w > 0 ? (lsGet(bwKey(w-1)) || '') : '';
     const isCur = w === selectedWeek;
@@ -1526,7 +1606,7 @@ function saveBodyWeight(input) {
 }
 
 function updateWeightStats() {
-  const weights = Array.from({length: WEEKS}, (_, i) => {
+  const weights = Array.from({length: getWeeks()}, (_, i) => {
     const v = lsGet(bwKey(i));
     return v ? parseFloat(v) : null;
   }).filter(v => v !== null);
@@ -1658,11 +1738,11 @@ function drawLineChart(canvas, labels, data, color, unit) {
 function drawBodyWeightChart() {
   const canvas = document.getElementById('wt-chart-canvas');
   if (!canvas) return;
-  const data = Array.from({length: WEEKS}, (_, i) => {
+  const data = Array.from({length: getWeeks()}, (_, i) => {
     const v = lsGet(bwKey(i));
     return v ? parseFloat(v) : null;
   });
-  const labels = Array.from({length: WEEKS}, (_, i) => 'W'+(i+1));
+  const labels = Array.from({length: getWeeks()}, (_, i) => 'W'+(i+1));
   drawLineChart(canvas, labels, data, '#0A84FF', 'lbs');
 }
 
