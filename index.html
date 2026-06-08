@@ -685,6 +685,67 @@
   .auth-guest-btn:active { opacity: 0.7; transform: scale(0.97); }
 
 
+  /* ── Admin Dashboard ── */
+  #screen-admin { overflow-y: auto; padding-bottom: 90px; flex: 1; flex-direction: column; }
+  .admin-header {
+    padding: calc(var(--safe-top) + 12px) 20px 16px;
+    position: sticky; top: 0; z-index: 100;
+    background: rgba(0,0,0,0.85);
+    backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+  }
+  .admin-stats-row { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; padding: 0 16px 16px; }
+  .admin-stat {
+    background: var(--card); border-radius: 14px; padding: 14px 12px;
+    text-align: center; border: 1px solid var(--card-border);
+  }
+  .admin-stat-num { font-size: 24px; font-weight: 800; line-height: 1; }
+  .admin-stat-label { font-size: 10px; color: var(--text-tertiary); text-transform: uppercase; letter-spacing: 0.8px; margin-top: 4px; }
+  .admin-section-title {
+    font-size: 12px; font-weight: 600; color: var(--text-tertiary);
+    text-transform: uppercase; letter-spacing: 1.1px; padding: 0 16px 10px; margin-top: 8px;
+  }
+  .user-card {
+    margin: 0 16px 10px; background: var(--card); border-radius: 16px;
+    overflow: hidden; border: 1px solid var(--card-border);
+  }
+  .user-card-header {
+    padding: 14px 16px; display: flex; align-items: center; gap: 12px;
+    cursor: pointer; width: 100%; text-align: left; font-family: inherit;
+  }
+  .user-card-header:active { background: rgba(255,255,255,0.04); }
+  .user-avatar {
+    width: 38px; height: 38px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 15px; font-weight: 800; color: #fff; flex-shrink: 0;
+  }
+  .user-info { flex: 1; min-width: 0; }
+  .user-email { font-size: 14px; font-weight: 600; color: var(--text); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .user-meta { font-size: 11px; color: var(--text-tertiary); margin-top: 2px; }
+  .user-chevron { color: var(--text-tertiary); font-size: 16px; transition: transform 0.25s cubic-bezier(0.34,1.56,0.64,1); }
+  .user-card.open .user-chevron { transform: rotate(90deg); }
+  .user-detail { display: none; padding: 0 16px 16px; border-top: 1px solid var(--separator); animation: slideIn 0.2s ease; }
+  .user-card.open .user-detail { display: block; }
+  .user-detail-section { margin-top: 12px; }
+  .user-detail-label { font-size: 11px; font-weight: 600; color: var(--text-tertiary); text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 6px; }
+  .user-detail-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(80px, 1fr)); gap: 6px; }
+  .user-detail-cell {
+    background: rgba(255,255,255,0.06); border-radius: 10px; padding: 8px;
+    text-align: center;
+  }
+  .user-detail-cell .cell-label { font-size: 9px; color: var(--text-tertiary); text-transform: uppercase; }
+  .user-detail-cell .cell-value { font-size: 14px; font-weight: 700; color: var(--text); margin-top: 2px; }
+  .admin-loading {
+    text-align: center; padding: 40px 16px; color: var(--text-tertiary);
+    font-size: 14px;
+  }
+  .admin-refresh-btn {
+    margin: 0 16px 16px; width: calc(100% - 32px); height: 44px;
+    border-radius: 12px; background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.1); color: var(--text-secondary);
+    font-size: 14px; font-weight: 600; font-family: inherit; cursor: pointer;
+  }
+  .admin-refresh-btn:active { opacity: 0.7; }
+
   /* ── Animations ── */
   @keyframes popIn {
     from { opacity: 0; transform: scale(0.95) translateY(8px); }
@@ -790,6 +851,10 @@
       <span class="tab-icon">🥗</span>
       <span class="tab-label">Nutrition</span>
     </button>
+    <button class="tab-btn" id="tab-admin" onclick="switchTab('admin')" style="display:none;">
+      <span class="tab-icon">👑</span>
+      <span class="tab-label">Admin</span>
+    </button>
   </div>
 
 
@@ -815,6 +880,19 @@
     </div>
     <div id="meal-cards"></div>
     <div style="height:20px;"></div>
+  </div>
+
+
+  <!-- ── ADMIN SCREEN ───────────────────────────── -->
+  <div id="screen-admin" class="screen">
+    <div class="admin-header">
+      <div class="header-eyebrow">Admin Panel</div>
+      <div class="header-title">👑 Dashboard</div>
+    </div>
+    <div id="admin-stats-row" class="admin-stats-row"></div>
+    <button class="admin-refresh-btn" onclick="loadAdminData()">↻ Refresh Data</button>
+    <div class="admin-section-title">Registered Users</div>
+    <div id="admin-user-list"><div class="admin-loading">Loading users...</div></div>
   </div>
 
   <!-- ── TARGETS MODAL ──────────────────────────── -->
@@ -1046,12 +1124,28 @@ async function showApp() {
   document.getElementById('screen-home').classList.add('active');
   document.getElementById('tab-bar').style.display = 'flex';
 
+  // Upsert profile for registered users
+  if (!isGuest && currentUser?.id) {
+    sbFetch('/rest/v1/profiles', {
+      method: 'POST',
+      body: JSON.stringify({
+        id: currentUser.id,
+        email: currentUser.email,
+        last_login: new Date().toISOString()
+      })
+    });
+  }
+
   // Show profile badge
   const badge = document.getElementById('profile-badge');
   badge.style.display = 'flex';
   const email = currentUser?.email || '';
   document.getElementById('profile-email').textContent = email;
   document.getElementById('profile-initial').textContent = email === 'Guest' ? '👤' : email.charAt(0).toUpperCase();
+
+  // Show admin tab if admin
+  const isAdmin = currentUser?.email === 'admin@workouttracker.app';
+  document.getElementById('tab-admin').style.display = isAdmin ? 'flex' : 'none';
 
   // Lock tabs for guests
   const weightTab = document.getElementById('tab-weight');
@@ -1165,7 +1259,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
 // ── Tab Switching ─────────────────────────────────────────────────────────────
 function switchTab(tab) {
-  if (isGuest && (tab === 'weight' || tab === 'food')) {
+  if (isGuest && (tab === 'weight' || tab === 'food' || tab === 'admin')) {
     showGuestUpgrade(tab === 'weight' ? '⚖️ Weight Tracking' : '🥗 Nutrition Tracking');
     return;
   }
@@ -1175,9 +1269,11 @@ function switchTab(tab) {
   document.getElementById('screen-home').classList.toggle('active', tab === 'workouts');
   document.getElementById('screen-weight').classList.toggle('active', tab === 'weight');
   document.getElementById('screen-food').classList.toggle('active', tab === 'food');
+  document.getElementById('screen-admin').classList.toggle('active', tab === 'admin');
   document.getElementById('screen-detail').classList.remove('active');
   if (tab === 'weight') updateWeightStats();
   if (tab === 'food') buildFoodScreen();
+  if (tab === 'admin') loadAdminData();
 }
 
 function showGuestUpgrade(feature) {
@@ -2082,6 +2178,172 @@ async function saveTargetsRemote(t) {
     body: JSON.stringify({ ...t, user_id: currentUser?.id, updated_at: new Date().toISOString() })
   });
   hideSyncIndicator();
+}
+
+// ════════════════════════════════════════════════════════════
+// ADMIN DASHBOARD
+// ════════════════════════════════════════════════════════════
+
+const AVATAR_COLORS = ['#0A84FF','#FF9F0A','#30D158','#BF5AF2','#FF375F','#FF6B35','#5E5CE6','#AC8E68'];
+
+async function loadAdminData() {
+  const listEl  = document.getElementById('admin-user-list');
+  const statsEl = document.getElementById('admin-stats-row');
+  listEl.innerHTML = '<div class="admin-loading">⏳ Loading...</div>';
+
+  try {
+    // Fetch all profiles
+    const pRes = await sbFetch('/rest/v1/profiles?select=*&order=last_login.desc');
+    const profiles = pRes && pRes.ok ? await pRes.json() : [];
+
+    // Fetch all workout data
+    const wRes = await sbFetch('/rest/v1/workout_sets?select=user_id,workout_id,exercise_index,set_index,week,weight,reps_done');
+    const allSets = wRes && wRes.ok ? await wRes.json() : [];
+
+    // Fetch all body weights
+    const bRes = await sbFetch('/rest/v1/body_weights?select=user_id,week,weight');
+    const allBW = bRes && bRes.ok ? await bRes.json() : [];
+
+    // Fetch all food logs
+    const fRes = await sbFetch('/rest/v1/food_logs?select=user_id,day_key,meal_idx,calories,protein');
+    const allFood = fRes && fRes.ok ? await fRes.json() : [];
+
+    // Stats
+    const totalUsers = profiles.length;
+    const totalSetsLogged = allSets.filter(s => s.weight).length;
+    const totalMeals = allFood.filter(f => f.calories).length;
+
+    statsEl.innerHTML = `
+      <div class="admin-stat">
+        <div class="admin-stat-num" style="color:#0A84FF">${totalUsers}</div>
+        <div class="admin-stat-label">Users</div>
+      </div>
+      <div class="admin-stat">
+        <div class="admin-stat-num" style="color:#30D158">${totalSetsLogged}</div>
+        <div class="admin-stat-label">Sets Logged</div>
+      </div>
+      <div class="admin-stat">
+        <div class="admin-stat-num" style="color:#FF9F0A">${totalMeals}</div>
+        <div class="admin-stat-label">Meals Logged</div>
+      </div>
+    `;
+
+    // Build user cards
+    if (!profiles.length) {
+      listEl.innerHTML = '<div class="admin-loading">No registered users yet</div>';
+      return;
+    }
+
+    listEl.innerHTML = '';
+    profiles.forEach((profile, idx) => {
+      const uid = profile.id;
+      const email = profile.email || 'Unknown';
+      const initial = email.charAt(0).toUpperCase();
+      const color = AVATAR_COLORS[idx % AVATAR_COLORS.length];
+      const lastLogin = profile.last_login ? new Date(profile.last_login).toLocaleDateString() : '—';
+
+      // Per-user stats
+      const userSets   = allSets.filter(s => s.user_id === uid);
+      const userBW     = allBW.filter(b => b.user_id === uid);
+      const userFood   = allFood.filter(f => f.user_id === uid);
+      const setsLogged = userSets.filter(s => s.weight).length;
+      const weeksActive = [...new Set(userSets.map(s => s.week))].length;
+      const workoutsHit = [...new Set(userSets.map(s => s.workout_id))].length;
+
+      // Body weight summary
+      const bwEntries = userBW.filter(b => b.weight).sort((a,b) => a.week - b.week);
+      const startBW = bwEntries.length ? bwEntries[0].weight : null;
+      const endBW   = bwEntries.length > 1 ? bwEntries[bwEntries.length-1].weight : null;
+      const bwChange = startBW && endBW ? (parseFloat(endBW) - parseFloat(startBW)).toFixed(1) : null;
+
+      const card = document.createElement('div');
+      card.className = 'user-card';
+      card.innerHTML = `
+        <button class="user-card-header" onclick="this.closest('.user-card').classList.toggle('open')">
+          <div class="user-avatar" style="background:${color}">${initial}</div>
+          <div class="user-info">
+            <div class="user-email">${email}</div>
+            <div class="user-meta">Last login: ${lastLogin} · ${setsLogged} sets logged</div>
+          </div>
+          <span class="user-chevron">›</span>
+        </button>
+        <div class="user-detail">
+          <div class="user-detail-section">
+            <div class="user-detail-label">🏋️ Workout Activity</div>
+            <div class="user-detail-grid">
+              <div class="user-detail-cell">
+                <div class="cell-label">Sets</div>
+                <div class="cell-value">${setsLogged}</div>
+              </div>
+              <div class="user-detail-cell">
+                <div class="cell-label">Weeks</div>
+                <div class="cell-value">${weeksActive}</div>
+              </div>
+              <div class="user-detail-cell">
+                <div class="cell-label">Workouts</div>
+                <div class="cell-value">${workoutsHit}</div>
+              </div>
+              <div class="user-detail-cell">
+                <div class="cell-label">Meals</div>
+                <div class="cell-value">${userFood.filter(f => f.calories).length}</div>
+              </div>
+            </div>
+          </div>
+          ${bwEntries.length ? `
+          <div class="user-detail-section">
+            <div class="user-detail-label">⚖️ Body Weight</div>
+            <div class="user-detail-grid">
+              <div class="user-detail-cell">
+                <div class="cell-label">Start</div>
+                <div class="cell-value">${startBW || '—'}</div>
+              </div>
+              <div class="user-detail-cell">
+                <div class="cell-label">Current</div>
+                <div class="cell-value">${endBW || startBW || '—'}</div>
+              </div>
+              ${bwChange !== null ? `
+              <div class="user-detail-cell">
+                <div class="cell-label">Change</div>
+                <div class="cell-value" style="color:${parseFloat(bwChange) < 0 ? '#30D158' : parseFloat(bwChange) > 0 ? '#FF9F0A' : 'var(--text)'}">${parseFloat(bwChange) > 0 ? '+' : ''}${bwChange}</div>
+              </div>` : ''}
+              <div class="user-detail-cell">
+                <div class="cell-label">Entries</div>
+                <div class="cell-value">${bwEntries.length}</div>
+              </div>
+            </div>
+          </div>` : ''}
+          <div class="user-detail-section">
+            <div class="user-detail-label">📅 Weekly Breakdown</div>
+            <div style="overflow-x:auto;margin-top:6px;">
+              <table class="history-table" style="min-width:100%;">
+                <thead><tr><th>Workout</th>${Array.from({length:12}, (_,w) => `<th>W${w+1}</th>`).join('')}</tr></thead>
+                <tbody>
+                  ${WORKOUTS.filter(wo => !wo.isRest).map(wo => {
+                    return `<tr><td style="white-space:nowrap;">${wo.emoji} ${wo.name.split(' ')[0]}</td>${
+                      Array.from({length:12}, (_, w) => {
+                        const weekSets = userSets.filter(s => s.workout_id === wo.id && s.week === w && s.weight);
+                        const total = wo.exercises ? wo.exercises.reduce((a,e) => a + e.sets, 0) : 0;
+                        const done = weekSets.length;
+                        if (!done) return '<td style="color:var(--text-tertiary)">—</td>';
+                        const pct = Math.round(done/total*100);
+                        const clr = pct === 100 ? '#30D158' : pct > 50 ? '#FF9F0A' : '#FF375F';
+                        return \`<td class="has-data" style="color:\${clr}">\${pct}%</td>\`;
+                      }).join('')
+                    }</tr>`;
+                  }).join('')}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      `;
+      listEl.appendChild(card);
+    });
+
+  } catch(e) {
+    console.warn('Admin load error:', e);
+    listEl.innerHTML = '<div class="admin-loading">Error loading data</div>';
+  }
 }
 
 </script>
