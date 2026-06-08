@@ -775,6 +775,52 @@
     font-size: 14px; font-weight: 600; font-family: inherit; cursor: pointer; border: none;
   }
 
+  /* ── Archive styles ── */
+  .archive-user-btn {
+    width: 100%; margin-top: 16px; padding: 12px; border-radius: 12px;
+    background: rgba(255,159,10,0.1); border: 1px solid rgba(255,159,10,0.25);
+    color: #FF9F0A; font-size: 14px; font-weight: 600; font-family: inherit;
+    cursor: pointer; transition: all 0.2s;
+  }
+  .archive-user-btn:active { background: rgba(255,159,10,0.25); }
+  .archive-confirm-bar {
+    display: none; margin-top: 10px; padding: 12px; border-radius: 12px;
+    background: rgba(255,159,10,0.08); border: 1px solid rgba(255,159,10,0.2);
+    text-align: center;
+  }
+  .archive-confirm-bar.visible { display: block; animation: slideIn 0.2s ease; }
+  .archive-confirm-text { font-size: 13px; color: #FF9F0A; margin-bottom: 10px; font-weight: 500; }
+  .archive-confirm-yes {
+    flex: 1; padding: 10px; border-radius: 10px;
+    background: #FF9F0A; color: #000; font-size: 14px; font-weight: 700;
+    font-family: inherit; cursor: pointer; border: none;
+  }
+  .archived-badge {
+    display: inline-block; font-size: 10px; background: rgba(255,159,10,0.2);
+    color: #FF9F0A; border-radius: 6px; padding: 2px 8px; font-weight: 700;
+    margin-left: 8px;
+  }
+  .restore-btn {
+    flex: 1; padding: 10px; border-radius: 10px;
+    background: rgba(48,209,88,0.12); border: 1px solid rgba(48,209,88,0.3);
+    color: #30D158; font-size: 13px; font-weight: 600; font-family: inherit;
+    cursor: pointer;
+  }
+  .restore-btn:active { opacity: 0.7; }
+  .purge-btn {
+    flex: 1; padding: 10px; border-radius: 10px;
+    background: rgba(255,59,48,0.1); border: 1px solid rgba(255,59,48,0.25);
+    color: #FF375F; font-size: 13px; font-weight: 600; font-family: inherit;
+    cursor: pointer;
+  }
+  .purge-btn:active { opacity: 0.7; }
+  .archived-actions { display: flex; gap: 10px; margin-top: 12px; }
+  .days-remaining {
+    font-size: 11px; color: var(--text-tertiary); margin-top: 6px; text-align: center;
+  }
+  .user-card.archived { opacity: 0.7; border-color: rgba(255,159,10,0.2); }
+  .user-card.archived .user-avatar { opacity: 0.5; }
+
   /* ── Animations ── */
   @keyframes popIn {
     from { opacity: 0; transform: scale(0.95) translateY(8px); }
@@ -920,8 +966,10 @@
     </div>
     <div id="admin-stats-row" class="admin-stats-row"></div>
     <button class="admin-refresh-btn" onclick="loadAdminData()">↻ Refresh Data</button>
-    <div class="admin-section-title">Registered Users</div>
+    <div class="admin-section-title" id="active-users-title">Active Users</div>
     <div id="admin-user-list"><div class="admin-loading">Loading users...</div></div>
+    <div class="admin-section-title" id="archived-title" style="display:none;margin-top:20px;">📦 Archived Users · 30-Day Hold</div>
+    <div id="admin-archived-list"></div>
   </div>
 
   <!-- ── TARGETS MODAL ──────────────────────────── -->
@@ -2206,227 +2254,220 @@ async function saveTargetsRemote(t) {
 // ════════════════════════════════════════════════════════════
 
 const AVATAR_COLORS = ['#0A84FF','#FF9F0A','#30D158','#BF5AF2','#FF375F','#FF6B35','#5E5CE6','#AC8E68'];
+const ADMIN_UID = 'f815eed6-f723-4658-81af-77528378361b';
 
 async function loadAdminData() {
-  const listEl  = document.getElementById('admin-user-list');
-  const statsEl = document.getElementById('admin-stats-row');
-  listEl.innerHTML = '<div class="admin-loading">⏳ Loading...</div>';
+  const listEl     = document.getElementById('admin-user-list');
+  const archListEl = document.getElementById('admin-archived-list');
+  const archTitle  = document.getElementById('archived-title');
+  const statsEl    = document.getElementById('admin-stats-row');
+  listEl.innerHTML = '<div class="admin-loading">Loading...</div>';
+  archListEl.innerHTML = '';
 
   try {
-    // Fetch all profiles
-    const { data: profiles, error: pErr } = await sb.from('profiles').select('*').order('last_login', { ascending: false });
-    if (pErr) console.warn('Profiles error:', pErr);
+    const { data: profiles } = await sb.from('profiles').select('*').order('last_login', { ascending: false });
+    const { data: allSets } = await sb.from('workout_sets').select('user_id,workout_id,exercise_index,set_index,week,weight,reps_done');
+    const { data: allBW } = await sb.from('body_weights').select('user_id,week,weight');
+    const { data: allFood } = await sb.from('food_logs').select('user_id,day_key,meal_idx,calories,protein');
 
-    // Fetch all workout data
-    const { data: allSets, error: wErr } = await sb.from('workout_sets').select('user_id,workout_id,exercise_index,set_index,week,weight,reps_done');
-    if (wErr) console.warn('Sets error:', wErr);
+    const all = profiles || [];
+    const active = all.filter(p => !p.archived_at);
+    const archived = all.filter(p => p.archived_at);
 
-    // Fetch all body weights
-    const { data: allBW, error: bErr } = await sb.from('body_weights').select('user_id,week,weight');
-    if (bErr) console.warn('BW error:', bErr);
-
-    // Fetch all food logs
-    const { data: allFood, error: fErr } = await sb.from('food_logs').select('user_id,day_key,meal_idx,calories,protein');
-    if (fErr) console.warn('Food error:', fErr);
-
-    // Stats
-    const totalUsers = (profiles || []).length;
-    const totalSetsLogged = (allSets || []).filter(s => s.weight).length;
-    const totalMeals = (allFood || []).filter(f => f.calories).length;
-
-    statsEl.innerHTML = `
-      <div class="admin-stat">
-        <div class="admin-stat-num" style="color:#0A84FF">${totalUsers}</div>
-        <div class="admin-stat-label">Users</div>
-      </div>
-      <div class="admin-stat">
-        <div class="admin-stat-num" style="color:#30D158">${totalSetsLogged}</div>
-        <div class="admin-stat-label">Sets Logged</div>
-      </div>
-      <div class="admin-stat">
-        <div class="admin-stat-num" style="color:#FF9F0A">${totalMeals}</div>
-        <div class="admin-stat-label">Meals Logged</div>
-      </div>
-    `;
-
-    // Build user cards
-    if (!(profiles || []).length) {
-      listEl.innerHTML = '<div class="admin-loading">No registered users yet</div>';
-      return;
+    // Auto-purge users archived > 30 days
+    for (const au of archived) {
+      const days = Math.floor((Date.now() - new Date(au.archived_at).getTime()) / 86400000);
+      if (days >= 30) await sb.rpc('purge_user', { target_user_id: au.id });
     }
-
-    listEl.innerHTML = '';
-    (profiles || []).forEach((profile, idx) => {
-      const uid = profile.id;
-      const email = profile.email || 'Unknown';
-      const initial = email.charAt(0).toUpperCase();
-      const color = AVATAR_COLORS[idx % AVATAR_COLORS.length];
-      const lastLogin = profile.last_login ? new Date(profile.last_login).toLocaleDateString() : '—';
-
-      // Per-user stats
-      const userSets   = (allSets || []).filter(s => s.user_id === uid);
-      const userBW     = (allBW || []).filter(b => b.user_id === uid);
-      const userFood   = (allFood || []).filter(f => f.user_id === uid);
-      const setsLogged = userSets.filter(s => s.weight).length;
-      const weeksActive = [...new Set(userSets.map(s => s.week))].length;
-      const workoutsHit = [...new Set(userSets.map(s => s.workout_id))].length;
-
-      // Body weight summary
-      const bwEntries = userBW.filter(b => b.weight).sort((a,b) => a.week - b.week);
-      const startBW = bwEntries.length ? bwEntries[0].weight : null;
-      const endBW   = bwEntries.length > 1 ? bwEntries[bwEntries.length-1].weight : null;
-      const bwChange = startBW && endBW ? (parseFloat(endBW) - parseFloat(startBW)).toFixed(1) : null;
-
-      const card = document.createElement('div');
-      card.className = 'user-card';
-      card.innerHTML = `
-        <button class="user-card-header" onclick="this.closest('.user-card').classList.toggle('open')">
-          <div class="user-avatar" style="background:${color}">${initial}</div>
-          <div class="user-info">
-            <div class="user-email">${email}</div>
-            <div class="user-meta">Last login: ${lastLogin} · ${setsLogged} sets logged</div>
-          </div>
-          <span class="user-chevron">›</span>
-        </button>
-        <div class="user-detail">
-          <div class="user-detail-section">
-            <div class="user-detail-label">🏋️ Workout Activity</div>
-            <div class="user-detail-grid">
-              <div class="user-detail-cell">
-                <div class="cell-label">Sets</div>
-                <div class="cell-value">${setsLogged}</div>
-              </div>
-              <div class="user-detail-cell">
-                <div class="cell-label">Weeks</div>
-                <div class="cell-value">${weeksActive}</div>
-              </div>
-              <div class="user-detail-cell">
-                <div class="cell-label">Workouts</div>
-                <div class="cell-value">${workoutsHit}</div>
-              </div>
-              <div class="user-detail-cell">
-                <div class="cell-label">Meals</div>
-                <div class="cell-value">${userFood.filter(f => f.calories).length}</div>
-              </div>
-            </div>
-          </div>
-          ${bwEntries.length ? `
-          <div class="user-detail-section">
-            <div class="user-detail-label">⚖️ Body Weight</div>
-            <div class="user-detail-grid">
-              <div class="user-detail-cell">
-                <div class="cell-label">Start</div>
-                <div class="cell-value">${startBW || '—'}</div>
-              </div>
-              <div class="user-detail-cell">
-                <div class="cell-label">Current</div>
-                <div class="cell-value">${endBW || startBW || '—'}</div>
-              </div>
-              ${bwChange !== null ? `
-              <div class="user-detail-cell">
-                <div class="cell-label">Change</div>
-                <div class="cell-value" style="color:${parseFloat(bwChange) < 0 ? '#30D158' : parseFloat(bwChange) > 0 ? '#FF9F0A' : 'var(--text)'}">${parseFloat(bwChange) > 0 ? '+' : ''}${bwChange}</div>
-              </div>` : ''}
-              <div class="user-detail-cell">
-                <div class="cell-label">Entries</div>
-                <div class="cell-value">${bwEntries.length}</div>
-              </div>
-            </div>
-          </div>` : ''}
-          <div class="user-detail-section">
-            <div class="user-detail-label">📅 Weekly Breakdown</div>
-            <div style="overflow-x:auto;margin-top:6px;">
-              <table class="history-table" style="min-width:100%;">
-                <thead><tr><th>Workout</th>${Array.from({length:12}, (_,w) => `<th>W${w+1}</th>`).join('')}</tr></thead>
-                <tbody>
-                  ${WORKOUTS.filter(wo => !wo.isRest).map(wo => {
-                    return `<tr><td style="white-space:nowrap;">${wo.emoji} ${wo.name.split(' ')[0]}</td>${
-                      Array.from({length:12}, (_, w) => {
-                        const weekSets = userSets.filter(s => s.workout_id === wo.id && s.week === w && s.weight);
-                        const total = wo.exercises ? wo.exercises.reduce((a,e) => a + e.sets, 0) : 0;
-                        const done = weekSets.length;
-                        if (!done) return '<td style="color:var(--text-tertiary)">—</td>';
-                        const pct = Math.round(done/total*100);
-                        const clr = pct === 100 ? '#30D158' : pct > 50 ? '#FF9F0A' : '#FF375F';
-                        return `<td class="has-data" style="color:${clr}">${pct}%</td>`;
-                      }).join('')
-                    }</tr>`;
-                  }).join('')}
-                </tbody>
-              </table>
-            </div>
-          </div>
-          ${uid !== 'f815eed6-f723-4658-81af-77528378361b' ? `
-          <div class="user-detail-section">
-            <button class="delete-user-btn" onclick="confirmDeleteUser(this, '${uid}', '${email}')">🗑 Delete User</button>
-            <div class="delete-confirm-bar" id="confirm-${uid}">
-              <div class="delete-confirm-text">Delete <strong>${email}</strong> and all their data?</div>
-              <div class="delete-confirm-actions">
-                <button class="delete-confirm-yes" onclick="executeDeleteUser('${uid}')">Yes, Delete</button>
-                <button class="delete-confirm-no" onclick="cancelDeleteUser('${uid}')">Cancel</button>
-              </div>
-            </div>
-          </div>` : '<div style="margin-top:12px;font-size:12px;color:var(--text-tertiary);text-align:center;">👑 This is you</div>'}
-        </div>
-      `;
-      listEl.appendChild(card);
+    const liveArchived = archived.filter(au => {
+      return Math.floor((Date.now() - new Date(au.archived_at).getTime()) / 86400000) < 30;
     });
 
+    const sets = (allSets||[]).filter(s => s.weight).length;
+    const meals = (allFood||[]).filter(f => f.calories).length;
+
+    statsEl.innerHTML =
+      '<div class="admin-stat"><div class="admin-stat-num" style="color:#0A84FF">' + active.length + '</div><div class="admin-stat-label">Active</div></div>' +
+      '<div class="admin-stat"><div class="admin-stat-num" style="color:#30D158">' + sets + '</div><div class="admin-stat-label">Sets Logged</div></div>' +
+      '<div class="admin-stat"><div class="admin-stat-num" style="color:#FF9F0A">' + liveArchived.length + '</div><div class="admin-stat-label">Archived</div></div>';
+
+    listEl.innerHTML = active.length ? '' : '<div class="admin-loading">No active users</div>';
+    active.forEach(function(p, i) { listEl.appendChild(buildUserCard(p, i, allSets, allBW, allFood, false)); });
+
+    if (liveArchived.length) {
+      archTitle.style.display = 'block';
+      liveArchived.forEach(function(p, i) { archListEl.appendChild(buildUserCard(p, i, allSets, allBW, allFood, true)); });
+    } else {
+      archTitle.style.display = 'none';
+    }
   } catch(e) {
-    console.warn('Admin load error:', e);
+    console.warn('Admin error:', e);
     listEl.innerHTML = '<div class="admin-loading">Error loading data</div>';
   }
 }
 
-// ── Admin: Delete User ──────────────────────────────────────────────────────
-function confirmDeleteUser(btn, uid, email) {
-  const bar = document.getElementById('confirm-' + uid);
-  bar.classList.add('visible');
-  btn.disabled = true;
-}
+function buildUserCard(profile, idx, allSets, allBW, allFood, isArchived) {
+  var uid = profile.id;
+  var email = profile.email || 'Unknown';
+  var initial = email.charAt(0).toUpperCase();
+  var color = AVATAR_COLORS[idx % AVATAR_COLORS.length];
+  var lastLogin = profile.last_login ? new Date(profile.last_login).toLocaleDateString() : '-';
 
-function cancelDeleteUser(uid) {
-  const bar = document.getElementById('confirm-' + uid);
-  bar.classList.remove('visible');
-  const btn = bar.previousElementSibling;
-  if (btn) btn.disabled = false;
-}
+  var userSets = (allSets||[]).filter(function(s){ return s.user_id === uid; });
+  var userBW = (allBW||[]).filter(function(b){ return b.user_id === uid; });
+  var userFood = (allFood||[]).filter(function(f){ return f.user_id === uid; });
+  var setsLogged = userSets.filter(function(s){ return s.weight; }).length;
+  var weeksActive = [...new Set(userSets.map(function(s){ return s.week; }))].length;
+  var workoutsHit = [...new Set(userSets.map(function(s){ return s.workout_id; }))].length;
+  var userMeals = userFood.filter(function(f){ return f.calories; }).length;
 
-async function executeDeleteUser(uid) {
-  const bar = document.getElementById('confirm-' + uid);
-  const yesBtn = bar.querySelector('.delete-confirm-yes');
-  yesBtn.textContent = 'Deleting...';
-  yesBtn.disabled = true;
+  var bwEntries = userBW.filter(function(b){ return b.weight; }).sort(function(a,b){ return a.week - b.week; });
+  var startBW = bwEntries.length ? bwEntries[0].weight : null;
+  var endBW = bwEntries.length > 1 ? bwEntries[bwEntries.length-1].weight : null;
+  var bwChange = startBW && endBW ? (parseFloat(endBW) - parseFloat(startBW)).toFixed(1) : null;
 
-  try {
-    const { error } = await sb.rpc('delete_user', { target_user_id: uid });
-
-    if (!error) {
-      const card = bar.closest('.user-card');
-      card.style.transition = 'all 0.3s';
-      card.style.opacity = '0';
-      card.style.transform = 'scale(0.95)';
-      setTimeout(() => {
-        card.remove();
-        loadAdminData();
-      }, 300);
-    } else {
-      yesBtn.textContent = 'Failed';
-      console.warn('Delete error:', error);
-      setTimeout(() => {
-        yesBtn.textContent = 'Yes, Delete';
-        yesBtn.disabled = false;
-      }, 2000);
-    }
-  } catch(e) {
-    console.warn('Delete error:', e);
-    yesBtn.textContent = 'Error';
-    setTimeout(() => {
-      yesBtn.textContent = 'Yes, Delete';
-      yesBtn.disabled = false;
-    }, 2000);
+  var daysLeft = '';
+  if (isArchived && profile.archived_at) {
+    var daysSince = Math.floor((Date.now() - new Date(profile.archived_at).getTime()) / 86400000);
+    daysLeft = (30 - daysSince) + ' days until permanent deletion';
   }
+
+  var actionsHtml = '';
+  if (uid === ADMIN_UID) {
+    actionsHtml = '<div style="margin-top:12px;font-size:12px;color:var(--text-tertiary);text-align:center;">This is you</div>';
+  } else if (isArchived) {
+    actionsHtml =
+      '<div class="archived-actions">' +
+        '<button class="restore-btn" onclick="restoreUser(\'' + uid + '\')">Restore</button>' +
+        '<button class="purge-btn" onclick="confirmPurge(\'' + uid + '\')">Permanently Delete</button>' +
+      '</div>' +
+      '<div class="days-remaining">' + daysLeft + '</div>' +
+      '<div class="delete-confirm-bar" id="purge-' + uid + '">' +
+        '<div class="delete-confirm-text">Permanently delete <strong>' + email + '</strong>? Cannot be undone.</div>' +
+        '<div class="delete-confirm-actions">' +
+          '<button class="delete-confirm-yes" onclick="executePurge(\'' + uid + '\')">Yes, Purge</button>' +
+          '<button class="delete-confirm-no" onclick="cancelPurge(\'' + uid + '\')">Cancel</button>' +
+        '</div>' +
+      '</div>';
+  } else {
+    actionsHtml =
+      '<button class="archive-user-btn" onclick="confirmArchive(\'' + uid + '\')">Archive User</button>' +
+      '<div class="archive-confirm-bar" id="archive-' + uid + '">' +
+        '<div class="archive-confirm-text">Archive <strong>' + email + '</strong>? Held 30 days before deletion.</div>' +
+        '<div class="delete-confirm-actions">' +
+          '<button class="archive-confirm-yes" onclick="executeArchive(\'' + uid + '\')">Yes, Archive</button>' +
+          '<button class="delete-confirm-no" onclick="cancelArchive(\'' + uid + '\')">Cancel</button>' +
+        '</div>' +
+      '</div>';
+  }
+
+  var bwHtml = '';
+  if (bwEntries.length) {
+    var changeHtml = '';
+    if (bwChange !== null) {
+      var changeColor = parseFloat(bwChange) < 0 ? '#30D158' : parseFloat(bwChange) > 0 ? '#FF9F0A' : 'var(--text)';
+      changeHtml = '<div class="user-detail-cell"><div class="cell-label">Change</div><div class="cell-value" style="color:' + changeColor + '">' + (parseFloat(bwChange) > 0 ? '+' : '') + bwChange + '</div></div>';
+    }
+    bwHtml = '<div class="user-detail-section"><div class="user-detail-label">Body Weight</div><div class="user-detail-grid">' +
+      '<div class="user-detail-cell"><div class="cell-label">Start</div><div class="cell-value">' + (startBW||'-') + '</div></div>' +
+      '<div class="user-detail-cell"><div class="cell-label">Current</div><div class="cell-value">' + (endBW||startBW||'-') + '</div></div>' +
+      changeHtml +
+      '<div class="user-detail-cell"><div class="cell-label">Entries</div><div class="cell-value">' + bwEntries.length + '</div></div>' +
+      '</div></div>';
+  }
+
+  var weeklyRows = '';
+  WORKOUTS.filter(function(wo){ return !wo.isRest; }).forEach(function(wo) {
+    weeklyRows += '<tr><td style="white-space:nowrap;">' + wo.emoji + ' ' + wo.name.split(' ')[0] + '</td>';
+    for (var w = 0; w < 12; w++) {
+      var ws = userSets.filter(function(s){ return s.workout_id === wo.id && s.week === w && s.weight; });
+      var total = wo.exercises ? wo.exercises.reduce(function(a,e){ return a + e.sets; }, 0) : 0;
+      if (!ws.length) { weeklyRows += '<td style="color:var(--text-tertiary)">-</td>'; }
+      else {
+        var pct = Math.round(ws.length/total*100);
+        var clr = pct === 100 ? '#30D158' : pct > 50 ? '#FF9F0A' : '#FF375F';
+        weeklyRows += '<td class="has-data" style="color:' + clr + '">' + pct + '%</td>';
+      }
+    }
+    weeklyRows += '</tr>';
+  });
+
+  var card = document.createElement('div');
+  card.className = 'user-card' + (isArchived ? ' archived' : '');
+  card.id = 'user-card-' + uid;
+  card.innerHTML =
+    '<button class="user-card-header" onclick="this.closest(\'.user-card\').classList.toggle(\' open\')">' +
+      '<div class="user-avatar" style="background:' + color + '">' + initial + '</div>' +
+      '<div class="user-info">' +
+        '<div class="user-email">' + email + (isArchived ? '<span class="archived-badge">ARCHIVED</span>' : '') + '</div>' +
+        '<div class="user-meta">Last login: ' + lastLogin + ' · ' + setsLogged + ' sets</div>' +
+      '</div>' +
+      '<span class="user-chevron">></span>' +
+    '</button>' +
+    '<div class="user-detail">' +
+      '<div class="user-detail-section"><div class="user-detail-label">Workout Activity</div><div class="user-detail-grid">' +
+        '<div class="user-detail-cell"><div class="cell-label">Sets</div><div class="cell-value">' + setsLogged + '</div></div>' +
+        '<div class="user-detail-cell"><div class="cell-label">Weeks</div><div class="cell-value">' + weeksActive + '</div></div>' +
+        '<div class="user-detail-cell"><div class="cell-label">Workouts</div><div class="cell-value">' + workoutsHit + '</div></div>' +
+        '<div class="user-detail-cell"><div class="cell-label">Meals</div><div class="cell-value">' + userMeals + '</div></div>' +
+      '</div></div>' +
+      bwHtml +
+      '<div class="user-detail-section"><div class="user-detail-label">Weekly Breakdown</div>' +
+        '<div style="overflow-x:auto;margin-top:6px;"><table class="history-table" style="min-width:100%;"><thead><tr><th>Workout</th>' +
+        '<th>W1</th><th>W2</th><th>W3</th><th>W4</th><th>W5</th><th>W6</th><th>W7</th><th>W8</th><th>W9</th><th>W10</th><th>W11</th><th>W12</th>' +
+        '</tr></thead><tbody>' + weeklyRows + '</tbody></table></div></div>' +
+      '<div class="user-detail-section">' + actionsHtml + '</div>' +
+    '</div>';
+  return card;
 }
+
+function confirmArchive(uid) {
+  document.getElementById('archive-' + uid).classList.add('visible');
+}
+function cancelArchive(uid) {
+  document.getElementById('archive-' + uid).classList.remove('visible');
+}
+async function executeArchive(uid) {
+  var bar = document.getElementById('archive-' + uid);
+  var btn = bar.querySelector('.archive-confirm-yes');
+  btn.textContent = 'Archiving...'; btn.disabled = true;
+  var res = await sb.rpc('archive_user', { target_user_id: uid });
+  if (!res.error) {
+    var card = document.getElementById('user-card-' + uid);
+    card.style.transition = 'all 0.3s'; card.style.opacity = '0';
+    setTimeout(loadAdminData, 400);
+  } else { btn.textContent = 'Failed'; setTimeout(function(){ btn.textContent = 'Yes, Archive'; btn.disabled = false; }, 2000); }
+}
+
+async function restoreUser(uid) {
+  var card = document.getElementById('user-card-' + uid);
+  var btn = card.querySelector('.restore-btn');
+  btn.textContent = 'Restoring...'; btn.disabled = true;
+  var res = await sb.rpc('restore_user', { target_user_id: uid });
+  if (!res.error) {
+    card.style.transition = 'all 0.3s'; card.style.opacity = '0';
+    setTimeout(loadAdminData, 400);
+  } else { btn.textContent = 'Failed'; setTimeout(function(){ btn.textContent = 'Restore'; btn.disabled = false; }, 2000); }
+}
+
+function confirmPurge(uid) {
+  document.getElementById('purge-' + uid).classList.add('visible');
+}
+function cancelPurge(uid) {
+  document.getElementById('purge-' + uid).classList.remove('visible');
+}
+async function executePurge(uid) {
+  var bar = document.getElementById('purge-' + uid);
+  var btn = bar.querySelector('.delete-confirm-yes');
+  btn.textContent = 'Purging...'; btn.disabled = true;
+  var res = await sb.rpc('purge_user', { target_user_id: uid });
+  if (!res.error) {
+    var card = document.getElementById('user-card-' + uid);
+    card.style.transition = 'all 0.3s'; card.style.opacity = '0';
+    setTimeout(loadAdminData, 400);
+  } else { btn.textContent = 'Failed'; setTimeout(function(){ btn.textContent = 'Yes, Purge'; btn.disabled = false; }, 2000); }
+}
+
 
 </script>
 </body>
