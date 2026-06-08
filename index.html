@@ -236,8 +236,9 @@
 
   .set-row {
     display: flex; align-items: center; justify-content: space-between;
-    padding: 10px 0;
+    padding: 12px 0;
     border-bottom: 1px solid var(--separator);
+    gap: 8px;
   }
   .set-row:last-child { border-bottom: none; }
   .set-left { display: flex; align-items: center; gap: 10px; }
@@ -255,7 +256,12 @@
     font-size: 10px; background: rgba(255,159,10,0.2); color: #FF9F0A;
     border-radius: 4px; padding: 1px 5px; font-weight: 700; margin-left: 6px;
   }
-  .weight-input-wrap { position: relative; width: 54px; flex-shrink: 0; }
+  .set-inputs { display: flex; gap: 8px; flex-shrink: 0; }
+  .input-col { position: relative; width: 54px; }
+  .input-label {
+    position: absolute; bottom: -14px; left: 50%; transform: translateX(-50%);
+    font-size: 9px; color: var(--text-tertiary); white-space: nowrap;
+  }
   .weight-input {
     width: 100%; height: 36px; border-radius: 10px;
     background: rgba(255,255,255,0.08);
@@ -264,13 +270,10 @@
     text-align: center; font-family: inherit; outline: none;
     transition: all 0.2s;
   }
+  .reps-input { background: rgba(255,255,255,0.05); }
   .weight-input.final-input { background: rgba(255,159,10,0.13); color: #FF9F0A; }
   .weight-input:focus { border-color: var(--blue); background: rgba(10,132,255,0.12); color: #fff; }
   .weight-input.final-input:focus { border-color: #FF9F0A; }
-  .weight-unit {
-    position: absolute; bottom: -14px; left: 50%; transform: translateX(-50%);
-    font-size: 9px; color: var(--text-tertiary); white-space: nowrap;
-  }
 
   /* ── Weight Tracker Screen ── */
   #weight-screen { overflow-y: auto; padding-bottom: 90px; flex: 1; }
@@ -307,6 +310,63 @@
     font-size: 13px; font-weight: 600; min-width: 52px; text-align: right;
     flex-shrink: 0;
   }
+
+
+  /* ── Progress History Panel ── */
+  .history-btn {
+    display: flex; align-items: center; gap: 4px;
+    font-size: 11px; font-weight: 600; color: var(--text-tertiary);
+    padding: 4px 8px; border-radius: 8px;
+    background: rgba(255,255,255,0.06);
+    transition: all 0.2s; margin-top: 6px;
+    border: 1px solid rgba(255,255,255,0.08);
+  }
+  .history-btn:active { opacity: 0.6; }
+  .history-panel {
+    display: none; padding: 12px 16px 16px;
+    border-top: 1px solid var(--separator);
+    animation: slideIn 0.2s ease;
+  }
+  .exercise-card.history-open .history-panel { display: block; }
+  .history-chart-wrap {
+    width: 100%; height: 80px; margin-bottom: 12px; position: relative;
+  }
+  .history-chart-wrap canvas { width: 100% !important; height: 80px !important; }
+  .history-table { width: 100%; border-collapse: collapse; }
+  .history-table th {
+    font-size: 10px; font-weight: 600; color: var(--text-tertiary);
+    text-transform: uppercase; letter-spacing: 0.8px;
+    padding: 4px 6px; text-align: center;
+    border-bottom: 1px solid var(--separator);
+  }
+  .history-table th:first-child { text-align: left; }
+  .history-table td {
+    font-size: 12px; color: var(--text-secondary);
+    padding: 6px 6px; text-align: center;
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+  }
+  .history-table td:first-child { color: var(--text-tertiary); text-align: left; font-weight: 600; }
+  .history-table td.has-data { color: var(--text); font-weight: 600; }
+  .history-table td.current-wk { background: rgba(10,132,255,0.1); color: var(--blue); border-radius: 4px; }
+  .history-table tr:last-child td { border-bottom: none; }
+  .pr-tag {
+    display: inline-block; font-size: 9px; background: rgba(245,166,35,0.2);
+    color: #F5A623; border-radius: 3px; padding: 1px 4px; margin-left: 3px; font-weight: 700;
+  }
+
+  /* ── Ghost placeholder (previous week hint) ── */
+  .weight-input::placeholder { color: rgba(255,255,255,0.18); font-style: italic; }
+
+  /* ── Weight chart (body weight) ── */
+  #wt-chart-wrap {
+    margin: 0 16px 16px; background: var(--card);
+    border-radius: 16px; padding: 16px; border: 1px solid var(--card-border);
+  }
+  .wt-chart-title {
+    font-size: 12px; font-weight: 600; color: var(--text-tertiary);
+    text-transform: uppercase; letter-spacing: 1px; margin-bottom: 12px;
+  }
+  #wt-chart-canvas { width: 100% !important; height: 120px !important; }
 
   /* ── Animations ── */
   @keyframes popIn {
@@ -358,7 +418,11 @@
     </div>
     <div id="wt-stats" style="padding:16px 16px 0;"></div>
     <div class="wt-stats-grid" id="wt-stat-cards" style="display:none;"></div>
-    <div style="padding:0 16px 12px;margin-top:8px;">
+    <div id="wt-chart-wrap" style="display:none;">
+      <div class="wt-chart-title">📈 12-Week Trend</div>
+      <canvas id="wt-chart-canvas" height="120"></canvas>
+    </div>
+    <div style="padding:0 16px 12px;margin-top:4px;">
       <div class="section-label">Weekly Weigh-Ins</div>
     </div>
     <div class="wt-list" id="wt-list"></div>
@@ -448,12 +512,95 @@ const WORKOUTS = [
     ]},
 ];
 
-// ── Storage ───────────────────────────────────────────────────────────────────
-const LS_PREFIX = 'wt12_';
-function lsGet(k)    { try { return localStorage.getItem(LS_PREFIX + k); } catch(e) { return null; } }
-function lsSet(k, v) { try { localStorage.setItem(LS_PREFIX + k, v); } catch(e) {} }
-function wKey(wid, ei, si, wk) { return `${wid}_${ei}_${si}_${wk}`; }
-function bwKey(wk)              { return `bw_${wk}`; }
+// ── Supabase Config ───────────────────────────────────────────────────────────
+const SB_URL = 'https://uvbwwtbznowfhasqfbld.supabase.co';
+const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV2Ynd3dGJ6bm93Zmhhc3FmYmxkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA4NjIyODksImV4cCI6MjA5NjQzODI4OX0.E2oU4FE7nfmhqYncBz2UUCsFM1WJbZCwW1aJan8mAE0';
+
+// ── In-memory cache (keeps UI fast) ──────────────────────────────────────────
+const cache = {};
+function wKey(wid, ei, si, wk)  { return `${wid}_${ei}_${si}_${wk}`; }
+function rKey(wid, ei, si, wk)  { return `r_${wid}_${ei}_${si}_${wk}`; }
+function bwKey(wk)               { return `bw_${wk}`; }
+function lsGet(k)               { return cache[k] ?? null; }
+function lsSet(k, v)            { cache[k] = v; }
+
+// ── Supabase fetch helper ─────────────────────────────────────────────────────
+async function sbFetch(path, opts = {}) {
+  try {
+    const res = await fetch(SB_URL + path, {
+      headers: {
+        'apikey': SB_KEY,
+        'Authorization': 'Bearer ' + SB_KEY,
+        'Content-Type': 'application/json',
+        'Prefer': 'resolution=merge-duplicates,return=minimal',
+        ...(opts.headers || {})
+      },
+      ...opts
+    });
+    return res;
+  } catch(e) { console.warn('sbFetch error:', e); return null; }
+}
+
+// ── Load all data from Supabase into cache ────────────────────────────────────
+async function loadAllData() {
+  showSyncIndicator('loading');
+  try {
+    const [r1, r2] = await Promise.all([
+      sbFetch('/rest/v1/workout_sets?select=*'),
+      sbFetch('/rest/v1/body_weights?select=*')
+    ]);
+    if (r1 && r1.ok) {
+      const rows = await r1.json();
+      rows.forEach(r => {
+        lsSet(wKey(r.workout_id, r.exercise_index, r.set_index, r.week), r.weight || '');
+        lsSet(rKey(r.workout_id, r.exercise_index, r.set_index, r.week), r.reps_done || '');
+      });
+    }
+    if (r2 && r2.ok) {
+      const rows = await r2.json();
+      rows.forEach(r => lsSet(bwKey(r.week), r.weight));
+    }
+  } catch(e) { console.warn('Load error:', e); }
+  hideSyncIndicator();
+}
+
+// ── Save workout set weight + reps ───────────────────────────────────────────
+async function saveSetRemote(workout_id, exercise_index, set_index, week, weight, reps_done) {
+  showSyncIndicator('saving');
+  await sbFetch('/rest/v1/workout_sets', {
+    method: 'POST',
+    body: JSON.stringify({ workout_id, exercise_index, set_index, week, weight, reps_done, updated_at: new Date().toISOString() })
+  });
+  hideSyncIndicator();
+}
+
+// ── Save body weight ──────────────────────────────────────────────────────────
+async function saveBodyWeightRemote(week, weight) {
+  showSyncIndicator('saving');
+  await sbFetch('/rest/v1/body_weights', {
+    method: 'POST',
+    body: JSON.stringify({ week, weight, updated_at: new Date().toISOString() })
+  });
+  hideSyncIndicator();
+}
+
+// ── Sync indicator dot ────────────────────────────────────────────────────────
+function showSyncIndicator(mode) {
+  let el = document.getElementById('sync-dot');
+  if (!el) {
+    el = document.createElement('div');
+    el.id = 'sync-dot';
+    el.style.cssText = 'position:fixed;top:calc(var(--safe-top) + 8px);right:16px;width:8px;height:8px;border-radius:50%;z-index:999;transition:all 0.4s;';
+    document.body.appendChild(el);
+  }
+  el.style.opacity = '1';
+  el.style.background = mode === 'saving' ? '#FF9F0A' : '#0A84FF';
+  el.style.boxShadow = `0 0 8px ${mode === 'saving' ? '#FF9F0A' : '#0A84FF'}`;
+}
+function hideSyncIndicator() {
+  const el = document.getElementById('sync-dot');
+  if (el) { el.style.background = '#30D158'; el.style.boxShadow = '0 0 8px #30D158'; setTimeout(() => { el.style.opacity = '0'; }, 1000); }
+}
 
 // ── State ─────────────────────────────────────────────────────────────────────
 let selectedWeek   = 0;
@@ -461,11 +608,16 @@ let currentTab     = 'workouts';
 let currentWorkout = null;
 
 // ── Init ──────────────────────────────────────────────────────────────────────
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
   buildWeekScroller();
   buildWorkoutList();
   buildWeightTracker();
   updateWeightStats();
+  await loadAllData();
+  buildWorkoutList();
+  buildWeightTracker();
+  updateWeightStats();
+  if (currentWorkout) buildExerciseList(currentWorkout);
 });
 
 // ── Tab Switching ─────────────────────────────────────────────────────────────
@@ -600,26 +752,45 @@ function buildExerciseList(wo) {
     let setRowsHtml = '';
     for (let si = 0; si < ex.sets; si++) {
       const isFinal = si === ex.sets - 1 && ex.sets > 1;
-      const storedVal = lsGet(wKey(wo.id, ei, si, selectedWeek)) || '';
+      const storedWeight = lsGet(wKey(wo.id, ei, si, selectedWeek)) || '';
+      const storedReps   = lsGet(rKey(wo.id, ei, si, selectedWeek)) || '';
+      // Ghost: previous week's values as placeholder
+      const prevWeek = selectedWeek > 0 ? selectedWeek - 1 : null;
+      const ghostW = prevWeek !== null ? (lsGet(wKey(wo.id, ei, si, prevWeek)) || '') : '';
+      const ghostR = prevWeek !== null ? (lsGet(rKey(wo.id, ei, si, prevWeek)) || '') : '';
+      const wPlaceholder = ghostW ? ghostW : '—';
+      const rPlaceholder = ghostR ? ghostR : '—';
       setRowsHtml += `
         <div class="set-row">
           <div class="set-left">
             <div class="set-num${isFinal ? ' final' : ''}">${si+1}</div>
-            <div class="set-reps${isFinal ? ' final' : ''}">
-              ${ex.reps} reps
-              ${isFinal ? '<span class="failure-badge">FAILURE</span>' : ''}
+            <div>
+              <div class="set-reps${isFinal ? ' final' : ''}">
+                ${ex.reps} reps target
+                ${isFinal ? '<span class="failure-badge">FAILURE</span>' : ''}
+              </div>
+              ${ghostW ? `<div style="font-size:10px;color:rgba(255,255,255,0.2);margin-top:1px;">prev: ${ghostW}lbs${ghostR ? ' · '+ghostR+'r' : ''}</div>` : ''}
             </div>
           </div>
-          <div class="weight-input-wrap">
-            <input type="number" inputmode="decimal" class="weight-input${isFinal ? ' final-input' : ''}"
-              placeholder="—"
-              value="${storedVal}"
-              data-key="${wKey(wo.id, ei, si, selectedWeek)}"
-              data-wid="${wo.id}" data-ei="${ei}" data-si="${si}"
-              onchange="saveWeight(this)"
-              onblur="saveWeight(this)"
-            >
-            <div class="weight-unit">lbs</div>
+          <div class="set-inputs">
+            <div class="input-col">
+              <input type="number" inputmode="decimal" class="weight-input${isFinal ? ' final-input' : ''}"
+                placeholder="${wPlaceholder}"
+                value="${storedWeight}"
+                data-wid="${wo.id}" data-ei="${ei}" data-si="${si}" data-type="weight"
+                onchange="saveSetField(this)" onblur="saveSetField(this)"
+              >
+              <div class="input-label">lbs</div>
+            </div>
+            <div class="input-col">
+              <input type="number" inputmode="numeric" class="weight-input reps-input${isFinal ? ' final-input' : ''}"
+                placeholder="${rPlaceholder}"
+                value="${storedReps}"
+                data-wid="${wo.id}" data-ei="${ei}" data-si="${si}" data-type="reps"
+                onchange="saveSetField(this)" onblur="saveSetField(this)"
+              >
+              <div class="input-label">reps</div>
+            </div>
           </div>
         </div>`;
     }
@@ -641,9 +812,93 @@ function buildExerciseList(wo) {
         </div>
       </button>
       <div class="set-rows">${setRowsHtml}</div>
+      <div class="history-panel">
+        <div class="history-chart-wrap">
+          <canvas id="chart_${wo.id}_${ei}" height="80"></canvas>
+        </div>
+        <div id="htable_${wo.id}_${ei}"></div>
+      </div>
     `;
+
+    // History toggle button — injected into exercise-header
+    const hdr = card.querySelector('.exercise-header');
+    const histBtn = document.createElement('button');
+    histBtn.className = 'history-btn';
+    histBtn.innerHTML = '📊 History';
+    histBtn.style.cssText = 'display:block;margin:0 16px 12px;';
+    histBtn.onclick = (e) => { e.stopPropagation(); toggleHistory(card, wo, ei); };
+    hdr.after(histBtn);
+
     el.appendChild(card);
   });
+}
+
+function toggleHistory(card, wo, ei) {
+  const isOpen = card.classList.toggle('history-open');
+  const btn = card.querySelector('.history-btn');
+  btn.innerHTML = isOpen ? '📊 Hide' : '📊 History';
+  if (isOpen) renderExHistory(card, wo, ei);
+}
+
+function renderExHistory(card, wo, ei) {
+  const ex = wo.exercises[ei];
+  const tableEl = card.querySelector(`[id^="htable_"]`);
+  const canvasEl = card.querySelector(`[id^="chart_"]`);
+
+  // Build per-week data for set 1 (representative set)
+  const weekLabels = [], weightData = [], repsData = [];
+  let maxWeight = 0;
+  for (let w = 0; w < WEEKS; w++) {
+    const wt = parseFloat(lsGet(wKey(wo.id, ei, 0, w))) || null;
+    const rp = parseFloat(lsGet(rKey(wo.id, ei, 0, w))) || null;
+    weekLabels.push('W' + (w+1));
+    weightData.push(wt);
+    repsData.push(rp);
+    if (wt && wt > maxWeight) maxWeight = wt;
+  }
+
+  // ── Mini line chart ──
+  drawLineChart(canvasEl, weekLabels, weightData, wo.color, 'lbs');
+
+  // ── History table (all sets, all weeks with data) ──
+  const filledWeeks = weekLabels.map((_, w) =>
+    Array.from({length: ex.sets}, (_, si) => lsGet(wKey(wo.id, ei, si, w)) || lsGet(rKey(wo.id, ei, si, w)))
+    .some(Boolean) ? w : null
+  ).filter(w => w !== null);
+
+  if (!filledWeeks.length) {
+    tableEl.innerHTML = '<div style="text-align:center;color:var(--text-tertiary);font-size:12px;padding:8px 0;">No data logged yet</div>';
+    return;
+  }
+
+  let html = '<table class="history-table"><thead><tr><th>Set</th>';
+  filledWeeks.forEach(w => {
+    const isCur = w === selectedWeek;
+    html += `<th style="${isCur ? 'color:var(--blue)' : ''}">W${w+1}</th>`;
+  });
+  html += '</tr></thead><tbody>';
+
+  for (let si = 0; si < ex.sets; si++) {
+    const isFinal = si === ex.sets - 1 && ex.sets > 1;
+    // Find PR weight across all weeks for this set
+    const allWeights = Array.from({length: WEEKS}, (_, w) => parseFloat(lsGet(wKey(wo.id, ei, si, w)))).filter(Boolean);
+    const prWeight = allWeights.length ? Math.max(...allWeights) : null;
+
+    html += `<tr><td>${isFinal ? '🔥' : ''}S${si+1}</td>`;
+    filledWeeks.forEach(w => {
+      const wt  = lsGet(wKey(wo.id, ei, si, w)) || '';
+      const rp  = lsGet(rKey(wo.id, ei, si, w)) || '';
+      const isCur = w === selectedWeek;
+      const isPR  = wt && parseFloat(wt) === prWeight && allWeights.length > 1;
+      const cls = isCur ? 'current-wk' : (wt || rp ? 'has-data' : '');
+      const prMark = isPR ? '<span class="pr-tag">PR</span>' : '';
+      const display = wt ? `${wt}${prMark}<br><span style="font-size:10px;color:var(--text-tertiary)">${rp ? rp+'r' : ''}</span>` : (rp ? `—<br><span style="font-size:10px">${rp}r</span>` : '—');
+      html += `<td class="${cls}">${display}</td>`;
+    });
+    html += '</tr>';
+  }
+  html += '</tbody></table>';
+  tableEl.innerHTML = html;
 }
 
 function toggleExercise(btn) {
@@ -651,10 +906,21 @@ function toggleExercise(btn) {
   card.classList.toggle('open');
 }
 
-function saveWeight(input) {
-  const key = input.getAttribute('data-key');
-  lsSet(key, input.value);
-  // Refresh progress displays
+function saveSetField(input) {
+  const wid   = input.getAttribute('data-wid');
+  const ei    = parseInt(input.getAttribute('data-ei'));
+  const si    = parseInt(input.getAttribute('data-si'));
+  const type  = input.getAttribute('data-type');
+  const val   = input.value;
+
+  if (type === 'weight') lsSet(wKey(wid, ei, si, selectedWeek), val);
+  else                   lsSet(rKey(wid, ei, si, selectedWeek), val);
+
+  // Always save both fields together
+  const weight   = lsGet(wKey(wid, ei, si, selectedWeek)) || '';
+  const repsDone = lsGet(rKey(wid, ei, si, selectedWeek)) || '';
+  saveSetRemote(wid, ei, si, selectedWeek, weight, repsDone);
+
   if (currentWorkout) {
     updateDetailProgress(currentWorkout);
     refreshExerciseProgress(input);
@@ -724,9 +990,11 @@ function buildWeightTracker() {
 }
 
 function saveBodyWeight(input) {
-  const w = parseInt(input.getAttribute('data-week'));
-  lsSet(bwKey(w), input.value);
-  buildWeightTracker(); // refresh deltas
+  const w   = parseInt(input.getAttribute('data-week'));
+  const val = input.value;
+  lsSet(bwKey(w), val);
+  saveBodyWeightRemote(w, val);
+  buildWeightTracker();
   updateWeightStats();
 }
 
@@ -742,11 +1010,14 @@ function updateWeightStats() {
   if (weights.length < 2) {
     statsEl.innerHTML = `<div class="section-label" style="padding-bottom:8px">Log 2+ weeks to see stats</div>`;
     cardsEl.style.display = 'none';
+    document.getElementById('wt-chart-wrap').style.display = 'none';
     return;
   }
 
   statsEl.innerHTML = `<div class="section-label" style="padding-bottom:8px">12-Week Summary</div>`;
   cardsEl.style.display = 'grid';
+  document.getElementById('wt-chart-wrap').style.display = 'block';
+  setTimeout(drawBodyWeightChart, 50);
 
   const start = weights[0], end = weights[weights.length - 1];
   const diff  = (end - start).toFixed(1);
@@ -768,6 +1039,106 @@ function updateWeightStats() {
   `).join('');
 }
 
+// ── Mini Line Chart ──────────────────────────────────────────────────────────
+function drawLineChart(canvas, labels, data, color, unit) {
+  if (!canvas) return;
+  const dpr = window.devicePixelRatio || 1;
+  const w = canvas.offsetWidth || 300;
+  const h = 80;
+  canvas.width  = w * dpr;
+  canvas.height = h * dpr;
+  canvas.style.width  = w + 'px';
+  canvas.style.height = h + 'px';
+  const ctx = canvas.getContext('2d');
+  ctx.scale(dpr, dpr);
+
+  const filled = data.filter(d => d !== null);
+  if (!filled.length) {
+    ctx.fillStyle = 'rgba(255,255,255,0.15)';
+    ctx.font = '11px -apple-system';
+    ctx.textAlign = 'center';
+    ctx.fillText('No data yet', w/2, h/2);
+    return;
+  }
+
+  const pad = { top: 8, right: 8, bottom: 20, left: 28 };
+  const cw = w - pad.left - pad.right;
+  const ch = h - pad.top - pad.bottom;
+  const min = Math.min(...filled) * 0.97;
+  const max = Math.max(...filled) * 1.03;
+
+  const xOf = (i) => pad.left + (i / (labels.length - 1)) * cw;
+  const yOf = (v) => pad.top + ch - ((v - min) / (max - min || 1)) * ch;
+
+  // Gradient fill
+  const grad = ctx.createLinearGradient(0, pad.top, 0, pad.top + ch);
+  grad.addColorStop(0, color + '44');
+  grad.addColorStop(1, color + '00');
+
+  ctx.beginPath();
+  let first = true;
+  data.forEach((v, i) => {
+    if (v === null) return;
+    if (first) { ctx.moveTo(xOf(i), yOf(v)); first = false; }
+    else ctx.lineTo(xOf(i), yOf(v));
+  });
+  // close fill path
+  const lastIdx = data.reduce((a, v, i) => v !== null ? i : a, 0);
+  const firstIdx = data.findIndex(v => v !== null);
+  ctx.lineTo(xOf(lastIdx), pad.top + ch);
+  ctx.lineTo(xOf(firstIdx), pad.top + ch);
+  ctx.closePath();
+  ctx.fillStyle = grad;
+  ctx.fill();
+
+  // Line
+  ctx.beginPath();
+  first = true;
+  data.forEach((v, i) => {
+    if (v === null) return;
+    if (first) { ctx.moveTo(xOf(i), yOf(v)); first = false; }
+    else ctx.lineTo(xOf(i), yOf(v));
+  });
+  ctx.strokeStyle = color;
+  ctx.lineWidth = 2;
+  ctx.lineJoin = 'round';
+  ctx.stroke();
+
+  // Dots + labels
+  data.forEach((v, i) => {
+    if (v === null) return;
+    const x = xOf(i), y = yOf(v);
+    ctx.beginPath();
+    ctx.arc(x, y, 3, 0, Math.PI * 2);
+    ctx.fillStyle = color;
+    ctx.fill();
+  });
+
+  // X axis labels (every 3)
+  ctx.fillStyle = 'rgba(255,255,255,0.25)';
+  ctx.font = `${9 * dpr / dpr}px -apple-system`;
+  ctx.textAlign = 'center';
+  labels.forEach((l, i) => {
+    if (i % 3 === 0) ctx.fillText(l, xOf(i), h - 4);
+  });
+
+  // Y min/max
+  ctx.textAlign = 'right';
+  ctx.fillText(Math.round(max), pad.left - 4, pad.top + 8);
+  ctx.fillText(Math.round(min), pad.left - 4, pad.top + ch);
+}
+
+function drawBodyWeightChart() {
+  const canvas = document.getElementById('wt-chart-canvas');
+  if (!canvas) return;
+  const data = Array.from({length: WEEKS}, (_, i) => {
+    const v = lsGet(bwKey(i));
+    return v ? parseFloat(v) : null;
+  });
+  const labels = Array.from({length: WEEKS}, (_, i) => 'W'+(i+1));
+  drawLineChart(canvas, labels, data, '#0A84FF', 'lbs');
+}
+
 // ── Helpers ───────────────────────────────────────────────────────────────────
 function getProgress(wo, week) {
   if (!wo.exercises) return { total: 0, completed: 0 };
@@ -775,7 +1146,7 @@ function getProgress(wo, week) {
   wo.exercises.forEach((ex, ei) => {
     total += ex.sets;
     for (let si = 0; si < ex.sets; si++) {
-      if (lsGet(wKey(wo.id, ei, si, week))) completed++;
+      if (lsGet(wKey(wo.id, ei, si, week)) || lsGet(rKey(wo.id, ei, si, week))) completed++;
     }
   });
   return { total, completed };
@@ -784,7 +1155,7 @@ function getProgress(wo, week) {
 function getExProgress(wid, ei, sets, week) {
   let completed = 0;
   for (let si = 0; si < sets; si++) {
-    if (lsGet(wKey(wid, ei, si, week))) completed++;
+    if (lsGet(wKey(wid, ei, si, week)) || lsGet(rKey(wid, ei, si, week))) completed++;
   }
   return { completed };
 }
