@@ -821,6 +821,20 @@
   .user-card.archived { opacity: 0.7; border-color: rgba(255,159,10,0.2); }
   .user-card.archived .user-avatar { opacity: 0.5; }
 
+  /* ── Nutrition Lookup ── */
+  .lookup-row { display: flex; gap: 8px; margin-bottom: 12px; }
+  .lookup-row .food-name-input { margin-bottom: 0; flex: 1; }
+  .lookup-btn {
+    flex-shrink: 0; width: 48px; height: 48px; border-radius: 12px;
+    background: rgba(48,209,88,0.12); border: 1.5px solid rgba(48,209,88,0.3);
+    color: #30D158; font-size: 20px; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    transition: all 0.2s; font-family: inherit;
+  }
+  .lookup-btn:active { background: rgba(48,209,88,0.25); transform: scale(0.92); }
+  .lookup-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+  .lookup-btn.loading { animation: pulse 1s ease infinite; }
+
   /* ── Animations ── */
   @keyframes popIn {
     from { opacity: 0; transform: scale(0.95) translateY(8px); }
@@ -1990,10 +2004,13 @@ function buildMealCards() {
         </div>
       </div>
       <div class="meal-body">
-        <input type="text" class="food-name-input" placeholder="What did you eat? (e.g. Chicken, rice, broccoli)"
-          value="${data.name || ''}"
-          data-mi="${mi}" data-field="name"
-          oninput="saveMealField(this)" onblur="saveMealField(this)">
+        <div class="lookup-row">
+          <input type="text" class="food-name-input" placeholder="What did you eat? (e.g. 6oz chicken, 1 cup rice)"
+            value="${data.name || ''}"
+            data-mi="${mi}" data-field="name"
+            oninput="saveMealField(this)" onblur="saveMealField(this)">
+          <button class="lookup-btn" onclick="lookupNutrition(${mi})" title="Auto-fill macros">🔍</button>
+        </div>
         <div class="macro-input-grid five-col">
           <div class="macro-input-cell">
             <label>Cal</label>
@@ -2453,6 +2470,73 @@ async function executePurge(uid) {
   } else { btn.textContent = 'Failed'; setTimeout(function(){ btn.textContent = 'Yes, Purge'; btn.disabled = false; }, 2000); }
 }
 
+
+// ── Nutrition Lookup (API-Ninjas) ────────────────────────────────────────────
+const NINJA_KEY = '7WebtWIUH7ahNo4NpWu3G18MFiD1s2rxRZuxur6K';
+
+async function lookupNutrition(mi) {
+  var card = document.getElementById('meal-card-' + mi);
+  var input = card.querySelector('[data-field="name"]');
+  var query = input.value.trim();
+  if (!query) { input.focus(); input.placeholder = 'Type a food first...'; return; }
+
+  var btn = card.querySelector('.lookup-btn');
+  btn.disabled = true;
+  btn.classList.add('loading');
+  btn.textContent = '⏳';
+
+  try {
+    var res = await fetch('https://api.api-ninjas.com/v1/nutrition?query=' + encodeURIComponent(query), {
+      headers: { 'X-Api-Key': NINJA_KEY }
+    });
+    var items = await res.json();
+
+    if (items && items.length > 0) {
+      var totals = { cal: 0, protein: 0, carbs: 0, fats: 0 };
+      items.forEach(function(item) {
+        totals.cal     += item.calories || 0;
+        totals.protein += item.protein_g || 0;
+        totals.carbs   += item.carbohydrates_total_g || 0;
+        totals.fats    += item.fat_total_g || 0;
+      });
+
+      // Fill in the fields
+      var calField = card.querySelector('[data-field="cal"]');
+      var proField = card.querySelector('[data-field="protein"]');
+      var carbField = card.querySelector('[data-field="carbs"]');
+      var fatField = card.querySelector('[data-field="fats"]');
+
+      calField.value  = Math.round(totals.cal);
+      proField.value  = Math.round(totals.protein);
+      carbField.value = Math.round(totals.carbs);
+      fatField.value  = Math.round(totals.fats);
+
+      // Trigger save
+      saveMealFieldByIndex(mi);
+
+      btn.textContent = '✓';
+      btn.style.background = 'rgba(48,209,88,0.25)';
+      setTimeout(function() {
+        btn.textContent = '🔍';
+        btn.style.background = '';
+      }, 2000);
+    } else {
+      btn.textContent = '✗';
+      btn.style.background = 'rgba(255,59,48,0.15)';
+      setTimeout(function() {
+        btn.textContent = '🔍';
+        btn.style.background = '';
+      }, 2000);
+    }
+  } catch(e) {
+    console.warn('Nutrition lookup error:', e);
+    btn.textContent = '✗';
+    setTimeout(function() { btn.textContent = '🔍'; }, 2000);
+  }
+
+  btn.disabled = false;
+  btn.classList.remove('loading');
+}
 
 </script>
 </body>
