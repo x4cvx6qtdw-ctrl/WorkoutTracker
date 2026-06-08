@@ -1044,22 +1044,6 @@ async function handleAuth() {
   const btn   = document.getElementById('auth-submit');
   errEl.textContent = '';
 
-  // Admin bypass — just entering the admin email triggers auto-login
-  if (email.toLowerCase() === 'admin@workouttracker.app') {
-    btn.disabled = true;
-    btn.textContent = 'Logging in...';
-    const { data, error } = await sb.auth.signInWithPassword({
-      email: 'admin@workouttracker.app',
-      password: 'IronWill2026!'
-    });
-    btn.disabled = false;
-    btn.textContent = authMode === 'login' ? 'Log In' : 'Sign Up';
-    if (error) { errEl.textContent = error.message; return; }
-    currentUser = data.user;
-    showApp();
-    return;
-  }
-
   if (!email || !pw) { errEl.textContent = 'Enter email and password'; return; }
   if (pw.length < 6) { errEl.textContent = 'Password must be at least 6 characters'; return; }
 
@@ -1144,7 +1128,7 @@ async function showApp() {
   document.getElementById('profile-initial').textContent = email === 'Guest' ? '👤' : email.charAt(0).toUpperCase();
 
   // Show admin tab if admin
-  const isAdmin = currentUser?.email === 'admin@workouttracker.app';
+  const isAdmin = currentUser?.id === 'f815eed6-f723-4658-81af-77528378361b';
   document.getElementById('tab-admin').style.display = isAdmin ? 'flex' : 'none';
 
   // Lock tabs for guests
