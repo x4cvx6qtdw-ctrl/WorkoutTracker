@@ -998,6 +998,106 @@
   }
   .version-changelog.open { display: block; }
 
+  /* ── Progress Photos ── */
+  .wt-photo-btn {
+    width: 28px; height: 28px; border-radius: 8px;
+    background: rgba(10,132,255,0.12); border: 1px solid rgba(10,132,255,0.3);
+    color: #0A84FF; font-size: 13px; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0; transition: all 0.2s; position: relative; overflow: hidden;
+  }
+  .wt-photo-btn:active { background: rgba(10,132,255,0.25); transform: scale(0.9); }
+  .wt-photo-btn input[type=file] {
+    position: absolute; inset: 0; opacity: 0; cursor: pointer;
+    font-size: 0;
+  }
+  .wt-photo-thumb {
+    width: 36px; height: 36px; border-radius: 8px;
+    object-fit: cover; cursor: pointer; flex-shrink: 0;
+    border: 1.5px solid rgba(10,132,255,0.3);
+    transition: transform 0.15s;
+  }
+  .wt-photo-thumb:active { transform: scale(0.9); }
+  .wt-photo-uploading {
+    width: 28px; height: 28px; border-radius: 8px;
+    background: rgba(10,132,255,0.12);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 11px; color: #0A84FF; flex-shrink: 0;
+    animation: pulse 1s ease infinite;
+  }
+  .photo-viewer-overlay {
+    display: none; position: fixed; inset: 0; z-index: 600;
+    background: rgba(0,0,0,0.92); backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    align-items: center; justify-content: center; flex-direction: column;
+    padding: 20px;
+  }
+  .photo-viewer-overlay.open { display: flex; }
+  .photo-viewer-img {
+    max-width: 100%; max-height: 70vh; border-radius: 16px;
+    object-fit: contain;
+  }
+  .photo-viewer-label {
+    color: var(--text-secondary); font-size: 14px; font-weight: 600;
+    margin-top: 12px;
+  }
+  .photo-viewer-close {
+    position: absolute; top: calc(var(--safe-top) + 12px); right: 16px;
+    font-size: 28px; color: var(--text-secondary); cursor: pointer;
+    width: 40px; height: 40px; display: flex; align-items: center;
+    justify-content: center; border-radius: 50%;
+    background: rgba(255,255,255,0.1);
+  }
+  .photo-viewer-close:active { opacity: 0.6; }
+
+  /* ── Pose Grid ── */
+  .pose-grid {
+    display: flex; gap: 6px; padding: 8px 16px 12px;
+    overflow-x: auto; -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+  .pose-slot {
+    flex-shrink: 0; width: 60px; display: flex; flex-direction: column;
+    align-items: center; gap: 4px;
+  }
+  .pose-label {
+    font-size: 8px; font-weight: 600; color: var(--text-tertiary);
+    text-transform: uppercase; letter-spacing: 0.3px; text-align: center;
+    line-height: 1.2; white-space: nowrap;
+  }
+  .pose-upload-btn {
+    width: 56px; height: 56px; border-radius: 10px;
+    background: rgba(10,132,255,0.08); border: 1.5px dashed rgba(10,132,255,0.25);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px; cursor: pointer; position: relative; overflow: hidden;
+    transition: all 0.2s;
+  }
+  .pose-upload-btn:active { background: rgba(10,132,255,0.15); transform: scale(0.93); }
+  .pose-upload-btn input[type=file] {
+    position: absolute; inset: 0; opacity: 0; cursor: pointer; font-size: 0;
+  }
+  .pose-thumb {
+    width: 56px; height: 56px; border-radius: 10px;
+    object-fit: cover; cursor: pointer;
+    border: 1.5px solid rgba(10,132,255,0.3);
+  }
+  .pose-thumb:active { transform: scale(0.93); }
+  .pose-replace {
+    width: 56px; margin-top: 2px; padding: 2px; border-radius: 6px;
+    background: rgba(255,255,255,0.06); color: var(--text-tertiary);
+    font-size: 8px; font-weight: 600; text-align: center; cursor: pointer;
+    position: relative; overflow: hidden;
+  }
+  .pose-replace input[type=file] {
+    position: absolute; inset: 0; opacity: 0; cursor: pointer; font-size: 0;
+  }
+  .pose-uploading {
+    width: 56px; height: 56px; border-radius: 10px;
+    background: rgba(10,132,255,0.08);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 14px; animation: pulse 1s ease infinite;
+  }
+
   /* ── Animations ── */
   @keyframes popIn {
     from { opacity: 0; transform: scale(0.95) translateY(8px); }
@@ -1028,7 +1128,7 @@
     <button class="auth-guest-btn" onclick="guestLogin()">Continue as Guest</button>
     <div style="font-size:11px;color:var(--text-tertiary);text-align:center;margin-top:8px;">Try 1 workout day free · Sign up for full access</div>
     <div id="auth-version" style="margin-top:24px;font-size:10px;color:rgba(255,255,255,0.12);text-align:center;">
-      <span style="background:rgba(255,255,255,0.06);padding:2px 8px;border-radius:6px;font-weight:600;letter-spacing:0.5px;">v1.4.0</span>
+      <span style="background:rgba(255,255,255,0.06);padding:2px 8px;border-radius:6px;font-weight:600;letter-spacing:0.5px;">v1.5.0</span>
       <div style="margin-top:4px;">Training Tracker · Built with 🦾</div>
     </div>
   </div>
@@ -1095,12 +1195,19 @@
 
   <!-- ── TAB BAR ─────────────────────────────── -->
 
+  <!-- ── Photo Viewer ── -->
+  <div class="photo-viewer-overlay" id="photo-viewer" onclick="closePhotoViewer(event)">
+    <button class="photo-viewer-close" onclick="closePhotoViewer()">✕</button>
+    <img class="photo-viewer-img" id="photo-viewer-img" src="">
+    <div class="photo-viewer-label" id="photo-viewer-label"></div>
+  </div>
+
   <!-- ── Version Footer ── -->
   <div class="version-footer" id="version-footer" style="position:fixed;bottom:60px;left:50%;transform:translateX(-50%);z-index:0;width:100%;max-width:430px;display:none;">
-    <div class="version-tag" onclick="document.getElementById('changelog').classList.toggle('open')" >v1.4.0</div>
+    <div class="version-tag" onclick="document.getElementById('changelog').classList.toggle('open')" style="background:rgba(255,159,10,0.15);color:#FF9F0A;">v1.5.0</div>
     <div>Training Tracker · Built with 🦾</div>
     <div class="version-changelog" id="changelog">
-      <strong>v1.4.0</strong> — Program Builder + Images<br>
+      <strong>v1.5.0</strong> — Program Builder + Images<br>
       • Admin program builder (create/edit/delete programs)<br>
       • Day editor with emoji and color picker<br>
       • Inline exercise editor with image URL support<br>
@@ -1465,6 +1572,7 @@ async function showApp() {
   buildWorkoutList();
   buildWeightTracker();
   updateWeightStats();
+  loadAllPhotoThumbs();
   if (currentWorkout) buildExerciseList(currentWorkout);
 }
 
@@ -1629,7 +1737,7 @@ function switchTab(tab) {
   document.getElementById('screen-food').classList.toggle('active', tab === 'food');
   document.getElementById('screen-admin').classList.toggle('active', tab === 'admin');
   document.getElementById('screen-detail').classList.remove('active');
-  if (tab === 'weight') updateWeightStats();
+  if (tab === 'weight') { updateWeightStats(); loadAllPhotoThumbs(); }
   if (tab === 'food') buildFoodScreen();
   if (tab === 'admin') loadAdminData();
 }
@@ -2053,9 +2161,26 @@ function buildWeightTracker() {
         oninput="saveBodyWeight(this)"
       >
       <button class="wt-save-btn" onclick="confirmSaveWeight(this, ${w})">↑</button>
+
       ${deltaStr ? `<div class="wt-delta" style="color:${deltaColor}">${deltaStr}</div>` : '<div class="wt-delta"></div>'}
+      <button class="wt-photo-btn" onclick="togglePoseGrid(${w})" title="Progress photos" style="margin-left:4px;">📷</button>
     `;
     el.appendChild(row);
+
+    // Pose grid (hidden by default)
+    const poseRow = document.createElement('div');
+    poseRow.id = 'pose-grid-' + w;
+    poseRow.className = 'pose-grid';
+    poseRow.style.display = 'none';
+    poseRow.innerHTML = POSE_NAMES.map(function(pose, pi) {
+      return '<div class="pose-slot" id="pose-' + w + '-' + pi + '">' +
+        '<div class="pose-label">' + pose.short + '</div>' +
+        '<div class="pose-upload-btn"><span>+</span>' +
+          '<input type="file" accept="image/*" capture="environment" onchange="handlePoseUpload(this,' + w + ',' + pi + ')">' +
+        '</div>' +
+      '</div>';
+    }).join('');
+    el.appendChild(poseRow);
   }
 }
 
@@ -3256,6 +3381,143 @@ async function deleteDay(dayId) {
   }
   builderStack.pop();
   renderProgramEditor();
+}
+
+// ════════════════════════════════════════════════════════════
+// PROGRESS PHOTOS (5 Poses)
+// ════════════════════════════════════════════════════════════
+
+var POSE_NAMES = [
+  { name: 'Front Relaxed',   short: 'Front' },
+  { name: 'Back Relaxed',    short: 'Back' },
+  { name: 'Side (Left)',     short: 'Left' },
+  { name: 'Side (Right)',    short: 'Right' },
+  { name: 'Most Muscular',   short: 'Muscular' },
+];
+
+function togglePoseGrid(week) {
+  var grid = document.getElementById('pose-grid-' + week);
+  if (!grid) return;
+  var isOpen = grid.style.display !== 'none';
+  grid.style.display = isOpen ? 'none' : 'flex';
+  if (!isOpen) loadPoseThumbs(week);
+}
+
+async function compressImage(file, maxDim, quality) {
+  return new Promise(function(resolve) {
+    var reader = new FileReader();
+    reader.onload = function(e) {
+      var img = new Image();
+      img.onload = function() {
+        var canvas = document.createElement('canvas');
+        var w = img.width, h = img.height;
+        if (w > h) {
+          if (w > maxDim) { h = h * maxDim / w; w = maxDim; }
+        } else {
+          if (h > maxDim) { w = w * maxDim / h; h = maxDim; }
+        }
+        canvas.width = w;
+        canvas.height = h;
+        var ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, w, h);
+        canvas.toBlob(function(blob) { resolve(blob); }, 'image/jpeg', quality);
+      };
+      img.src = e.target.result;
+    };
+    reader.readAsDataURL(file);
+  });
+}
+
+async function handlePoseUpload(input, week, poseIdx) {
+  var file = input.files[0];
+  if (!file) return;
+
+  var slot = document.getElementById('pose-' + week + '-' + poseIdx);
+  var label = slot.querySelector('.pose-label').outerHTML;
+  slot.innerHTML = label + '<div class="pose-uploading">⏳</div>';
+
+  try {
+    var compressed = await compressImage(file, 800, 0.7);
+    var path = currentUser.id + '/week_' + week + '_pose_' + poseIdx + '.jpg';
+
+    var { error } = await sb.storage
+      .from('progress-photos')
+      .upload(path, compressed, { contentType: 'image/jpeg', upsert: true });
+
+    if (error) {
+      console.warn('Upload error:', error);
+      showPoseUploadBtn(week, poseIdx);
+      return;
+    }
+
+    await sb.from('progress_photos').upsert({
+      user_id: currentUser.id, week: week, pose_index: poseIdx, storage_path: path
+    }, { onConflict: 'user_id,week,pose_index' });
+
+    loadPoseThumb(week, poseIdx);
+  } catch(e) {
+    console.warn('Photo error:', e);
+    showPoseUploadBtn(week, poseIdx);
+  }
+}
+
+async function loadPoseThumb(week, poseIdx) {
+  var slot = document.getElementById('pose-' + week + '-' + poseIdx);
+  if (!slot) return;
+
+  var path = currentUser.id + '/week_' + week + '_pose_' + poseIdx + '.jpg';
+  var { data } = await sb.storage
+    .from('progress-photos')
+    .createSignedUrl(path, 3600);
+
+  var label = '<div class="pose-label">' + POSE_NAMES[poseIdx].short + '</div>';
+
+  if (data && data.signedUrl) {
+    slot.innerHTML = label +
+      '<img class="pose-thumb" src="' + data.signedUrl + '" onclick="viewPose(' + week + ',' + poseIdx + ')" onerror="showPoseUploadBtn(' + week + ',' + poseIdx + ')">' +
+      '<div class="pose-replace">replace<input type="file" accept="image/*" capture="environment" onchange="handlePoseUpload(this,' + week + ',' + poseIdx + ')"></div>';
+  } else {
+    showPoseUploadBtn(week, poseIdx);
+  }
+}
+
+function showPoseUploadBtn(week, poseIdx) {
+  var slot = document.getElementById('pose-' + week + '-' + poseIdx);
+  if (slot) {
+    slot.innerHTML = '<div class="pose-label">' + POSE_NAMES[poseIdx].short + '</div>' +
+      '<div class="pose-upload-btn"><span>+</span>' +
+        '<input type="file" accept="image/*" capture="environment" onchange="handlePoseUpload(this,' + week + ',' + poseIdx + ')">' +
+      '</div>';
+  }
+}
+
+async function loadPoseThumbs(week) {
+  for (var i = 0; i < POSE_NAMES.length; i++) {
+    loadPoseThumb(week, i);
+  }
+}
+
+async function loadAllPhotoThumbs() {
+  // No-op on initial load — thumbs load when pose grid is opened
+}
+
+async function viewPose(week, poseIdx) {
+  var path = currentUser.id + '/week_' + week + '_pose_' + poseIdx + '.jpg';
+  var { data } = await sb.storage
+    .from('progress-photos')
+    .createSignedUrl(path, 3600);
+
+  if (data && data.signedUrl) {
+    document.getElementById('photo-viewer-img').src = data.signedUrl;
+    document.getElementById('photo-viewer-label').textContent = 'Week ' + (week + 1) + ' — ' + POSE_NAMES[poseIdx].name;
+    document.getElementById('photo-viewer').classList.add('open');
+  }
+}
+
+function closePhotoViewer(e) {
+  if (!e || e.target === document.getElementById('photo-viewer') || e.target.closest('.photo-viewer-close')) {
+    document.getElementById('photo-viewer').classList.remove('open');
+  }
 }
 
 </script>
