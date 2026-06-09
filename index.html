@@ -1150,6 +1150,78 @@
     font-weight: 600; font-style: italic;
   }
 
+  /* ── Set Timer Button ── */
+  .set-timer-btn {
+    width: 32px; height: 32px; border-radius: 8px;
+    background: rgba(10,132,255,0.1); border: 1px solid rgba(10,132,255,0.2);
+    color: #0A84FF; font-size: 13px; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0; transition: all 0.15s;
+  }
+  .set-timer-btn:active { background: rgba(10,132,255,0.25); transform: scale(0.9); }
+
+  /* ── Cardio Logging ── */
+  .cardio-section {
+    margin: 0 16px 16px; background: var(--card);
+    border-radius: 16px; overflow: hidden; border: 1px solid var(--card-border);
+  }
+  .cardio-header {
+    padding: 14px 16px; display: flex; align-items: center;
+    justify-content: space-between; cursor: pointer;
+  }
+  .cardio-header:active { background: rgba(255,255,255,0.04); }
+  .cardio-title { font-size: 15px; font-weight: 700; color: var(--text); }
+  .cardio-badge {
+    font-size: 12px; font-weight: 700; padding: 3px 9px;
+    border-radius: 20px; background: rgba(255,159,10,0.12); color: #FF9F0A;
+  }
+  .cardio-badge.empty { background: rgba(255,255,255,0.06); color: var(--text-tertiary); }
+  .cardio-chevron { color: var(--text-tertiary); font-size: 16px; transition: transform 0.25s cubic-bezier(0.34,1.56,0.64,1); display: inline-block; }
+  .cardio-section.open .cardio-chevron { transform: rotate(90deg); }
+  .cardio-body {
+    display: none; padding: 14px 16px; border-top: 1px solid var(--separator);
+    animation: slideIn 0.2s ease;
+  }
+  .cardio-section.open .cardio-body { display: block; }
+  .cardio-type-row {
+    display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 12px;
+  }
+  .cardio-type-btn {
+    padding: 8px 14px; border-radius: 10px;
+    background: rgba(255,255,255,0.06); border: 1.5px solid transparent;
+    color: var(--text-secondary); font-size: 13px; font-weight: 600;
+    font-family: inherit; cursor: pointer; transition: all 0.2s;
+  }
+  .cardio-type-btn.selected { border-color: #FF9F0A; color: #FF9F0A; background: rgba(255,159,10,0.1); }
+  .cardio-type-btn:active { transform: scale(0.95); }
+  .cardio-fields {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 12px;
+  }
+  .cardio-field-wrap { display: flex; flex-direction: column; gap: 4px; }
+  .cardio-field-label { font-size: 10px; font-weight: 600; color: var(--text-tertiary); text-transform: uppercase; letter-spacing: 0.8px; }
+  .cardio-input {
+    width: 100%; height: 40px; border-radius: 10px;
+    background: rgba(255,255,255,0.08); border: 2px solid transparent;
+    color: var(--text); font-size: 14px; font-weight: 600;
+    text-align: center; font-family: inherit; outline: none; transition: all 0.2s;
+  }
+  .cardio-input:focus { border-color: #FF9F0A; background: rgba(255,159,10,0.08); }
+  .cardio-notes {
+    width: 100%; min-height: 44px; border-radius: 10px;
+    background: rgba(255,255,255,0.06); border: 1.5px solid transparent;
+    color: var(--text); font-size: 13px; padding: 10px 12px;
+    font-family: inherit; outline: none; resize: none; margin-bottom: 12px;
+  }
+  .cardio-notes:focus { border-color: #FF9F0A; }
+  .cardio-notes::placeholder { color: var(--text-tertiary); }
+  .cardio-save-btn {
+    width: 100%; padding: 12px; border-radius: 12px;
+    background: rgba(255,159,10,0.12); border: 1px solid rgba(255,159,10,0.25);
+    color: #FF9F0A; font-size: 14px; font-weight: 600;
+    font-family: inherit; cursor: pointer;
+  }
+  .cardio-save-btn:active { background: rgba(255,159,10,0.25); }
+
   /* ── Animations ── */
   @keyframes popIn {
     from { opacity: 0; transform: scale(0.95) translateY(8px); }
@@ -1180,7 +1252,7 @@
     <button class="auth-guest-btn" onclick="guestLogin()">Continue as Guest</button>
     <div style="font-size:11px;color:var(--text-tertiary);text-align:center;margin-top:8px;">Try 1 workout day free · Sign up for full access</div>
     <div id="auth-version" style="margin-top:24px;font-size:10px;color:rgba(255,255,255,0.12);text-align:center;">
-      <span style="background:rgba(255,255,255,0.06);padding:2px 8px;border-radius:6px;font-weight:600;letter-spacing:0.5px;">v1.6.0</span>
+      <span style="background:rgba(255,255,255,0.06);padding:2px 8px;border-radius:6px;font-weight:600;letter-spacing:0.5px;">v1.7.0</span>
       <div style="margin-top:4px;">Training Tracker · Built with 🦾</div>
     </div>
   </div>
@@ -1219,6 +1291,40 @@
       </div>
     </div>
     <div id="exercise-list"></div>
+    <!-- ── Cardio (Optional) ── -->
+    <div class="cardio-section" id="cardio-section">
+      <div class="cardio-header" onclick="document.getElementById('cardio-section').classList.toggle('open')">
+        <div style="display:flex;align-items:center;gap:10px;">
+          <div class="cardio-title">🏃 Cardio</div>
+          <div style="font-size:11px;color:var(--text-tertiary);">Optional</div>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px;">
+          <div class="cardio-badge empty" id="cardio-badge">— min</div>
+          <span class="cardio-chevron">›</span>
+        </div>
+      </div>
+      <div class="cardio-body">
+        <div class="cardio-type-row" id="cardio-type-row"></div>
+        <div class="cardio-fields">
+          <div class="cardio-field-wrap">
+            <div class="cardio-field-label">Duration (min)</div>
+            <input type="number" inputmode="numeric" class="cardio-input" id="cardio-duration" placeholder="—">
+          </div>
+          <div class="cardio-field-wrap">
+            <div class="cardio-field-label">Intensity</div>
+            <select class="cardio-input" id="cardio-intensity" style="text-align:left;padding:0 10px;font-size:13px;">
+              <option value="">—</option>
+              <option value="low">Low (walking)</option>
+              <option value="moderate">Moderate</option>
+              <option value="high">High (HIIT)</option>
+            </select>
+          </div>
+        </div>
+        <textarea class="cardio-notes" id="cardio-notes" placeholder="Notes (optional)"></textarea>
+        <button class="cardio-save-btn" onclick="saveCardio()">Save Cardio</button>
+      </div>
+    </div>
+
     <div class="save-workout-wrap">
       <button class="save-workout-btn in-progress" id="save-workout-btn" onclick="saveAndExit()">
         Save Workout
@@ -1279,10 +1385,10 @@
 
   <!-- ── Version Footer ── -->
   <div class="version-footer" id="version-footer" style="position:fixed;bottom:60px;left:50%;transform:translateX(-50%);z-index:0;width:100%;max-width:430px;display:none;">
-    <div class="version-tag" onclick="document.getElementById('changelog').classList.toggle('open')" style="background:rgba(255,159,10,0.15);color:#FF9F0A;">v1.6.0</div>
+    <div class="version-tag" onclick="document.getElementById('changelog').classList.toggle('open')" style="background:rgba(255,159,10,0.15);color:#FF9F0A;">v1.7.0</div>
     <div>Training Tracker · Built with 🦾</div>
     <div class="version-changelog" id="changelog">
-      <strong>v1.6.0</strong> — Program Builder + Images<br>
+      <strong>v1.7.0</strong> — Program Builder + Images<br>
       • Admin program builder (create/edit/delete programs)<br>
       • Day editor with emoji and color picker<br>
       • Inline exercise editor with image URL support<br>
@@ -1939,6 +2045,7 @@ function showDetail(wo) {
 
   buildExerciseList(wo);
   updateDetailProgress(wo);
+  loadCardio();
 }
 
 function showHome() {
@@ -2008,6 +2115,7 @@ function buildExerciseList(wo) {
               >
               <div class="input-label">reps</div>
             </div>
+            <button class="set-timer-btn" onclick="startSetTimer(${ei})" title="Start rest timer">⏱️</button>
           </div>
         </div>`;
     }
@@ -2143,14 +2251,9 @@ function saveSetField(input) {
   const repsDone = lsGet(rKey(wid, ei, si, selectedWeek)) || '';
   saveSetRemote(wid, ei, si, selectedWeek, weight, repsDone);
 
-  // Check for PR and start rest timer
+  // Check for PR
   if (type === 'weight' && weight) {
     checkForPR(wid, ei, si, selectedWeek, weight);
-  }
-  if (val && currentWorkout && currentWorkout.exercises) {
-    var exNote = currentWorkout.exercises[ei] ? currentWorkout.exercises[ei].note : '';
-    var restSecs = detectRestTime(exNote);
-    startRestTimer(restSecs);
   }
 
   if (currentWorkout) {
@@ -3575,6 +3678,13 @@ function cancelRestTimer() {
   document.getElementById('rest-timer').classList.remove('active');
 }
 
+function startSetTimer(ei) {
+  if (!currentWorkout || !currentWorkout.exercises) return;
+  var ex = currentWorkout.exercises[ei];
+  var restSecs = detectRestTime(ex ? ex.note : '');
+  startRestTimer(restSecs);
+}
+
 function detectRestTime(exerciseNote) {
   if (!exerciseNote) return 60;
   var note = exerciseNote.toLowerCase();
@@ -3604,6 +3714,101 @@ function getOverloadSuggestion(wid, ei, si, week) {
     }
   }
   return '';
+}
+
+// ════════════════════════════════════════════════════════════
+// CARDIO LOGGING
+// ════════════════════════════════════════════════════════════
+
+var CARDIO_TYPES = ['Treadmill', 'Stair Master', 'Bike', 'Elliptical', 'Rowing', 'Jump Rope', 'Walking', 'Other'];
+var selectedCardioType = '';
+
+function buildCardioTypeButtons() {
+  var row = document.getElementById('cardio-type-row');
+  if (!row) return;
+  row.innerHTML = CARDIO_TYPES.map(function(t) {
+    return '<button class="cardio-type-btn' + (t === selectedCardioType ? ' selected' : '') + '" onclick="selectCardioType(this, \'' + t + '\')">' + t + '</button>';
+  }).join('');
+}
+
+function selectCardioType(btn, type) {
+  selectedCardioType = type;
+  document.querySelectorAll('.cardio-type-btn').forEach(function(b) { b.classList.remove('selected'); });
+  btn.classList.add('selected');
+}
+
+async function loadCardio() {
+  if (!currentWorkout || isGuest) return;
+  selectedCardioType = '';
+  document.getElementById('cardio-duration').value = '';
+  document.getElementById('cardio-intensity').value = '';
+  document.getElementById('cardio-notes').value = '';
+
+  buildCardioTypeButtons();
+
+  var { data } = await sb.from('cardio_logs')
+    .select('*')
+    .eq('user_id', currentUser.id)
+    .eq('workout_id', currentWorkout.id)
+    .eq('week', selectedWeek)
+    .single();
+
+  if (data) {
+    selectedCardioType = data.cardio_type || '';
+    document.getElementById('cardio-duration').value = data.duration_mins || '';
+    document.getElementById('cardio-intensity').value = data.intensity || '';
+    document.getElementById('cardio-notes').value = data.notes || '';
+    buildCardioTypeButtons();
+    updateCardioBadge(data.duration_mins);
+  } else {
+    updateCardioBadge(null);
+  }
+}
+
+function updateCardioBadge(mins) {
+  var badge = document.getElementById('cardio-badge');
+  if (!badge) return;
+  if (mins && parseInt(mins) > 0) {
+    badge.textContent = mins + ' min';
+    badge.className = 'cardio-badge';
+  } else {
+    badge.textContent = '— min';
+    badge.className = 'cardio-badge empty';
+  }
+}
+
+async function saveCardio() {
+  if (!currentWorkout || isGuest) return;
+  var duration = document.getElementById('cardio-duration').value;
+  var intensity = document.getElementById('cardio-intensity').value;
+  var notes = document.getElementById('cardio-notes').value;
+
+  showSyncIndicator('saving');
+  await sb.from('cardio_logs').upsert({
+    user_id: currentUser.id,
+    workout_id: currentWorkout.id,
+    week: selectedWeek,
+    cardio_type: selectedCardioType,
+    duration_mins: duration ? parseInt(duration) : null,
+    intensity: intensity || null,
+    notes: notes || null
+  }, { onConflict: 'user_id,workout_id,week' });
+  hideSyncIndicator();
+
+  updateCardioBadge(duration);
+
+  // Flash save confirmation
+  var btn = document.querySelector('.cardio-save-btn');
+  btn.textContent = '✓ Saved';
+  btn.style.background = 'rgba(48,209,88,0.2)';
+  btn.style.color = '#30D158';
+  btn.style.borderColor = 'rgba(48,209,88,0.3)';
+  setTimeout(function() {
+    btn.textContent = 'Save Cardio';
+    btn.style.background = '';
+    btn.style.color = '';
+    btn.style.borderColor = '';
+  }, 2000);
 }
 
 // ════════════════════════════════════════════════════════════
