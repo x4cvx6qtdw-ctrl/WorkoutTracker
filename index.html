@@ -1162,21 +1162,21 @@
 
   /* ── Cardio Logging ── */
   .cardio-section {
-    margin: 0 16px 16px; background: var(--card);
-    border-radius: 16px; overflow: hidden; border: 1px solid var(--card-border);
+    margin: 0 16px 16px; background: rgba(255,159,10,0.04);
+    border-radius: 16px; overflow: hidden; border: 1px solid rgba(255,159,10,0.15);
   }
   .cardio-header {
     padding: 14px 16px; display: flex; align-items: center;
     justify-content: space-between; cursor: pointer;
   }
   .cardio-header:active { background: rgba(255,255,255,0.04); }
-  .cardio-title { font-size: 15px; font-weight: 700; color: var(--text); }
+  .cardio-title { font-size: 15px; font-weight: 700; color: #FF9F0A; }
   .cardio-badge {
     font-size: 12px; font-weight: 700; padding: 3px 9px;
     border-radius: 20px; background: rgba(255,159,10,0.12); color: #FF9F0A;
   }
   .cardio-badge.empty { background: rgba(255,255,255,0.06); color: var(--text-tertiary); }
-  .cardio-chevron { color: var(--text-tertiary); font-size: 16px; transition: transform 0.25s cubic-bezier(0.34,1.56,0.64,1); display: inline-block; }
+  .cardio-chevron { color: #FF9F0A; font-size: 16px; transition: transform 0.25s cubic-bezier(0.34,1.56,0.64,1); display: inline-block; }
   .cardio-section.open .cardio-chevron { transform: rotate(90deg); }
   .cardio-body {
     display: none; padding: 14px 16px; border-top: 1px solid var(--separator);
@@ -1188,7 +1188,7 @@
   }
   .cardio-type-btn {
     padding: 8px 14px; border-radius: 10px;
-    background: rgba(255,255,255,0.06); border: 1.5px solid transparent;
+    background: rgba(255,159,10,0.06); border: 1.5px solid rgba(255,159,10,0.15);
     color: var(--text-secondary); font-size: 13px; font-weight: 600;
     font-family: inherit; cursor: pointer; transition: all 0.2s;
   }
@@ -1198,17 +1198,17 @@
     display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 12px;
   }
   .cardio-field-wrap { display: flex; flex-direction: column; gap: 4px; }
-  .cardio-field-label { font-size: 10px; font-weight: 600; color: var(--text-tertiary); text-transform: uppercase; letter-spacing: 0.8px; }
+  .cardio-field-label { font-size: 10px; font-weight: 600; color: #FF9F0A; text-transform: uppercase; letter-spacing: 0.8px; opacity: 0.7; }
   .cardio-input {
     width: 100%; height: 40px; border-radius: 10px;
-    background: rgba(255,255,255,0.08); border: 2px solid transparent;
+    background: rgba(255,159,10,0.06); border: 2px solid rgba(255,159,10,0.12);
     color: var(--text); font-size: 14px; font-weight: 600;
     text-align: center; font-family: inherit; outline: none; transition: all 0.2s;
   }
   .cardio-input:focus { border-color: #FF9F0A; background: rgba(255,159,10,0.12); }
   .cardio-notes {
     width: 100%; min-height: 44px; border-radius: 10px;
-    background: rgba(255,255,255,0.06); border: 1.5px solid transparent;
+    background: rgba(255,159,10,0.06); border: 1.5px solid rgba(255,159,10,0.12);
     color: var(--text); font-size: 13px; padding: 10px 12px;
     font-family: inherit; outline: none; resize: none; margin-bottom: 12px;
   }
@@ -1354,7 +1354,7 @@
       <div class="cardio-header" onclick="document.getElementById('cardio-section').classList.toggle('open')">
         <div style="display:flex;align-items:center;gap:10px;">
           <div class="cardio-title">🏃 Cardio</div>
-          <div style="font-size:11px;color:var(--text-tertiary);">Optional</div>
+          <div style="font-size:11px;color:#FF9F0A;opacity:0.5;">Optional</div>
         </div>
         <div style="display:flex;align-items:center;gap:8px;">
           <div class="cardio-badge empty" id="cardio-badge">— min</div>
