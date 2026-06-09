@@ -1192,7 +1192,7 @@
     color: var(--text-secondary); font-size: 13px; font-weight: 600;
     font-family: inherit; cursor: pointer; transition: all 0.2s;
   }
-  .cardio-type-btn.selected { border-color: #FF9F0A; color: #FF9F0A; background: rgba(255,159,10,0.1); }
+  .cardio-type-btn.selected { border-color: #FF9F0A; color: #FF9F0A; background: rgba(255,159,10,0.12); }
   .cardio-type-btn:active { transform: scale(0.95); }
   .cardio-fields {
     display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 12px;
@@ -1205,7 +1205,7 @@
     color: var(--text); font-size: 14px; font-weight: 600;
     text-align: center; font-family: inherit; outline: none; transition: all 0.2s;
   }
-  .cardio-input:focus { border-color: #FF9F0A; background: rgba(255,159,10,0.08); }
+  .cardio-input:focus { border-color: #FF9F0A; background: rgba(255,159,10,0.12); }
   .cardio-notes {
     width: 100%; min-height: 44px; border-radius: 10px;
     background: rgba(255,255,255,0.06); border: 1.5px solid transparent;
@@ -1220,7 +1220,65 @@
     color: #FF9F0A; font-size: 14px; font-weight: 600;
     font-family: inherit; cursor: pointer;
   }
-  .cardio-save-btn:active { background: rgba(255,159,10,0.25); }
+  .cardio-save-btn:active { opacity: 0.8; }
+
+  /* ── Daily Weigh-ins ── */
+  .daily-grid {
+    display: none; padding: 8px 16px 12px;
+    background: rgba(10,132,255,0.03);
+    border-top: 1px solid var(--separator);
+  }
+  .daily-grid.open { display: block; animation: slideIn 0.2s ease; }
+  .daily-grid-title {
+    font-size: 10px; font-weight: 600; color: var(--text-tertiary);
+    text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 8px;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .daily-avg {
+    font-size: 11px; font-weight: 700; color: #0A84FF;
+    background: rgba(10,132,255,0.1); padding: 2px 8px; border-radius: 6px;
+  }
+  .daily-row {
+    display: flex; align-items: center; gap: 8px; padding: 6px 0;
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+  }
+  .daily-row:last-child { border-bottom: none; }
+  .daily-label {
+    font-size: 12px; font-weight: 600; color: var(--text-tertiary);
+    width: 36px; flex-shrink: 0;
+  }
+  .daily-input {
+    flex: 1; height: 34px; background: rgba(255,255,255,0.06);
+    border: 1.5px solid transparent; border-radius: 8px;
+    color: var(--text); font-size: 14px; font-weight: 600;
+    text-align: center; font-family: inherit; outline: none;
+    transition: all 0.2s;
+  }
+  .daily-input:focus { border-color: #0A84FF; background: rgba(10,132,255,0.08); }
+  .daily-input::placeholder { color: var(--text-tertiary); font-weight: 400; }
+  .daily-save-btn {
+    width: 28px; height: 28px; border-radius: 8px;
+    background: rgba(48,209,88,0.12); border: 1px solid rgba(48,209,88,0.3);
+    color: #30D158; font-size: 12px; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+  .daily-save-btn:active { background: rgba(48,209,88,0.3); transform: scale(0.9); }
+  .wt-expand-btn {
+    width: 24px; height: 24px; border-radius: 6px;
+    background: rgba(10,132,255,0.1); color: #0A84FF;
+    font-size: 10px; cursor: pointer; display: flex;
+    align-items: center; justify-content: center;
+    flex-shrink: 0; transition: all 0.2s;
+  }
+  .wt-expand-btn:active { transform: scale(0.9); }
+  .wt-expand-btn.open { background: rgba(10,132,255,0.2); }
+
+  /* ── Weight Checkbox ── */
+  .wt-check {
+    width: 24px; height: 24px; accent-color: #30D158;
+    cursor: pointer; flex-shrink: 0;
+  }
 
   /* ── Animations ── */
   @keyframes popIn {
@@ -1252,7 +1310,7 @@
     <button class="auth-guest-btn" onclick="guestLogin()">Continue as Guest</button>
     <div style="font-size:11px;color:var(--text-tertiary);text-align:center;margin-top:8px;">Try 1 workout day free · Sign up for full access</div>
     <div id="auth-version" style="margin-top:24px;font-size:10px;color:rgba(255,255,255,0.12);text-align:center;">
-      <span style="background:rgba(255,255,255,0.06);padding:2px 8px;border-radius:6px;font-weight:600;letter-spacing:0.5px;">v1.7.0</span>
+      <span style="background:rgba(255,255,255,0.06);padding:2px 8px;border-radius:6px;font-weight:600;letter-spacing:0.5px;">v1.8.0</span>
       <div style="margin-top:4px;">Training Tracker · Built with 🦾</div>
     </div>
   </div>
@@ -1385,10 +1443,10 @@
 
   <!-- ── Version Footer ── -->
   <div class="version-footer" id="version-footer" style="position:fixed;bottom:60px;left:50%;transform:translateX(-50%);z-index:0;width:100%;max-width:430px;display:none;">
-    <div class="version-tag" onclick="document.getElementById('changelog').classList.toggle('open')" style="background:rgba(255,159,10,0.15);color:#FF9F0A;">v1.7.0</div>
+    <div class="version-tag" onclick="document.getElementById('changelog').classList.toggle('open')" style="background:rgba(255,159,10,0.15);color:#FF9F0A;">v1.8.0</div>
     <div>Training Tracker · Built with 🦾</div>
     <div class="version-changelog" id="changelog">
-      <strong>v1.7.0</strong> — Program Builder + Images<br>
+      <strong>v1.8.0</strong> — Program Builder + Images<br>
       • Admin program builder (create/edit/delete programs)<br>
       • Day editor with emoji and color picker<br>
       • Inline exercise editor with image URL support<br>
@@ -1788,6 +1846,10 @@ async function loadAllData() {
 
     const { data: targets } = await sb.from('macro_targets').select('*');
     if (targets) targets.forEach(r => lsSet('target_' + r.day_type, JSON.stringify(r)));
+
+    // Load daily weights
+    const { data: dailyW } = await sb.from('daily_weights').select('*');
+    if (dailyW) dailyW.forEach(r => { if (r.weight) lsSet('dw_' + r.week + '_' + r.day_index, r.weight); });
   } catch(e) { console.warn('Load error:', e); }
   hideSyncIndicator();
 }
@@ -2073,7 +2135,7 @@ function buildExerciseList(wo) {
       const isFinal = si === ex.sets - 1 && ex.sets > 1;
       const storedWeight = lsGet(wKey(wo.id, ei, si, selectedWeek)) || '';
       const storedReps   = lsGet(rKey(wo.id, ei, si, selectedWeek)) || '';
-      const isDone = storedWeight || storedReps;
+      const isDone = storedWeight && storedReps;
       if (!isDone && !foundActive) { isActiveSet = true; foundActive = true; }
       else { isActiveSet = false; }
       // Ghost: previous week's values as placeholder
@@ -2288,7 +2350,7 @@ function refreshExerciseProgress(input) {
   rows.forEach((row, si) => {
     const hasW = lsGet(wKey(wo.id, ei, si, selectedWeek));
     const hasR = lsGet(rKey(wo.id, ei, si, selectedWeek));
-    const isDone = hasW || hasR;
+    const isDone = hasW && hasR;
     row.classList.remove('active-set', 'done-set');
     if (isDone) {
       row.classList.add('done-set');
@@ -2353,12 +2415,30 @@ function buildWeightTracker() {
         data-week="${w}"
         oninput="saveBodyWeight(this)"
       >
-      <button class="wt-save-btn" onclick="confirmSaveWeight(this, ${w})">↑</button>
+      <input type="checkbox" class="wt-check" id="wt-check-${w}" onchange="confirmSaveWeight(this, ${w})" ${val ? 'checked' : ''}>
 
       ${deltaStr ? `<div class="wt-delta" style="color:${deltaColor}">${deltaStr}</div>` : '<div class="wt-delta"></div>'}
+      <button class="wt-expand-btn" onclick="toggleDailyGrid(${w})" title="Daily weigh-ins" id="expand-btn-${w}">▾</button>
       <button class="wt-photo-btn" onclick="togglePoseGrid(${w})" title="Progress photos" style="margin-left:4px;">📷</button>
     `;
     el.appendChild(row);
+
+    // Daily weigh-in grid (hidden by default)
+    const dailyGrid = document.createElement('div');
+    dailyGrid.id = 'daily-grid-' + w;
+    dailyGrid.className = 'daily-grid';
+    const dayLabels = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+    dailyGrid.innerHTML =
+      '<div class="daily-grid-title"><span>Daily Weigh-ins</span><span class="daily-avg" id="daily-avg-' + w + '">avg: —</span></div>' +
+      dayLabels.map(function(dl, di) {
+        var dVal = lsGet('dw_' + w + '_' + di) || '';
+        return '<div class="daily-row">' +
+          '<div class="daily-label">' + dl + '</div>' +
+          '<input type="number" inputmode="decimal" class="daily-input" placeholder="— lbs" value="' + dVal + '" data-week="' + w + '" data-day="' + di + '">' +
+          '<input type="checkbox" class="wt-check" onchange="saveDailyWeight(' + w + ',' + di + ',this)" ' + (dVal ? 'checked' : '') + '>' +
+        '</div>';
+      }).join('');
+    el.appendChild(dailyGrid);
 
     // Pose grid (hidden by default)
     const poseRow = document.createElement('div');
@@ -2383,22 +2463,20 @@ function saveBodyWeight(input) {
   lsSet(bwKey(w), input.value);
 }
 
-function confirmSaveWeight(btn, weekIdx) {
+function confirmSaveWeight(cb, weekIdx) {
   const row = document.getElementById('wt-row-' + weekIdx);
   const input = row.querySelector('.wt-input');
   const val = input.value;
   lsSet(bwKey(weekIdx), val);
   saveBodyWeightRemote(weekIdx, val);
 
-  // Visual feedback
-  btn.textContent = '✓';
-  btn.classList.add('saved');
-  setTimeout(function() {
-    btn.textContent = '↑';
-    btn.classList.remove('saved');
-  }, 1500);
+  // If unchecked, clear the value
+  if (!cb.checked) {
+    input.value = '';
+    lsSet(bwKey(weekIdx), '');
+    saveBodyWeightRemote(weekIdx, '');
+  }
 
-  // Update deltas and stats without rebuilding inputs
   updateWeightDeltas();
   updateWeightStats();
 }
@@ -2571,7 +2649,7 @@ function getProgress(wo, week) {
   wo.exercises.forEach((ex, ei) => {
     total += ex.sets;
     for (let si = 0; si < ex.sets; si++) {
-      if (lsGet(wKey(wo.id, ei, si, week)) || lsGet(rKey(wo.id, ei, si, week))) completed++;
+      if (lsGet(wKey(wo.id, ei, si, week)) && lsGet(rKey(wo.id, ei, si, week))) completed++;
     }
   });
   return { total, completed };
@@ -2580,7 +2658,7 @@ function getProgress(wo, week) {
 function getExProgress(wid, ei, sets, week) {
   let completed = 0;
   for (let si = 0; si < sets; si++) {
-    if (lsGet(wKey(wid, ei, si, week)) || lsGet(rKey(wid, ei, si, week))) completed++;
+    if (lsGet(wKey(wid, ei, si, week)) && lsGet(rKey(wid, ei, si, week))) completed++;
   }
   return { completed };
 }
@@ -3714,6 +3792,86 @@ function getOverloadSuggestion(wid, ei, si, week) {
     }
   }
   return '';
+}
+
+// ════════════════════════════════════════════════════════════
+// DAILY WEIGH-INS
+// ════════════════════════════════════════════════════════════
+
+function toggleDailyGrid(week) {
+  var grid = document.getElementById('daily-grid-' + week);
+  var btn = document.getElementById('expand-btn-' + week);
+  if (!grid) return;
+  var isOpen = grid.classList.toggle('open');
+  btn.classList.toggle('open', isOpen);
+  btn.textContent = isOpen ? '▴' : '▾';
+  if (isOpen) updateDailyAvg(week);
+}
+
+function saveDailyWeight(week, dayIdx, cb) {
+  var grid = document.getElementById('daily-grid-' + week);
+  var input = grid.querySelectorAll('.daily-input')[dayIdx];
+  var val = input.value;
+
+  if (!cb.checked) {
+    val = '';
+    input.value = '';
+  }
+
+  lsSet('dw_' + week + '_' + dayIdx, val);
+  saveDailyWeightRemote(week, dayIdx, val);
+  updateDailyAvg(week);
+}
+
+function updateDailyAvg(week) {
+  var vals = [];
+  for (var d = 0; d < 7; d++) {
+    var v = lsGet('dw_' + week + '_' + d);
+    if (v && parseFloat(v) > 0) vals.push(parseFloat(v));
+  }
+  var avgEl = document.getElementById('daily-avg-' + week);
+  if (avgEl) {
+    if (vals.length > 0) {
+      var avg = (vals.reduce(function(a,b){ return a+b; }, 0) / vals.length).toFixed(1);
+      avgEl.textContent = 'avg: ' + avg + ' lbs';
+
+      // Auto-update weekly weight with average
+      var row = document.getElementById('wt-row-' + week);
+      if (row) {
+        var weekInput = row.querySelector('.wt-input');
+        if (weekInput && !weekInput.value) {
+          weekInput.value = avg;
+          lsSet(bwKey(week), avg);
+        }
+      }
+    } else {
+      avgEl.textContent = 'avg: —';
+    }
+  }
+}
+
+async function saveDailyWeightRemote(week, dayIdx, weight) {
+  if (isGuest || !currentUser) return;
+  showSyncIndicator('saving');
+  await sb.from('daily_weights').upsert({
+    user_id: currentUser.id,
+    week: week,
+    day_index: dayIdx,
+    weight: weight || null
+  }, { onConflict: 'user_id,week,day_index' });
+  hideSyncIndicator();
+}
+
+async function loadDailyWeights() {
+  if (isGuest || !currentUser) return;
+  var { data } = await sb.from('daily_weights')
+    .select('*')
+    .eq('user_id', currentUser.id);
+  if (data) {
+    data.forEach(function(r) {
+      if (r.weight) lsSet('dw_' + r.week + '_' + r.day_index, r.weight);
+    });
+  }
 }
 
 // ════════════════════════════════════════════════════════════
