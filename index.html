@@ -1098,6 +1098,58 @@
     font-size: 14px; animation: pulse 1s ease infinite;
   }
 
+  /* ── PR Toast ── */
+  .pr-toast {
+    position: fixed; top: calc(var(--safe-top) + 16px); left: 50%;
+    transform: translateX(-50%) translateY(-100px);
+    z-index: 700; padding: 14px 24px; border-radius: 16px;
+    background: linear-gradient(135deg, #FFD60A, #FF9F0A);
+    color: #000; font-size: 15px; font-weight: 700;
+    box-shadow: 0 8px 30px rgba(255,214,10,0.4);
+    display: flex; align-items: center; gap: 10px;
+    transition: transform 0.4s cubic-bezier(0.34,1.56,0.64,1);
+    pointer-events: none; white-space: nowrap;
+  }
+  .pr-toast.show { transform: translateX(-50%) translateY(0); }
+  .pr-toast .pr-emoji { font-size: 24px; }
+
+  /* ── Rest Timer ── */
+  .rest-timer-overlay {
+    display: none; position: fixed; bottom: calc(var(--safe-bottom) + 70px);
+    left: 50%; transform: translateX(-50%);
+    z-index: 300; padding: 12px 20px; border-radius: 20px;
+    background: rgba(28,28,30,0.95); border: 1px solid rgba(255,255,255,0.15);
+    backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+    box-shadow: 0 8px 30px rgba(0,0,0,0.5);
+    align-items: center; gap: 14px;
+    max-width: 320px;
+  }
+  .rest-timer-overlay.active { display: flex; animation: sheetUp 0.3s ease; }
+  .rest-timer-time {
+    font-size: 32px; font-weight: 800; font-variant-numeric: tabular-nums;
+    min-width: 60px; text-align: center;
+  }
+  .rest-timer-label { font-size: 12px; color: var(--text-tertiary); }
+  .rest-timer-bar {
+    flex: 1; height: 4px; background: rgba(255,255,255,0.1);
+    border-radius: 2px; overflow: hidden; min-width: 80px;
+  }
+  .rest-timer-fill { height: 100%; border-radius: 2px; background: #0A84FF; transition: width 0.3s; }
+  .rest-timer-btns { display: flex; gap: 6px; }
+  .rest-timer-btn {
+    width: 32px; height: 32px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 14px; cursor: pointer; background: rgba(255,255,255,0.1);
+    color: var(--text-secondary);
+  }
+  .rest-timer-btn:active { opacity: 0.6; }
+
+  /* ── Overload Suggestion ── */
+  .overload-hint {
+    font-size: 10px; color: #30D158; margin-top: 2px;
+    font-weight: 600; font-style: italic;
+  }
+
   /* ── Animations ── */
   @keyframes popIn {
     from { opacity: 0; transform: scale(0.95) translateY(8px); }
@@ -1128,7 +1180,7 @@
     <button class="auth-guest-btn" onclick="guestLogin()">Continue as Guest</button>
     <div style="font-size:11px;color:var(--text-tertiary);text-align:center;margin-top:8px;">Try 1 workout day free · Sign up for full access</div>
     <div id="auth-version" style="margin-top:24px;font-size:10px;color:rgba(255,255,255,0.12);text-align:center;">
-      <span style="background:rgba(255,255,255,0.06);padding:2px 8px;border-radius:6px;font-weight:600;letter-spacing:0.5px;">v1.5.0</span>
+      <span style="background:rgba(255,255,255,0.06);padding:2px 8px;border-radius:6px;font-weight:600;letter-spacing:0.5px;">v1.6.0</span>
       <div style="margin-top:4px;">Training Tracker · Built with 🦾</div>
     </div>
   </div>
@@ -1195,6 +1247,29 @@
 
   <!-- ── TAB BAR ─────────────────────────────── -->
 
+  <!-- ── PR Toast ── -->
+  <div class="pr-toast" id="pr-toast">
+    <span class="pr-emoji">🏆</span>
+    <span id="pr-toast-text">New PR!</span>
+  </div>
+
+  <!-- ── Rest Timer ── -->
+  <div class="rest-timer-overlay" id="rest-timer">
+    <div>
+      <div class="rest-timer-time" id="rest-timer-time">0:35</div>
+      <div class="rest-timer-label" id="rest-timer-label">Rest</div>
+    </div>
+    <div style="flex:1;">
+      <div class="rest-timer-bar">
+        <div class="rest-timer-fill" id="rest-timer-fill" style="width:100%"></div>
+      </div>
+    </div>
+    <div class="rest-timer-btns">
+      <button class="rest-timer-btn" onclick="skipRestTimer()">⏭</button>
+      <button class="rest-timer-btn" onclick="cancelRestTimer()">✕</button>
+    </div>
+  </div>
+
   <!-- ── Photo Viewer ── -->
   <div class="photo-viewer-overlay" id="photo-viewer" onclick="closePhotoViewer(event)">
     <button class="photo-viewer-close" onclick="closePhotoViewer()">✕</button>
@@ -1204,10 +1279,10 @@
 
   <!-- ── Version Footer ── -->
   <div class="version-footer" id="version-footer" style="position:fixed;bottom:60px;left:50%;transform:translateX(-50%);z-index:0;width:100%;max-width:430px;display:none;">
-    <div class="version-tag" onclick="document.getElementById('changelog').classList.toggle('open')" style="background:rgba(255,159,10,0.15);color:#FF9F0A;">v1.5.0</div>
+    <div class="version-tag" onclick="document.getElementById('changelog').classList.toggle('open')" style="background:rgba(255,159,10,0.15);color:#FF9F0A;">v1.6.0</div>
     <div>Training Tracker · Built with 🦾</div>
     <div class="version-changelog" id="changelog">
-      <strong>v1.5.0</strong> — Program Builder + Images<br>
+      <strong>v1.6.0</strong> — Program Builder + Images<br>
       • Admin program builder (create/edit/delete programs)<br>
       • Day editor with emoji and color picker<br>
       • Inline exercise editor with image URL support<br>
@@ -1330,6 +1405,7 @@
 <script>
 // ── Data ──────────────────────────────────────────────────────────────────────
 const WEEKS = 12;
+const SHOW_NUTRITION = false; // Set false in production to hide Nutrition tab
 const DAYS  = ['Day 1','Day 2','Day 3','Day 4','Day 5','Day 6','Day 7'];
 
 const DEFAULT_WORKOUTS = [
@@ -1547,9 +1623,12 @@ async function showApp() {
   const isAdmin = currentUser?.id === 'f815eed6-f723-4658-81af-77528378361b';
   document.getElementById('tab-admin').style.display = isAdmin ? 'flex' : 'none';
 
+  // Hide nutrition tab if disabled
+  const foodTab   = document.getElementById('tab-food');
+  foodTab.style.display = SHOW_NUTRITION ? 'flex' : 'none';
+
   // Lock tabs for guests
   const weightTab = document.getElementById('tab-weight');
-  const foodTab   = document.getElementById('tab-food');
   if (isGuest) {
     weightTab.querySelector('.tab-label').textContent = '🔒 Weight';
     foodTab.querySelector('.tab-label').textContent = '🔒 Nutrition';
@@ -1907,6 +1986,7 @@ function buildExerciseList(wo) {
                 ${isFinal ? '<span class="failure-badge">FAILURE</span>' : ''}
               </div>
               ${ghostW ? `<div style="font-size:10px;color:rgba(255,255,255,0.2);margin-top:1px;">prev: ${ghostW}lbs${ghostR ? ' · '+ghostR+'r' : ''}</div>` : ''}
+              ${!isDone ? `<div class="overload-hint">${getOverloadSuggestion(wo.id, ei, si, selectedWeek)}</div>` : ''}
             </div>
           </div>
           <div class="set-inputs">
@@ -2062,6 +2142,16 @@ function saveSetField(input) {
   const weight   = lsGet(wKey(wid, ei, si, selectedWeek)) || '';
   const repsDone = lsGet(rKey(wid, ei, si, selectedWeek)) || '';
   saveSetRemote(wid, ei, si, selectedWeek, weight, repsDone);
+
+  // Check for PR and start rest timer
+  if (type === 'weight' && weight) {
+    checkForPR(wid, ei, si, selectedWeek, weight);
+  }
+  if (val && currentWorkout && currentWorkout.exercises) {
+    var exNote = currentWorkout.exercises[ei] ? currentWorkout.exercises[ei].note : '';
+    var restSecs = detectRestTime(exNote);
+    startRestTimer(restSecs);
+  }
 
   if (currentWorkout) {
     updateDetailProgress(currentWorkout);
@@ -3381,6 +3471,139 @@ async function deleteDay(dayId) {
   }
   builderStack.pop();
   renderProgramEditor();
+}
+
+// ════════════════════════════════════════════════════════════
+// PR NOTIFICATIONS
+// ════════════════════════════════════════════════════════════
+
+function checkForPR(wid, ei, si, week, weight) {
+  if (!weight || isNaN(parseFloat(weight))) return;
+  var currentW = parseFloat(weight);
+  var prevMax = 0;
+  // Check all previous weeks for this exercise + set
+  for (var w = 0; w < week; w++) {
+    var prev = parseFloat(lsGet(wKey(wid, ei, si, w)));
+    if (prev && prev > prevMax) prevMax = prev;
+  }
+  // Also check other sets in previous weeks for this exercise
+  if (prevMax === 0) {
+    var wo = WORKOUTS.find(function(x) { return x.id === wid; });
+    if (wo && wo.exercises && wo.exercises[ei]) {
+      for (var w2 = 0; w2 < week; w2++) {
+        for (var s = 0; s < wo.exercises[ei].sets; s++) {
+          var prev2 = parseFloat(lsGet(wKey(wid, ei, s, w2)));
+          if (prev2 && prev2 > prevMax) prevMax = prev2;
+        }
+      }
+    }
+  }
+  if (prevMax > 0 && currentW > prevMax) {
+    showPRToast(currentW, prevMax);
+  }
+}
+
+var prToastTimeout = null;
+function showPRToast(newW, oldW) {
+  var toast = document.getElementById('pr-toast');
+  var text = document.getElementById('pr-toast-text');
+  text.textContent = 'New PR! ' + newW + 'lbs (was ' + oldW + ')';
+  toast.classList.add('show');
+  if (prToastTimeout) clearTimeout(prToastTimeout);
+  prToastTimeout = setTimeout(function() {
+    toast.classList.remove('show');
+  }, 3000);
+  // Vibrate if supported
+  if (navigator.vibrate) navigator.vibrate([100, 50, 100]);
+}
+
+// ════════════════════════════════════════════════════════════
+// REST TIMER
+// ════════════════════════════════════════════════════════════
+
+var restTimerInterval = null;
+var restTimerRemaining = 0;
+var restTimerTotal = 0;
+
+function startRestTimer(seconds) {
+  cancelRestTimer();
+  restTimerTotal = seconds;
+  restTimerRemaining = seconds;
+  var el = document.getElementById('rest-timer');
+  el.classList.add('active');
+  updateRestTimerDisplay();
+  restTimerInterval = setInterval(function() {
+    restTimerRemaining--;
+    updateRestTimerDisplay();
+    if (restTimerRemaining <= 0) {
+      cancelRestTimer();
+      // Vibrate and flash
+      if (navigator.vibrate) navigator.vibrate([200, 100, 200, 100, 200]);
+      var el2 = document.getElementById('rest-timer');
+      el2.classList.add('active');
+      document.getElementById('rest-timer-time').textContent = 'GO!';
+      document.getElementById('rest-timer-time').style.color = '#30D158';
+      document.getElementById('rest-timer-fill').style.width = '100%';
+      document.getElementById('rest-timer-fill').style.background = '#30D158';
+      setTimeout(function() {
+        el2.classList.remove('active');
+        document.getElementById('rest-timer-time').style.color = '';
+        document.getElementById('rest-timer-fill').style.background = '';
+      }, 2500);
+    }
+  }, 1000);
+}
+
+function updateRestTimerDisplay() {
+  var mins = Math.floor(restTimerRemaining / 60);
+  var secs = restTimerRemaining % 60;
+  document.getElementById('rest-timer-time').textContent = mins + ':' + (secs < 10 ? '0' : '') + secs;
+  var pct = restTimerTotal > 0 ? (restTimerRemaining / restTimerTotal * 100) : 0;
+  document.getElementById('rest-timer-fill').style.width = pct + '%';
+  var label = restTimerTotal <= 45 ? 'Short rest' : restTimerTotal <= 90 ? 'Rest' : 'Long rest';
+  document.getElementById('rest-timer-label').textContent = label;
+}
+
+function skipRestTimer() {
+  cancelRestTimer();
+  if (navigator.vibrate) navigator.vibrate(100);
+}
+
+function cancelRestTimer() {
+  if (restTimerInterval) clearInterval(restTimerInterval);
+  restTimerInterval = null;
+  document.getElementById('rest-timer').classList.remove('active');
+}
+
+function detectRestTime(exerciseNote) {
+  if (!exerciseNote) return 60;
+  var note = exerciseNote.toLowerCase();
+  if (note.includes('35s')) return 35;
+  if (note.includes('45s')) return 45;
+  if (note.includes('60s') || note.includes('1 min')) return 60;
+  if (note.includes('90s') || note.includes('1.5 min')) return 90;
+  if (note.includes('2 min') || note.includes('2-3 min')) return 120;
+  if (note.includes('3 min')) return 180;
+  return 60;
+}
+
+// ════════════════════════════════════════════════════════════
+// PROGRESSIVE OVERLOAD SUGGESTIONS
+// ════════════════════════════════════════════════════════════
+
+function getOverloadSuggestion(wid, ei, si, week) {
+  if (week === 0) return '';
+  // Find the most recent previous week with data for this set
+  for (var w = week - 1; w >= 0; w--) {
+    var prevW = lsGet(wKey(wid, ei, si, w));
+    var prevR = lsGet(rKey(wid, ei, si, w));
+    if (prevW) {
+      var suggested = Math.ceil(parseFloat(prevW) * 1.025 / 2.5) * 2.5;
+      if (suggested === parseFloat(prevW)) suggested += 2.5;
+      return 'Try ' + suggested + 'lbs';
+    }
+  }
+  return '';
 }
 
 // ════════════════════════════════════════════════════════════
