@@ -846,6 +846,35 @@
   .wt-save-btn:active { background: rgba(48,209,88,0.3); transform: scale(0.9); }
   .wt-save-btn.saved { background: #30D158; color: #000; }
 
+  /* ── Exercise Images ── */
+  .ex-thumb {
+    width: 44px; height: 44px; border-radius: 12px;
+    object-fit: cover; flex-shrink: 0;
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.1);
+  }
+  .ex-header-left { display: flex; align-items: center; gap: 12px; flex: 1; min-width: 0; }
+
+  /* ── Version Footer ── */
+  .version-footer {
+    text-align: center; padding: 20px 16px 8px;
+    font-size: 10px; color: rgba(255,255,255,0.15);
+    font-family: -apple-system, sans-serif;
+  }
+  .version-footer a { color: rgba(255,255,255,0.2); text-decoration: none; }
+  .version-footer .version-tag {
+    display: inline-block; background: rgba(255,255,255,0.06);
+    padding: 2px 8px; border-radius: 6px; margin-bottom: 4px;
+    font-weight: 600; letter-spacing: 0.5px;
+  }
+  .version-changelog {
+    display: none; text-align: left; margin-top: 8px;
+    padding: 10px 14px; background: rgba(255,255,255,0.04);
+    border-radius: 10px; font-size: 11px; color: rgba(255,255,255,0.25);
+    line-height: 1.6;
+  }
+  .version-changelog.open { display: block; }
+
   /* ── Animations ── */
   @keyframes popIn {
     from { opacity: 0; transform: scale(0.95) translateY(8px); }
@@ -1021,6 +1050,32 @@
     </div>
   </div>
 
+  <!-- ── Version Footer ── -->
+  <div class="version-footer" id="version-footer" style="position:fixed;bottom:60px;left:50%;transform:translateX(-50%);z-index:0;width:100%;max-width:430px;">
+    <div class="version-tag" onclick="document.getElementById('changelog').classList.toggle('open')">v1.1.0</div>
+    <div>Training Tracker · Built with 🦾</div>
+    <div class="version-changelog" id="changelog">
+      <strong>v1.1.0</strong> — Exercise Images<br>
+      • Added workout images for all 37 exercises<br>
+      • Images from open-source exercise database<br>
+      • Lazy loading for fast performance<br>
+      • Graceful fallback if image fails to load<br>
+      <br>
+      <strong>v1.0.0</strong> — Initial Release<br>
+      • 12-week workout strength tracker<br>
+      • 7-day split: Back, Quads, Chest, Rest, Hams, Shoulders, Arms<br>
+      • Body weight tracking with charts<br>
+      • Nutrition logging with macro targets<br>
+      • Water intake tracking<br>
+      • Nutrition lookup via API-Ninjas<br>
+      • User auth with email/password<br>
+      • Guest mode (1 week demo)<br>
+      • Admin dashboard with user management<br>
+      • Archive/restore/purge users<br>
+      • Cloud sync via Supabase<br>
+    </div>
+  </div>
+
 </div>
 
 <script>
@@ -1031,64 +1086,64 @@ const DAYS  = ['Day 1','Day 2','Day 3','Day 4','Day 5','Day 6','Day 7'];
 const WORKOUTS = [
   { id:'back',      name:'Back & Biceps',       emoji:'🏋️', color:'#0A84FF', g:['#0A84FF','#0055CC'],
     exercises:[
-      {name:'Abs',                        sets:3, reps:'Till Failure', note:''},
-      {name:'Wide Grip Pulldown',         sets:7, reps:'10–12',        note:'35s rest · stretch lats'},
-      {name:'Close Grip Pulldown',        sets:3, reps:'8–10',         note:''},
-      {name:'Incline Dumbbell Row',       sets:3, reps:'8–10',         note:''},
-      {name:'Dumbbell Pullover',          sets:3, reps:'10–12',        note:''},
-      {name:'Preacher Machine Curl',      sets:3, reps:'10–12',        note:'Giant Set A · 2 min rest'},
-      {name:'Seated DB Hammer Curl',      sets:3, reps:'15–20',        note:'Giant Set B'},
-      {name:'Incline Dumbbell Curl',      sets:3, reps:'6–8',          note:'Giant Set C'},
+      {name:'Abs',                        sets:3, reps:'Till Failure', note:'', image_url:'https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Ab_Crunch_Machine/0.jpg'},
+      {name:'Wide Grip Pulldown',         sets:7, reps:'10–12',        note:'35s rest · stretch lats', image_url:'https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Wide-Grip_Lat_Pulldown/0.jpg'},
+      {name:'Close Grip Pulldown',        sets:3, reps:'8–10',         note:'', image_url:'https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Close-Grip_Front_Lat_Pulldown/0.jpg'},
+      {name:'Incline Dumbbell Row',       sets:3, reps:'8–10',         note:'', image_url:'https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Dumbbell_Incline_Row/0.jpg'},
+      {name:'Dumbbell Pullover',          sets:3, reps:'10–12',        note:'', image_url:'https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Bent-Arm_Dumbbell_Pullover/0.jpg'},
+      {name:'Preacher Machine Curl',      sets:3, reps:'10–12',        note:'Giant Set A · 2 min rest', image_url:'https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Machine_Preacher_Curls/0.jpg'},
+      {name:'Seated DB Hammer Curl',      sets:3, reps:'15–20',        note:'Giant Set B', image_url:'https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Hammer_Curls/0.jpg'},
+      {name:'Incline Dumbbell Curl',      sets:3, reps:'6–8',          note:'Giant Set C', image_url:'https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Incline_Dumbbell_Curl/0.jpg'},
     ]},
   { id:'quads',     name:'Quads & Hams',         emoji:'🦵', color:'#FF9F0A', g:['#FF9F0A','#CC7A00'],
     exercises:[
-      {name:'Adductor (Inner)',           sets:3, reps:'12–15',        note:''},
-      {name:'Leg Press',                  sets:3, reps:'25',           note:''},
-      {name:'Hack Squat',                 sets:3, reps:'10–15',        note:''},
-      {name:'Abs',                        sets:3, reps:'Till Failure',  note:''},
-      {name:'Dumbbell RDL',               sets:3, reps:'10–12',        note:''},
-      {name:'Leg Extensions',             sets:3, reps:'12–20',        note:''},
-      {name:'Seated Leg Curl',            sets:3, reps:'8–10',         note:'Hold & squeeze'},
-      {name:'Standing Calf Raise',        sets:7, reps:'12–15',        note:'35s rest'},
+      {name:'Adductor (Inner)',           sets:3, reps:'12–15',        note:'', image_url:'https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Adductor/0.jpg'},
+      {name:'Leg Press',                  sets:3, reps:'25',           note:'', image_url:'https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Leg_Press/0.jpg'},
+      {name:'Hack Squat',                 sets:3, reps:'10–15',        note:'', image_url:'https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Hack_Squat/0.jpg'},
+      {name:'Abs',                        sets:3, reps:'Till Failure',  note:'', image_url:'https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Ab_Crunch_Machine/0.jpg'},
+      {name:'Dumbbell RDL',               sets:3, reps:'10–12',        note:'', image_url:'https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Stiff-Legged_Dumbbell_Deadlift/0.jpg'},
+      {name:'Leg Extensions',             sets:3, reps:'12–20',        note:'', image_url:'https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Leg_Extensions/0.jpg'},
+      {name:'Seated Leg Curl',            sets:3, reps:'8–10',         note:'Hold & squeeze', image_url:'https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Seated_Leg_Curl/0.jpg'},
+      {name:'Standing Calf Raise',        sets:7, reps:'12–15',        note:'35s rest', image_url:'https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Standing_Calf_Raises/0.jpg'},
     ]},
   { id:'chest',     name:'Chest & Triceps',       emoji:'🦾', color:'#30D158', g:['#30D158','#1A8A35'],
     exercises:[
-      {name:'Abs',                        sets:3, reps:'Till Failure',  note:''},
-      {name:'Cable Crossovers',           sets:3, reps:'12–15',        note:''},
-      {name:'30° DB Neutral Press',       sets:3, reps:'10–12',        note:''},
-      {name:'Decline Dumbbell Press',     sets:3, reps:'10–12',        note:''},
-      {name:'EZ Bar Pushdown',            sets:3, reps:'10–12',        note:''},
-      {name:'Close Grip Bench Press',     sets:3, reps:'8–10',         note:''},
-      {name:'Dumbbell Skull Crushers',    sets:3, reps:'12–15',        note:''},
+      {name:'Abs',                        sets:3, reps:'Till Failure',  note:'', image_url:'https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Ab_Crunch_Machine/0.jpg'},
+      {name:'Cable Crossovers',           sets:3, reps:'12–15',        note:'', image_url:'https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Cable_Crossover/0.jpg'},
+      {name:'30° DB Neutral Press',       sets:3, reps:'10–12',        note:'', image_url:'https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Dumbbell_Bench_Press/0.jpg'},
+      {name:'Decline Dumbbell Press',     sets:3, reps:'10–12',        note:'', image_url:'https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Decline_Dumbbell_Bench_Press/0.jpg'},
+      {name:'EZ Bar Pushdown',            sets:3, reps:'10–12',        note:'', image_url:'https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Triceps_Pushdown/0.jpg'},
+      {name:'Close Grip Bench Press',     sets:3, reps:'8–10',         note:'', image_url:'https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Close-Grip_Barbell_Bench_Press/0.jpg'},
+      {name:'Dumbbell Skull Crushers',    sets:3, reps:'12–15',        note:'', image_url:'https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Lying_Dumbbell_Tricep_Extension/0.jpg'},
     ]},
   { id:'rest', name:'Rest Day', emoji:'😴', color:'#636366', isRest:true },
   { id:'hams',      name:'Hamstrings & Glutes',   emoji:'🍑', color:'#BF5AF2', g:['#BF5AF2','#8944B0'],
     exercises:[
-      {name:'Single Leg Curl',            sets:3, reps:'10–12',        note:''},
-      {name:'Hyperextensions w/ Weight',  sets:3, reps:'12',           note:'Hold 3s at top'},
-      {name:'Glute Kickback',             sets:3, reps:'15',           note:''},
-      {name:'Barbell RDL',                sets:3, reps:'10–12',        note:''},
-      {name:'Abductor (Outer)',           sets:3, reps:'15',           note:''},
-      {name:'Abs',                        sets:3, reps:'Till Failure',  note:'3x'},
+      {name:'Single Leg Curl',            sets:3, reps:'10–12',        note:'', image_url:'https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Lying_Leg_Curls/0.jpg'},
+      {name:'Hyperextensions w/ Weight',  sets:3, reps:'12',           note:'Hold 3s at top', image_url:'https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Hyperextensions_With_No_Hyperextension_Bench/0.jpg'},
+      {name:'Glute Kickback',             sets:3, reps:'15',           note:'', image_url:'https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Glute_Kickback/0.jpg'},
+      {name:'Barbell RDL',                sets:3, reps:'10–12',        note:'', image_url:'https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Romanian_Deadlift/0.jpg'},
+      {name:'Abductor (Outer)',           sets:3, reps:'15',           note:'', image_url:'https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Thigh_Abductor/0.jpg'},
+      {name:'Abs',                        sets:3, reps:'Till Failure',  note:'3x', image_url:'https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Ab_Crunch_Machine/0.jpg'},
     ]},
   { id:'shoulders', name:'Shoulders',              emoji:'🏔️', color:'#FF375F', g:['#FF375F','#CC1A3A'],
     exercises:[
-      {name:'DB Lateral Raise',           sets:7, reps:'10',           note:'35s rest'},
-      {name:'Seated DB Shoulder Press',   sets:3, reps:'10–12',        note:''},
-      {name:'Abs',                        sets:3, reps:'Till Failure',  note:'3x'},
-      {name:'Cable Lateral Raise',        sets:3, reps:'12–15',        note:''},
-      {name:'Reverse Cable Fly',          sets:3, reps:'12–15',        note:''},
-      {name:'Seated Machine Lateral',     sets:3, reps:'20',           note:''},
+      {name:'DB Lateral Raise',           sets:7, reps:'10',           note:'35s rest', image_url:'https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Side_Lateral_Raise/0.jpg'},
+      {name:'Seated DB Shoulder Press',   sets:3, reps:'10–12',        note:'', image_url:'https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Seated_Dumbbell_Press/0.jpg'},
+      {name:'Abs',                        sets:3, reps:'Till Failure',  note:'3x', image_url:'https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Ab_Crunch_Machine/0.jpg'},
+      {name:'Cable Lateral Raise',        sets:3, reps:'12–15',        note:'', image_url:'https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/One-Arm_Side_Laterals/0.jpg'},
+      {name:'Reverse Cable Fly',          sets:3, reps:'12–15',        note:'', image_url:'https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Cable_Rear_Delt_Fly/0.jpg'},
+      {name:'Seated Machine Lateral',     sets:3, reps:'20',           note:'', image_url:'https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Seated_Side_Lateral_Raise/0.jpg'},
     ]},
   { id:'arms',      name:'Arms',                   emoji:'💥', color:'#FF6B35', g:['#FF6B35','#CC4A18'],
     exercises:[
-      {name:'Abs',                        sets:3, reps:'Till Failure',  note:'3x'},
-      {name:'Preacher EZ Bar / Machine Curl', sets:3, reps:'10–12',   note:''},
-      {name:'Dumbbell Curl',              sets:3, reps:'10–12',        note:''},
-      {name:'Reverse EZ Bar Curl',        sets:3, reps:'15',           note:''},
-      {name:'Triceps Rope Pushdown',      sets:3, reps:'10–12',        note:''},
-      {name:'Overhead Cable Extensions',  sets:3, reps:'15',           note:''},
-      {name:'EZ Bar Skull Crushers',      sets:3, reps:'10–12',        note:''},
+      {name:'Abs',                        sets:3, reps:'Till Failure',  note:'3x', image_url:'https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Ab_Crunch_Machine/0.jpg'},
+      {name:'Preacher EZ Bar / Machine Curl', sets:3, reps:'10–12',   note:'', image_url:'https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Preacher_Curl/0.jpg'},
+      {name:'Dumbbell Curl',              sets:3, reps:'10–12',        note:'', image_url:'https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Dumbbell_Bicep_Curl/0.jpg'},
+      {name:'Reverse EZ Bar Curl',        sets:3, reps:'15',           note:'', image_url:'https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Barbell_Curl/0.jpg'},
+      {name:'Triceps Rope Pushdown',      sets:3, reps:'10–12',        note:'', image_url:'https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Triceps_Pushdown_-_Rope_Attachment/0.jpg'},
+      {name:'Overhead Cable Extensions',  sets:3, reps:'15',           note:'', image_url:'https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Overhead_Cable_Curl/0.jpg'},
+      {name:'EZ Bar Skull Crushers',      sets:3, reps:'10–12',        note:'', image_url:'https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/EZ-Bar_Skullcrusher/0.jpg'},
     ]},
 ];
 
@@ -1563,11 +1618,14 @@ function buildExerciseList(wo) {
 
     card.innerHTML = `
       <button class="exercise-header" onclick="toggleExercise(this)">
-        <div class="ex-info">
-          <div class="ex-name">${ex.name}</div>
-          <div class="ex-meta">
-            <span class="ex-reps">${ex.sets} sets · ${ex.reps} reps</span>
-            ${ex.note ? `<span class="ex-note" style="color:${wo.color};opacity:0.85">${ex.note}</span>` : ''}
+        <div class="ex-header-left">
+          ${ex.image_url ? `<img src="${ex.image_url}" class="ex-thumb" alt="${ex.name}" loading="lazy" onerror="this.style.display='none'">` : ''}
+          <div class="ex-info">
+            <div class="ex-name">${ex.name}</div>
+            <div class="ex-meta">
+              <span class="ex-reps">${ex.sets} sets · ${ex.reps} reps</span>
+              ${ex.note ? `<span class="ex-note" style="color:${wo.color};opacity:0.85">${ex.note}</span>` : ''}
+            </div>
           </div>
         </div>
         <div class="ex-right">
