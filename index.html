@@ -846,6 +846,130 @@
   .wt-save-btn:active { background: rgba(48,209,88,0.3); transform: scale(0.9); }
   .wt-save-btn.saved { background: #30D158; color: #000; }
 
+  /* ── Program Builder ── */
+  .builder-overlay {
+    display: none; position: fixed; inset: 0; background: #000;
+    z-index: 500; overflow-y: auto; -webkit-overflow-scrolling: touch;
+  }
+  .builder-overlay.open { display: block; animation: sheetUp 0.3s ease; }
+  .builder-header {
+    position: sticky; top: 0; z-index: 10;
+    padding: calc(var(--safe-top) + 8px) 16px 12px;
+    background: rgba(0,0,0,0.9); backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-bottom: 1px solid var(--separator);
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .builder-back { color: var(--blue); font-size: 16px; font-weight: 500; font-family: inherit; cursor: pointer; }
+  .builder-back:active { opacity: 0.6; }
+  .builder-title { font-size: 17px; font-weight: 700; color: var(--text); }
+  .builder-action { color: #30D158; font-size: 15px; font-weight: 600; font-family: inherit; cursor: pointer; }
+  .builder-action:active { opacity: 0.6; }
+  .builder-body { padding: 16px 16px calc(var(--safe-bottom) + 20px); }
+  .builder-section { margin-bottom: 20px; }
+  .builder-label { font-size: 12px; font-weight: 600; color: var(--text-tertiary); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; }
+  .builder-input {
+    width: 100%; height: 44px; border-radius: 12px;
+    background: rgba(255,255,255,0.08); border: 1.5px solid transparent;
+    color: var(--text); font-size: 15px; padding: 0 14px;
+    font-family: inherit; outline: none; transition: all 0.2s;
+    margin-bottom: 10px;
+  }
+  .builder-input:focus { border-color: var(--blue); background: rgba(10,132,255,0.08); }
+  .builder-textarea {
+    width: 100%; min-height: 60px; border-radius: 12px;
+    background: rgba(255,255,255,0.08); border: 1.5px solid transparent;
+    color: var(--text); font-size: 14px; padding: 10px 14px;
+    font-family: inherit; outline: none; resize: vertical;
+    margin-bottom: 10px;
+  }
+  .builder-textarea:focus { border-color: var(--blue); }
+  .builder-card {
+    background: var(--card); border-radius: 16px; padding: 14px 16px;
+    margin-bottom: 8px; display: flex; align-items: center; gap: 12px;
+    cursor: pointer; border: 1px solid var(--card-border); transition: all 0.2s;
+  }
+  .builder-card:active { background: rgba(255,255,255,0.1); }
+  .builder-card-icon { font-size: 24px; flex-shrink: 0; }
+  .builder-card-info { flex: 1; min-width: 0; }
+  .builder-card-name { font-size: 15px; font-weight: 600; color: var(--text); }
+  .builder-card-meta { font-size: 12px; color: var(--text-tertiary); margin-top: 2px; }
+  .builder-card-chev { color: var(--text-tertiary); font-size: 16px; }
+  .builder-add-btn {
+    width: 100%; padding: 14px; border-radius: 14px;
+    background: rgba(10,132,255,0.1); border: 1.5px dashed rgba(10,132,255,0.3);
+    color: var(--blue); font-size: 15px; font-weight: 600;
+    font-family: inherit; cursor: pointer; margin-top: 8px;
+  }
+  .builder-add-btn:active { background: rgba(10,132,255,0.2); }
+  .builder-delete-btn {
+    width: 100%; padding: 12px; border-radius: 12px;
+    background: rgba(255,59,48,0.1); border: 1px solid rgba(255,59,48,0.2);
+    color: #FF375F; font-size: 14px; font-weight: 600;
+    font-family: inherit; cursor: pointer; margin-top: 20px;
+  }
+  .builder-delete-btn:active { background: rgba(255,59,48,0.2); }
+  .builder-inline-row {
+    display: flex; gap: 8px; margin-bottom: 8px; align-items: center;
+  }
+  .builder-inline-row .builder-input { margin-bottom: 0; }
+  .builder-small-input {
+    width: 60px; height: 38px; border-radius: 10px;
+    background: rgba(255,255,255,0.08); border: 1.5px solid transparent;
+    color: var(--text); font-size: 13px; text-align: center;
+    font-family: inherit; outline: none; flex-shrink: 0;
+  }
+  .builder-small-input:focus { border-color: var(--blue); }
+  .builder-ex-card {
+    background: rgba(255,255,255,0.05); border-radius: 12px;
+    padding: 10px 12px; margin-bottom: 6px;
+    border: 1px solid rgba(255,255,255,0.06);
+  }
+  .builder-ex-row1 { display: flex; gap: 8px; align-items: center; margin-bottom: 6px; }
+  .builder-ex-name {
+    flex: 1; height: 36px; border-radius: 8px;
+    background: rgba(255,255,255,0.06); border: none;
+    color: var(--text); font-size: 14px; padding: 0 10px;
+    font-family: inherit; outline: none;
+  }
+  .builder-ex-name:focus { background: rgba(10,132,255,0.08); }
+  .builder-ex-row2 { display: flex; gap: 6px; align-items: center; }
+  .builder-ex-field {
+    width: 50px; height: 32px; border-radius: 8px;
+    background: rgba(255,255,255,0.06); border: none;
+    color: var(--text-secondary); font-size: 12px; text-align: center;
+    font-family: inherit; outline: none;
+  }
+  .builder-ex-note {
+    flex: 1; height: 32px; border-radius: 8px;
+    background: rgba(255,255,255,0.06); border: none;
+    color: var(--text-tertiary); font-size: 12px; padding: 0 8px;
+    font-family: inherit; outline: none; font-style: italic;
+  }
+  .builder-ex-del {
+    width: 28px; height: 28px; border-radius: 8px;
+    background: rgba(255,59,48,0.1); color: #FF375F;
+    font-size: 14px; cursor: pointer; display: flex;
+    align-items: center; justify-content: center; flex-shrink: 0;
+  }
+  .builder-ex-del:active { opacity: 0.6; }
+  .color-picker-row { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 10px; }
+  .color-dot {
+    width: 32px; height: 32px; border-radius: 50%; cursor: pointer;
+    border: 2px solid transparent; transition: all 0.2s;
+  }
+  .color-dot.selected { border-color: #fff; transform: scale(1.15); }
+  .color-dot:active { transform: scale(0.9); }
+  .emoji-picker-row { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 10px; }
+  .emoji-opt {
+    width: 36px; height: 36px; border-radius: 10px;
+    background: rgba(255,255,255,0.06); display: flex;
+    align-items: center; justify-content: center;
+    font-size: 20px; cursor: pointer; border: 2px solid transparent;
+  }
+  .emoji-opt.selected { border-color: var(--blue); background: rgba(10,132,255,0.15); }
+  .emoji-opt:active { transform: scale(0.9); }
+
   /* ── Exercise Images ── */
   .ex-thumb {
     width: 44px; height: 44px; border-radius: 12px;
@@ -861,7 +985,6 @@
     font-size: 10px; color: rgba(255,255,255,0.15);
     font-family: -apple-system, sans-serif;
   }
-  .version-footer a { color: rgba(255,255,255,0.2); text-decoration: none; }
   .version-footer .version-tag {
     display: inline-block; background: rgba(255,255,255,0.06);
     padding: 2px 8px; border-radius: 6px; margin-bottom: 4px;
@@ -904,6 +1027,10 @@
     </div>
     <button class="auth-guest-btn" onclick="guestLogin()">Continue as Guest</button>
     <div style="font-size:11px;color:var(--text-tertiary);text-align:center;margin-top:8px;">Try 1 workout day free · Sign up for full access</div>
+    <div id="auth-version" style="margin-top:24px;font-size:10px;color:rgba(255,255,255,0.12);text-align:center;">
+      <span style="background:rgba(255,255,255,0.06);padding:2px 8px;border-radius:6px;font-weight:600;letter-spacing:0.5px;">v1.4.0</span>
+      <div style="margin-top:4px;">Training Tracker · Built with 🦾</div>
+    </div>
   </div>
 
   <!-- ── HOME SCREEN ─────────────────────────── -->
@@ -967,6 +1094,43 @@
   </div>
 
   <!-- ── TAB BAR ─────────────────────────────── -->
+
+  <!-- ── Version Footer ── -->
+  <div class="version-footer" id="version-footer" style="position:fixed;bottom:60px;left:50%;transform:translateX(-50%);z-index:0;width:100%;max-width:430px;display:none;">
+    <div class="version-tag" onclick="document.getElementById('changelog').classList.toggle('open')" >v1.4.0</div>
+    <div>Training Tracker · Built with 🦾</div>
+    <div class="version-changelog" id="changelog">
+      <strong>v1.4.0</strong> — Program Builder + Images<br>
+      • Admin program builder (create/edit/delete programs)<br>
+      • Day editor with emoji and color picker<br>
+      • Inline exercise editor with image URL support<br>
+      • Exercise images for all 37 exercises<br>
+      <br>
+      <strong>v1.2.0-dev</strong> — Dynamic Programs<br>
+      • Programs stored in Supabase database<br>
+      • Load user-assigned program on login<br>
+      • Admin can assign programs to users<br>
+      <br>
+      <strong>v1.1.0</strong> — Exercise Images<br>
+      • Added workout images for all 37 exercises<br>
+      <br>
+      <strong>v1.0.0</strong> — Initial Release<br>
+      • 12-week workout tracker with 7-day split<br>
+      • Body weight, nutrition, water tracking<br>
+      • User auth, guest mode, admin dashboard<br>
+    </div>
+  </div>
+
+  <!-- ── PROGRAM BUILDER ──────────────────────── -->
+  <div class="builder-overlay" id="builder-overlay">
+    <div class="builder-header">
+      <button class="builder-back" id="builder-back-btn" onclick="builderBack()">‹ Back</button>
+      <div class="builder-title" id="builder-title">Programs</div>
+      <button class="builder-action" id="builder-save-btn" onclick="builderSave()" style="display:none;">Save</button>
+    </div>
+    <div class="builder-body" id="builder-body"></div>
+  </div>
+
   <div id="tab-bar" style="display:none;">
     <button class="tab-btn active" id="tab-workouts" onclick="switchTab('workouts')">
       <span class="tab-icon">🦾</span>
@@ -1019,6 +1183,10 @@
       <div class="header-title">👑 Dashboard</div>
     </div>
     <div id="admin-stats-row" class="admin-stats-row"></div>
+    <button class="targets-btn" onclick="openProgramBuilder()" style="margin-bottom:8px;">
+      <span>🏗️ Manage Programs</span>
+      <span style="color:var(--text-tertiary);font-size:18px;">›</span>
+    </button>
     <button class="admin-refresh-btn" onclick="loadAdminData()">↻ Refresh Data</button>
     <div class="admin-section-title" id="active-users-title">Active Users</div>
     <div id="admin-user-list"><div class="admin-loading">Loading users...</div></div>
@@ -1050,32 +1218,6 @@
     </div>
   </div>
 
-  <!-- ── Version Footer ── -->
-  <div class="version-footer" id="version-footer" style="position:fixed;bottom:60px;left:50%;transform:translateX(-50%);z-index:0;width:100%;max-width:430px;">
-    <div class="version-tag" onclick="document.getElementById('changelog').classList.toggle('open')">v1.1.0</div>
-    <div>Training Tracker · Built with 🦾</div>
-    <div class="version-changelog" id="changelog">
-      <strong>v1.1.0</strong> — Exercise Images<br>
-      • Added workout images for all 37 exercises<br>
-      • Images from open-source exercise database<br>
-      • Lazy loading for fast performance<br>
-      • Graceful fallback if image fails to load<br>
-      <br>
-      <strong>v1.0.0</strong> — Initial Release<br>
-      • 12-week workout strength tracker<br>
-      • 7-day split: Back, Quads, Chest, Rest, Hams, Shoulders, Arms<br>
-      • Body weight tracking with charts<br>
-      • Nutrition logging with macro targets<br>
-      • Water intake tracking<br>
-      • Nutrition lookup via API-Ninjas<br>
-      • User auth with email/password<br>
-      • Guest mode (1 week demo)<br>
-      • Admin dashboard with user management<br>
-      • Archive/restore/purge users<br>
-      • Cloud sync via Supabase<br>
-    </div>
-  </div>
-
 </div>
 
 <script>
@@ -1083,7 +1225,7 @@
 const WEEKS = 12;
 const DAYS  = ['Day 1','Day 2','Day 3','Day 4','Day 5','Day 6','Day 7'];
 
-const WORKOUTS = [
+const DEFAULT_WORKOUTS = [
   { id:'back',      name:'Back & Biceps',       emoji:'🏋️', color:'#0A84FF', g:['#0A84FF','#0055CC'],
     exercises:[
       {name:'Abs',                        sets:3, reps:'Till Failure', note:'', image_url:'https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/Ab_Crunch_Machine/0.jpg'},
@@ -1146,6 +1288,8 @@ const WORKOUTS = [
       {name:'EZ Bar Skull Crushers',      sets:3, reps:'10–12',        note:'', image_url:'https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/EZ-Bar_Skullcrusher/0.jpg'},
     ]},
 ];
+
+let WORKOUTS = [...DEFAULT_WORKOUTS];
 
 // ── Supabase Config ───────────────────────────────────────────────────────────
 const SB_URL = 'https://uvbwwtbznowfhasqfbld.supabase.co';
@@ -1261,6 +1405,7 @@ function guestLogin() {
 
 function showAuthScreen() {
   document.getElementById('screen-auth').style.display = 'flex';
+  document.getElementById('version-footer').style.display = 'none';
   document.getElementById('screen-home').classList.remove('active');
   document.getElementById('screen-weight').classList.remove('active');
   document.getElementById('screen-food').classList.remove('active');
@@ -1270,8 +1415,10 @@ function showAuthScreen() {
 
 async function showApp() {
   document.getElementById('screen-auth').style.display = 'none';
+  var authVer = document.getElementById('auth-version'); if (authVer) authVer.style.display = 'none';
   document.getElementById('screen-home').classList.add('active');
   document.getElementById('tab-bar').style.display = 'flex';
+  document.getElementById('version-footer').style.display = 'block';
 
   // Upsert profile for registered users
   if (!isGuest && currentUser?.id) {
@@ -1308,6 +1455,8 @@ async function showApp() {
     foodTab.style.opacity = '1';
   }
 
+  await loadUserProgram();
+  if (weekOffset > 0 && selectedWeek < weekOffset) selectedWeek = weekOffset;
   buildWeekScroller();
   buildWorkoutList();
   buildWeightTracker();
@@ -1350,6 +1499,62 @@ async function loadAllData() {
   hideSyncIndicator();
 }
 
+// ── Load user's assigned program from DB ──────────────────────────────────────
+async function loadUserProgram() {
+  if (isGuest) return;
+  try {
+    // Get user's program_id from profile
+    const { data: profile } = await sb.from('profiles').select('program_id,week_offset').eq('id', currentUser.id).single();
+    weekOffset = (profile && profile.week_offset) ? profile.week_offset : 0;
+    if (!profile || !profile.program_id) return; // Use default
+
+    // Load program days
+    const { data: days } = await sb.from('program_days')
+      .select('*')
+      .eq('program_id', profile.program_id)
+      .order('day_number');
+    if (!days || !days.length) return;
+
+    // Load all exercises for this program's days
+    const dayIds = days.map(d => d.id);
+    const { data: exercises } = await sb.from('program_exercises')
+      .select('*')
+      .in('day_id', dayIds)
+      .order('exercise_order');
+
+    // Convert to app WORKOUTS format
+    var newWorkouts = days.map(function(day) {
+      if (day.is_rest) {
+        return {
+          id: day.id, name: day.name, emoji: day.emoji || '😴',
+          color: day.color || '#636366', isRest: true
+        };
+      }
+      var dayExercises = (exercises || [])
+        .filter(function(e) { return e.day_id === day.id; })
+        .sort(function(a, b) { return a.exercise_order - b.exercise_order; })
+        .map(function(e) {
+          return { name: e.name, sets: e.sets, reps: e.reps, note: e.note || '', image_url: e.image_url || '' };
+        });
+      return {
+        id: day.id,
+        name: day.name,
+        emoji: day.emoji || '🏋️',
+        color: day.color || '#0A84FF',
+        g: [day.gradient_start || day.color || '#0A84FF', day.gradient_end || '#0055CC'],
+        exercises: dayExercises
+      };
+    });
+
+    WORKOUTS = newWorkouts;
+
+    // Update DAYS labels
+    while (DAYS.length < WORKOUTS.length) DAYS.push('Day ' + (DAYS.length + 1));
+  } catch(e) {
+    console.warn('Program load error:', e);
+  }
+}
+
 // ── Save workout set weight + reps ───────────────────────────────────────────
 async function saveSetRemote(workout_id, exercise_index, set_index, week, weight, reps_done) {
   showSyncIndicator('saving');
@@ -1389,6 +1594,7 @@ function hideSyncIndicator() {
 
 // ── State ─────────────────────────────────────────────────────────────────────
 let selectedWeek   = 0;
+let weekOffset     = 0;
 let currentTab     = 'workouts';
 let currentWorkout = null;
 
@@ -1450,7 +1656,9 @@ function showGuestUpgrade(feature) {
 function buildWeekScroller() {
   const el = document.getElementById('week-scroller');
   el.innerHTML = '';
-  for (let w = 0; w < getWeeks(); w++) {
+  const totalWeeks = getWeeks();
+  for (let i = 0; i < totalWeeks; i++) {
+    const w = weekOffset + i;
     const btn = document.createElement('button');
     btn.className = 'week-btn' + (w === selectedWeek ? ' selected' : '');
     btn.setAttribute('data-week', w);
@@ -1672,7 +1880,8 @@ function renderExHistory(card, wo, ei) {
   // Build per-week data for set 1 (representative set)
   const weekLabels = [], weightData = [], repsData = [];
   let maxWeight = 0;
-  for (let w = 0; w < getWeeks(); w++) {
+  for (let i = 0; i < getWeeks(); i++) {
+    const w = weekOffset + i;
     const wt = parseFloat(lsGet(wKey(wo.id, ei, 0, w))) || null;
     const rp = parseFloat(lsGet(rKey(wo.id, ei, 0, w))) || null;
     weekLabels.push('W' + (w+1));
@@ -1685,10 +1894,11 @@ function renderExHistory(card, wo, ei) {
   drawLineChart(canvasEl, weekLabels, weightData, wo.color, 'lbs');
 
   // ── History table (all sets, all weeks with data) ──
-  const filledWeeks = weekLabels.map((_, w) =>
-    Array.from({length: ex.sets}, (_, si) => lsGet(wKey(wo.id, ei, si, w)) || lsGet(rKey(wo.id, ei, si, w)))
-    .some(Boolean) ? w : null
-  ).filter(w => w !== null);
+  const filledWeeks = weekLabels.map((_, idx) => {
+    const w = weekOffset + idx;
+    return Array.from({length: ex.sets}, (_, si) => lsGet(wKey(wo.id, ei, si, w)) || lsGet(rKey(wo.id, ei, si, w)))
+      .some(Boolean) ? w : null;
+  }).filter(w => w !== null);
 
   if (!filledWeeks.length) {
     tableEl.innerHTML = '<div style="text-align:center;color:var(--text-tertiary);font-size:12px;padding:8px 0;">No data logged yet</div>';
@@ -1705,7 +1915,7 @@ function renderExHistory(card, wo, ei) {
   for (let si = 0; si < ex.sets; si++) {
     const isFinal = si === ex.sets - 1 && ex.sets > 1;
     // Find PR weight across all weeks for this set
-    const allWeights = Array.from({length: getWeeks()}, (_, w) => parseFloat(lsGet(wKey(wo.id, ei, si, w)))).filter(Boolean);
+    const allWeights = Array.from({length: getWeeks()}, (_, i) => parseFloat(lsGet(wKey(wo.id, ei, si, weekOffset + i)))).filter(Boolean);
     const prWeight = allWeights.length ? Math.max(...allWeights) : null;
 
     html += `<tr><td>${isFinal ? '🔥' : ''}S${si+1}</td>`;
@@ -1817,7 +2027,9 @@ function saveAndExit() {
 function buildWeightTracker() {
   const el = document.getElementById('wt-list');
   el.innerHTML = '';
-  for (let w = 0; w < getWeeks(); w++) {
+  var totalWeeks = getWeeks();
+  for (let i = 0; i < totalWeeks; i++) {
+    const w = weekOffset + i;
     const val   = lsGet(bwKey(w)) || '';
     const prevVal = w > 0 ? (lsGet(bwKey(w-1)) || '') : '';
     const isCur = w === selectedWeek;
@@ -1874,7 +2086,8 @@ function confirmSaveWeight(btn, weekIdx) {
 }
 
 function updateWeightDeltas() {
-  for (var w = 0; w < getWeeks(); w++) {
+  for (var i = 0; i < getWeeks(); i++) {
+    var w = weekOffset + i;
     var row = document.getElementById('wt-row-' + w);
     if (!row) continue;
     var deltaEl = row.querySelector('.wt-delta');
@@ -1894,7 +2107,7 @@ function updateWeightDeltas() {
 
 function updateWeightStats() {
   const weights = Array.from({length: getWeeks()}, (_, i) => {
-    const v = lsGet(bwKey(i));
+    const v = lsGet(bwKey(weekOffset + i));
     return v ? parseFloat(v) : null;
   }).filter(v => v !== null);
 
@@ -2026,10 +2239,10 @@ function drawBodyWeightChart() {
   const canvas = document.getElementById('wt-chart-canvas');
   if (!canvas) return;
   const data = Array.from({length: getWeeks()}, (_, i) => {
-    const v = lsGet(bwKey(i));
+    const v = lsGet(bwKey(weekOffset + i));
     return v ? parseFloat(v) : null;
   });
-  const labels = Array.from({length: getWeeks()}, (_, i) => 'W'+(i+1));
+  const labels = Array.from({length: getWeeks()}, (_, i) => 'W'+(weekOffset+i+1));
   drawLineChart(canvas, labels, data, '#0A84FF', 'lbs');
 }
 
@@ -2420,6 +2633,9 @@ async function loadAdminData() {
     } else {
       archTitle.style.display = 'none';
     }
+
+    // Populate program dropdowns
+    await populateProgramDropdowns();
   } catch(e) {
     console.warn('Admin error:', e);
     listEl.innerHTML = '<div class="admin-loading">Error loading data</div>';
@@ -2470,7 +2686,12 @@ function buildUserCard(profile, idx, allSets, allBW, allFood, isArchived) {
         '</div>' +
       '</div>';
   } else {
+    // Program assignment
     actionsHtml =
+      '<div style="margin-bottom:12px;"><div class="user-detail-label">Assign Program</div>' +
+      '<select style="width:100%;height:38px;border-radius:10px;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.15);color:#fff;font-size:13px;padding:0 10px;font-family:inherit;outline:none;" onchange="assignProgram(\'' + uid + '\', this.value)" id="prog-select-' + uid + '">' +
+      '<option value="">Default (hardcoded)</option>' +
+      '</select></div>' +
       '<button class="archive-user-btn" onclick="confirmArchive(\'' + uid + '\')">Archive User</button>' +
       '<div class="archive-confirm-bar" id="archive-' + uid + '">' +
         '<div class="archive-confirm-text">Archive <strong>' + email + '</strong>? Held 30 days before deletion.</div>' +
@@ -2514,6 +2735,7 @@ function buildUserCard(profile, idx, allSets, allBW, allFood, isArchived) {
 
   var card = document.createElement('div');
   card.className = 'user-card' + (isArchived ? ' archived' : '');
+  card.setAttribute('data-program-id', profile.program_id || '');
   card.id = 'user-card-' + uid;
   card.innerHTML =
     '<button class="user-card-header">' +
@@ -2540,6 +2762,57 @@ function buildUserCard(profile, idx, allSets, allBW, allFood, isArchived) {
     '</div>';
   card.querySelector('.user-card-header').onclick = function() { card.classList.toggle('open'); };
   return card;
+}
+
+// ── Program assignment ─────────────────────────────────────────────────────────
+var allPrograms = [];
+
+async function loadProgramList() {
+  const { data } = await sb.from('workout_programs').select('id,name');
+  allPrograms = data || [];
+}
+
+async function populateProgramDropdowns() {
+  await loadProgramList();
+  var selects = document.querySelectorAll('[id^="prog-select-"]');
+  selects.forEach(function(sel) {
+    var uid = sel.id.replace('prog-select-', '');
+    // Keep the first option (default)
+    while (sel.options.length > 1) sel.remove(1);
+    allPrograms.forEach(function(p) {
+      var opt = document.createElement('option');
+      opt.value = p.id;
+      opt.textContent = p.name;
+      sel.appendChild(opt);
+    });
+    // Set current value from profile
+    var card = document.getElementById('user-card-' + uid);
+    var progId = card ? card.getAttribute('data-program-id') : '';
+    if (progId) sel.value = progId;
+  });
+}
+
+async function assignProgram(uid, programId) {
+  showSyncIndicator('saving');
+  // Get current week_offset for this user
+  var { data: prof } = await sb.from('profiles').select('week_offset').eq('id', uid).single();
+  var currentOffset = (prof && prof.week_offset) ? prof.week_offset : 0;
+
+  // Ask admin if this is a continuation (extend weeks) or fresh start
+  var newOffset = currentOffset;
+  if (programId) {
+    var extend = confirm('Continue from Week ' + (currentOffset + 13) + '?\n\nOK = Continue (weeks ' + (currentOffset + 13) + '-' + (currentOffset + 24) + ')\nCancel = Start fresh (weeks 1-12)');
+    if (extend) {
+      newOffset = currentOffset + 12;
+    } else {
+      newOffset = 0;
+    }
+  } else {
+    newOffset = 0;
+  }
+
+  await sb.from('profiles').update({ program_id: programId || null, week_offset: newOffset }).eq('id', uid);
+  hideSyncIndicator();
 }
 
 function confirmArchive(uid) {
@@ -2655,6 +2928,334 @@ async function lookupNutrition(mi) {
 
   btn.disabled = false;
   btn.classList.remove('loading');
+}
+
+// ════════════════════════════════════════════════════════════
+// PROGRAM BUILDER
+// ════════════════════════════════════════════════════════════
+
+var builderStack = []; // navigation stack
+var builderPrograms = [];
+var builderCurrentProg = null;
+var builderCurrentDay = null;
+var builderDays = [];
+var builderExercises = [];
+
+var DAY_COLORS = [
+  {name:'Blue',color:'#0A84FF',g:['#0A84FF','#0055CC']},
+  {name:'Orange',color:'#FF9F0A',g:['#FF9F0A','#CC7A00']},
+  {name:'Green',color:'#30D158',g:['#30D158','#1A8A35']},
+  {name:'Purple',color:'#BF5AF2',g:['#BF5AF2','#8944B0']},
+  {name:'Red',color:'#FF375F',g:['#FF375F','#CC1A3A']},
+  {name:'Coral',color:'#FF6B35',g:['#FF6B35','#CC4A18']},
+  {name:'Yellow',color:'#FFD60A',g:['#FFD60A','#CCA800']},
+  {name:'Teal',color:'#30B0C7',g:['#30B0C7','#1A8A9E']}
+];
+var DAY_EMOJIS = ['🏋️','🦵','🦾','💪','🍑','🏔️','💥','🔥','⚡','🎯','👊','🏆'];
+
+function openProgramBuilder() {
+  builderStack = ['list'];
+  renderProgramList();
+  document.getElementById('builder-overlay').classList.add('open');
+}
+
+function closeProgramBuilder() {
+  document.getElementById('builder-overlay').classList.remove('open');
+  loadAdminData();
+}
+
+function builderBack() {
+  builderStack.pop();
+  if (!builderStack.length) { closeProgramBuilder(); return; }
+  var view = builderStack[builderStack.length - 1];
+  if (view === 'list') renderProgramList();
+  else if (view === 'program') renderProgramEditor();
+  else if (view === 'day') renderDayEditor();
+}
+
+async function builderSave() {}
+
+// ── Program List ──────────────────────────────────────────
+async function renderProgramList() {
+  document.getElementById('builder-title').textContent = 'Programs';
+  document.getElementById('builder-back-btn').textContent = '✕ Close';
+  document.getElementById('builder-save-btn').style.display = 'none';
+  var body = document.getElementById('builder-body');
+  body.innerHTML = '<div class="admin-loading">Loading...</div>';
+
+  var { data } = await sb.from('workout_programs').select('*').order('created_at');
+  builderPrograms = data || [];
+
+  var html = '';
+  builderPrograms.forEach(function(p) {
+    html += '<div class="builder-card" onclick="openProgramEditor(\'' + p.id + '\')">' +
+      '<div class="builder-card-icon">📋</div>' +
+      '<div class="builder-card-info">' +
+        '<div class="builder-card-name">' + p.name + '</div>' +
+        '<div class="builder-card-meta">' + p.weeks + ' weeks · ' + (p.description || 'No description') + '</div>' +
+      '</div>' +
+      '<div class="builder-card-chev">›</div>' +
+    '</div>';
+  });
+  html += '<button class="builder-add-btn" onclick="createNewProgram()">+ New Program</button>';
+  body.innerHTML = html;
+}
+
+async function createNewProgram() {
+  var name = prompt('Program name:');
+  if (!name) return;
+  var { data, error } = await sb.from('workout_programs').insert({
+    name: name, description: '', weeks: 12,
+    created_by: currentUser.id
+  }).select().single();
+  if (error) { alert('Error: ' + error.message); return; }
+  openProgramEditor(data.id);
+}
+
+// ── Program Editor ────────────────────────────────────────
+async function openProgramEditor(progId) {
+  builderCurrentProg = builderPrograms.find(function(p) { return p.id === progId; });
+  if (!builderCurrentProg) {
+    var { data } = await sb.from('workout_programs').select('*').eq('id', progId).single();
+    builderCurrentProg = data;
+  }
+  var { data: days } = await sb.from('program_days').select('*').eq('program_id', progId).order('day_number');
+  builderDays = days || [];
+  builderStack.push('program');
+  renderProgramEditor();
+}
+
+function renderProgramEditor() {
+  var p = builderCurrentProg;
+  document.getElementById('builder-title').textContent = 'Edit Program';
+  document.getElementById('builder-back-btn').textContent = '‹ Back';
+  document.getElementById('builder-save-btn').style.display = 'block';
+  document.getElementById('builder-save-btn').textContent = 'Save';
+  document.getElementById('builder-save-btn').onclick = saveProgramDetails;
+
+  var html = '<div class="builder-section">' +
+    '<div class="builder-label">Program Name</div>' +
+    '<input class="builder-input" id="bp-name" value="' + (p.name || '') + '">' +
+    '<div class="builder-label">Description</div>' +
+    '<textarea class="builder-textarea" id="bp-desc">' + (p.description || '') + '</textarea>' +
+    '<div class="builder-label">Weeks</div>' +
+    '<input class="builder-input" id="bp-weeks" type="number" value="' + (p.weeks || 12) + '" style="width:80px;">' +
+  '</div>';
+
+  html += '<div class="builder-section"><div class="builder-label">Days (' + builderDays.length + ')</div>';
+  builderDays.forEach(function(d) {
+    var exCount = '...';
+    html += '<div class="builder-card" onclick="openDayEditor(\'' + d.id + '\')">' +
+      '<div class="builder-card-icon">' + (d.emoji || '🏋️') + '</div>' +
+      '<div class="builder-card-info">' +
+        '<div class="builder-card-name">Day ' + d.day_number + ': ' + d.name + '</div>' +
+        '<div class="builder-card-meta">' + (d.is_rest ? 'Rest day' : 'Workout day') + '</div>' +
+      '</div>' +
+      '<div class="builder-card-chev">›</div>' +
+    '</div>';
+  });
+  html += '<button class="builder-add-btn" onclick="addDay()">+ Add Day</button></div>';
+
+  html += '<button class="builder-delete-btn" onclick="deleteProgram(\'' + p.id + '\')">Delete This Program</button>';
+  document.getElementById('builder-body').innerHTML = html;
+}
+
+async function saveProgramDetails() {
+  var name = document.getElementById('bp-name').value.trim();
+  var desc = document.getElementById('bp-desc').value.trim();
+  var weeks = parseInt(document.getElementById('bp-weeks').value) || 12;
+  if (!name) return;
+  await sb.from('workout_programs').update({ name: name, description: desc, weeks: weeks }).eq('id', builderCurrentProg.id);
+  builderCurrentProg.name = name;
+  builderCurrentProg.description = desc;
+  builderCurrentProg.weeks = weeks;
+  var btn = document.getElementById('builder-save-btn');
+  btn.textContent = 'Saved!';
+  setTimeout(function() { btn.textContent = 'Save'; }, 1500);
+}
+
+async function addDay() {
+  var nextNum = builderDays.length + 1;
+  var name = prompt('Day name (e.g. "Chest & Triceps"):');
+  if (!name) return;
+  var isRest = name.toLowerCase().includes('rest');
+  var { data, error } = await sb.from('program_days').insert({
+    program_id: builderCurrentProg.id,
+    day_number: nextNum,
+    name: name,
+    emoji: isRest ? '😴' : '🏋️',
+    color: DAY_COLORS[(nextNum - 1) % DAY_COLORS.length].color,
+    gradient_start: DAY_COLORS[(nextNum - 1) % DAY_COLORS.length].g[0],
+    gradient_end: DAY_COLORS[(nextNum - 1) % DAY_COLORS.length].g[1],
+    is_rest: isRest
+  }).select().single();
+  if (error) { alert('Error: ' + error.message); return; }
+  builderDays.push(data);
+  renderProgramEditor();
+}
+
+async function deleteProgram(progId) {
+  if (!confirm('Delete this program and all its days/exercises?')) return;
+  await sb.from('workout_programs').delete().eq('id', progId);
+  builderStack.pop();
+  renderProgramList();
+}
+
+// ── Day Editor ────────────────────────────────────────────
+async function openDayEditor(dayId) {
+  builderCurrentDay = builderDays.find(function(d) { return d.id === dayId; });
+  var { data } = await sb.from('program_exercises').select('*').eq('day_id', dayId).order('exercise_order');
+  builderExercises = data || [];
+  builderStack.push('day');
+  renderDayEditor();
+}
+
+function renderDayEditor() {
+  var d = builderCurrentDay;
+  document.getElementById('builder-title').textContent = 'Day ' + d.day_number;
+  document.getElementById('builder-save-btn').style.display = 'block';
+  document.getElementById('builder-save-btn').textContent = 'Save';
+  document.getElementById('builder-save-btn').onclick = saveDayDetails;
+
+  var html = '<div class="builder-section">' +
+    '<div class="builder-label">Day Name</div>' +
+    '<input class="builder-input" id="bd-name" value="' + d.name + '">' +
+    '<div class="builder-label">Emoji</div>' +
+    '<div class="emoji-picker-row">';
+  DAY_EMOJIS.forEach(function(em) {
+    html += '<div class="emoji-opt' + (em === d.emoji ? ' selected' : '') + '" onclick="pickEmoji(this,\'' + em + '\')">' + em + '</div>';
+  });
+  html += '<div class="emoji-opt' + ('😴' === d.emoji ? ' selected' : '') + '" onclick="pickEmoji(this,\'😴\')">😴</div></div>';
+
+  html += '<div class="builder-label">Color</div><div class="color-picker-row">';
+  DAY_COLORS.forEach(function(col) {
+    html += '<div class="color-dot' + (col.color === d.color ? ' selected' : '') + '" style="background:' + col.color + '" onclick="pickColor(this,\'' + col.color + '\',\'' + col.g[0] + '\',\'' + col.g[1] + '\')"></div>';
+  });
+  html += '</div>';
+
+  html += '<label style="display:flex;align-items:center;gap:8px;color:var(--text-secondary);font-size:14px;margin-bottom:10px;">' +
+    '<input type="checkbox" id="bd-rest" ' + (d.is_rest ? 'checked' : '') + ' style="width:18px;height:18px;accent-color:#0A84FF;"> Rest Day</label>';
+  html += '</div>';
+
+  if (!d.is_rest) {
+    html += '<div class="builder-section"><div class="builder-label">Exercises (' + builderExercises.length + ')</div>';
+    builderExercises.forEach(function(ex, i) {
+      html += '<div class="builder-ex-card" id="bex-' + i + '">' +
+        '<div class="builder-ex-row1">' +
+          (ex.image_url ? '<img src="' + ex.image_url + '" style="width:36px;height:36px;border-radius:8px;object-fit:cover;flex-shrink:0;border:1px solid rgba(255,255,255,0.1);" onerror="this.style.display=\'none\'">' : '<div style="width:36px;height:36px;border-radius:8px;background:rgba(255,255,255,0.06);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:14px;color:var(--text-tertiary);">📷</div>') +
+          '<input class="builder-ex-name" value="' + (ex.name || '') + '" data-idx="' + i + '" data-field="name" onchange="updateExField(this)">' +
+          '<button class="builder-ex-del" onclick="deleteExercise(' + i + ')">✕</button>' +
+        '</div>' +
+        '<div class="builder-ex-row2">' +
+          '<input class="builder-ex-field" value="' + ex.sets + '" placeholder="Sets" data-idx="' + i + '" data-field="sets" onchange="updateExField(this)">' +
+          '<span style="color:var(--text-tertiary);font-size:11px;">x</span>' +
+          '<input class="builder-ex-field" value="' + (ex.reps || '') + '" placeholder="Reps" style="width:70px;" data-idx="' + i + '" data-field="reps" onchange="updateExField(this)">' +
+          '<input class="builder-ex-note" value="' + (ex.note || '') + '" placeholder="Note" data-idx="' + i + '" data-field="note" onchange="updateExField(this)">' +
+        '</div>' +
+        '<div style="display:flex;gap:6px;align-items:center;margin-top:6px;">' +
+          '<span style="color:var(--text-tertiary);font-size:10px;flex-shrink:0;">🖼️</span>' +
+          '<input class="builder-ex-note" value="' + (ex.image_url || '') + '" placeholder="Image URL (paste link)" style="font-style:normal;font-size:11px;" data-idx="' + i + '" data-field="image_url" onchange="updateExField(this)">' +
+        '</div>' +
+      '</div>';
+    });
+    html += '<button class="builder-add-btn" onclick="addExercise()">+ Add Exercise</button></div>';
+  }
+
+  html += '<button class="builder-delete-btn" onclick="deleteDay(\'' + d.id + '\')">Delete This Day</button>';
+  document.getElementById('builder-body').innerHTML = html;
+}
+
+var pendingDayEmoji = null;
+var pendingDayColor = null;
+var pendingDayGStart = null;
+var pendingDayGEnd = null;
+
+function pickEmoji(el, emoji) {
+  document.querySelectorAll('.emoji-opt').forEach(function(e) { e.classList.remove('selected'); });
+  el.classList.add('selected');
+  pendingDayEmoji = emoji;
+}
+
+function pickColor(el, color, g1, g2) {
+  document.querySelectorAll('.color-dot').forEach(function(e) { e.classList.remove('selected'); });
+  el.classList.add('selected');
+  pendingDayColor = color;
+  pendingDayGStart = g1;
+  pendingDayGEnd = g2;
+}
+
+async function saveDayDetails() {
+  var d = builderCurrentDay;
+  var name = document.getElementById('bd-name').value.trim();
+  var isRest = document.getElementById('bd-rest').checked;
+  if (!name) return;
+
+  var update = { name: name, is_rest: isRest };
+  if (pendingDayEmoji) update.emoji = pendingDayEmoji;
+  if (pendingDayColor) {
+    update.color = pendingDayColor;
+    update.gradient_start = pendingDayGStart;
+    update.gradient_end = pendingDayGEnd;
+  }
+  await sb.from('program_days').update(update).eq('id', d.id);
+
+  // Save all exercise changes
+  for (var i = 0; i < builderExercises.length; i++) {
+    var ex = builderExercises[i];
+    await sb.from('program_exercises').update({
+      name: ex.name, sets: parseInt(ex.sets) || 3, reps: ex.reps || '10-12', note: ex.note || '', image_url: ex.image_url || ''
+    }).eq('id', ex.id);
+  }
+
+  Object.assign(d, update);
+  pendingDayEmoji = null; pendingDayColor = null;
+  var btn = document.getElementById('builder-save-btn');
+  btn.textContent = 'Saved!';
+  setTimeout(function() { btn.textContent = 'Save'; }, 1500);
+}
+
+function updateExField(input) {
+  var idx = parseInt(input.getAttribute('data-idx'));
+  var field = input.getAttribute('data-field');
+  builderExercises[idx][field] = input.value;
+}
+
+async function addExercise() {
+  var nextOrder = builderExercises.length + 1;
+  var { data, error } = await sb.from('program_exercises').insert({
+    day_id: builderCurrentDay.id,
+    exercise_order: nextOrder,
+    name: 'New Exercise',
+    sets: 3, reps: '10-12', note: '', image_url: ''
+  }).select().single();
+  if (error) { alert('Error: ' + error.message); return; }
+  builderExercises.push(data);
+  renderDayEditor();
+}
+
+async function deleteExercise(idx) {
+  var ex = builderExercises[idx];
+  await sb.from('program_exercises').delete().eq('id', ex.id);
+  builderExercises.splice(idx, 1);
+  // Re-order remaining
+  for (var i = 0; i < builderExercises.length; i++) {
+    await sb.from('program_exercises').update({ exercise_order: i + 1 }).eq('id', builderExercises[i].id);
+    builderExercises[i].exercise_order = i + 1;
+  }
+  renderDayEditor();
+}
+
+async function deleteDay(dayId) {
+  if (!confirm('Delete this day and all its exercises?')) return;
+  await sb.from('program_days').delete().eq('id', dayId);
+  builderDays = builderDays.filter(function(d) { return d.id !== dayId; });
+  // Re-number remaining days
+  for (var i = 0; i < builderDays.length; i++) {
+    await sb.from('program_days').update({ day_number: i + 1 }).eq('id', builderDays[i].id);
+    builderDays[i].day_number = i + 1;
+  }
+  builderStack.pop();
+  renderProgramEditor();
 }
 
 </script>
