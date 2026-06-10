@@ -1283,6 +1283,61 @@
     cursor: pointer; flex-shrink: 0;
   }
 
+  /* ── Workout Timer ── */
+  .workout-timer-start {
+    padding: 5px 14px; border-radius: 8px;
+    background: rgba(255,159,10,0.12); border: 1px solid rgba(255,159,10,0.25);
+    color: #FF9F0A; font-size: 12px; font-weight: 600;
+    font-family: inherit; cursor: pointer;
+  }
+  .workout-timer-start:active { opacity: 0.7; }
+  .workout-timer {
+    display: flex; align-items: center; gap: 6px;
+    font-size: 13px; font-weight: 700; color: #FF9F0A;
+    font-variant-numeric: tabular-nums;
+    padding: 4px 10px; border-radius: 8px;
+    background: rgba(255,159,10,0.1);
+  }
+  .workout-timer .timer-dot {
+    width: 6px; height: 6px; border-radius: 50%;
+    background: #FF9F0A; animation: pulse 1.5s ease infinite;
+  }
+
+  /* ── Body Measurements ── */
+  .meas-section {
+    margin: 16px 16px 0; background: rgba(255,159,10,0.04);
+    border-radius: 16px; border: 1px solid rgba(255,159,10,0.1);
+    overflow: hidden;
+  }
+  .meas-header {
+    padding: 14px 16px; display: flex; align-items: center;
+    justify-content: space-between; cursor: pointer;
+  }
+  .meas-header:active { background: rgba(255,255,255,0.03); }
+  .meas-title { font-size: 15px; font-weight: 700; color: #FF9F0A; }
+  .meas-chevron { color: #FF9F0A; font-size: 16px; transition: transform 0.25s; display: inline-block; }
+  .meas-section.open .meas-chevron { transform: rotate(90deg); }
+  .meas-body { display: none; padding: 0 16px 16px; border-top: 1px solid rgba(255,159,10,0.08); }
+  .meas-section.open .meas-body { display: block; animation: slideIn 0.2s ease; }
+  .meas-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .meas-field { display: flex; flex-direction: column; gap: 3px; }
+  .meas-label { font-size: 10px; font-weight: 600; color: rgba(255,159,10,0.5); text-transform: uppercase; letter-spacing: 0.8px; }
+  .meas-input {
+    height: 38px; border-radius: 10px;
+    background: rgba(255,255,255,0.06); border: 1.5px solid rgba(255,159,10,0.1);
+    color: #fff; font-size: 14px; font-weight: 600;
+    text-align: center; font-family: inherit; outline: none;
+  }
+  .meas-input:focus { border-color: #FF9F0A; background: rgba(255,159,10,0.06); }
+  .meas-input::placeholder { color: var(--text-tertiary); }
+  .meas-save-btn {
+    margin-top: 10px; width: 100%; padding: 10px; border-radius: 10px;
+    background: rgba(255,159,10,0.12); border: 1px solid rgba(255,159,10,0.25);
+    color: #FF9F0A; font-size: 13px; font-weight: 600;
+    font-family: inherit; cursor: pointer;
+  }
+  .meas-save-btn:active { opacity: 0.7; }
+
   /* ── Animations ── */
   @keyframes popIn {
     from { opacity: 0; transform: scale(0.95) translateY(8px); }
@@ -1341,7 +1396,7 @@
     <button class="auth-guest-btn" onclick="guestLogin()">Continue as Guest</button>
     <div style="font-size:11px;color:var(--text-tertiary);text-align:center;margin-top:8px;">Try 1 workout day free · Sign up for full access</div>
     <div id="auth-version" style="margin-top:24px;font-size:10px;color:rgba(255,255,255,0.12);text-align:center;">
-      <span style="background:rgba(255,255,255,0.06);padding:2px 8px;border-radius:6px;font-weight:600;letter-spacing:0.5px;">v1.8.0</span>
+      <span style="background:rgba(255,255,255,0.06);padding:2px 8px;border-radius:6px;font-weight:600;letter-spacing:0.5px;">v1.8.5</span>
       <div style="margin-top:4px;">MackTrak · Built with 🦾</div>
     </div>
   </div>
@@ -1350,7 +1405,7 @@
   <div id="screen-home" class="screen">
     <div id="home-header">
       
-      <div class="header-eyebrow" style="color:rgba(255,159,10,0.5);">12-Week Program</div>
+      
       <div style="text-align:center;margin:-4px 0 -8px;">
         <div style="position:relative;display:inline-block;">
           <svg viewBox="0 0 320 160" width="260" height="130" xmlns="http://www.w3.org/2000/svg">
@@ -1394,6 +1449,18 @@
   <div id="screen-detail" class="screen">
     <div id="detail-header">
       <button class="back-btn" onclick="showHome()">‹ Back</button>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;">
+        <div></div>
+        <div id="workout-timer-wrap">
+          <button class="workout-timer-start" id="workout-timer-start" onclick="startWorkoutTimer()">▶ Start Workout Timer</button>
+          <div class="workout-timer" id="workout-timer" style="display:none;">
+            <div class="timer-dot" id="timer-dot"></div>
+            <span id="workout-timer-text">0:00</span>
+            <button id="timer-pause-btn" onclick="togglePauseTimer()" style="background:none;border:none;color:#FF9F0A;font-size:13px;cursor:pointer;padding:2px 6px;font-weight:700;">❚❚</button>
+            <button onclick="stopWorkoutTimer()" style="background:none;border:none;color:rgba(255,159,10,0.3);font-size:14px;cursor:pointer;padding:2px 4px;">✕</button>
+          </div>
+        </div>
+      </div>
       <div class="detail-top">
         <div>
           <div class="detail-eyebrow" id="detail-eyebrow"></div>
@@ -1458,6 +1525,7 @@
     </div>
     <div id="wt-stats" style="padding:16px 16px 0;"></div>
     <div class="wt-stats-grid" id="wt-stat-cards" style="display:none;"></div>
+    <div id="measurements-container" style="margin-bottom:16px;"></div>
     <div id="wt-chart-wrap" style="display:none;">
       <div class="wt-chart-title">Progress Trend</div>
       <canvas id="wt-chart-canvas" height="120"></canvas>
@@ -1503,10 +1571,10 @@
 
   <!-- ── Version Footer ── -->
   <div class="version-footer" id="version-footer" style="position:fixed;bottom:60px;left:50%;transform:translateX(-50%);z-index:0;width:100%;max-width:430px;display:none;">
-    <div class="version-tag" onclick="document.getElementById('changelog').classList.toggle('open')" style="background:rgba(255,159,10,0.15);color:#FF9F0A;">v1.8.0</div>
+    <div class="version-tag" onclick="document.getElementById('changelog').classList.toggle('open')" style="background:rgba(255,159,10,0.15);color:#FF9F0A;">v1.8.5</div>
     <div>MackTrak · Built with 🦾</div>
     <div class="version-changelog" id="changelog">
-      <strong>v1.8.0</strong> — Program Builder + Images<br>
+      <strong>v1.8.5</strong> — Program Builder + Images<br>
       • Admin program builder (create/edit/delete programs)<br>
       • Day editor with emoji and color picker<br>
       • Inline exercise editor with image URL support<br>
@@ -1909,10 +1977,12 @@ async function showApp() {
   buildWorkoutList();
   buildWeightTracker();
   updateWeightStats();
+  buildMeasurements();
   await loadAllData();
   buildWorkoutList();
   buildWeightTracker();
   updateWeightStats();
+  buildMeasurements();
   loadAllPhotoThumbs();
   if (currentWorkout) buildExerciseList(currentWorkout);
 }
@@ -1944,6 +2014,12 @@ async function loadAllData() {
 
     const { data: targets } = await sb.from('macro_targets').select('*');
     if (targets) targets.forEach(r => lsSet('target_' + r.day_type, JSON.stringify(r)));
+
+    // Load measurements
+    const { data: meas } = await sb.from('body_measurements').select('*');
+    if (meas) meas.forEach(r => {
+      ['arms','chest','waist','hips','thighs'].forEach(f => { if (r[f]) lsSet('meas_' + r.week + '_' + f, r[f]); });
+    });
 
     // Load daily weights
     const { data: dailyW } = await sb.from('daily_weights').select('*');
@@ -2082,7 +2158,7 @@ function switchTab(tab) {
   document.getElementById('screen-food').classList.toggle('active', tab === 'food');
   document.getElementById('screen-admin').classList.toggle('active', tab === 'admin');
   document.getElementById('screen-detail').classList.remove('active');
-  if (tab === 'weight') { updateWeightStats(); loadAllPhotoThumbs(); }
+  if (tab === 'weight') { updateWeightStats(); loadAllPhotoThumbs(); buildMeasurements(); }
   if (tab === 'food') buildFoodScreen();
   if (tab === 'admin') loadAdminData();
 }
@@ -2138,6 +2214,7 @@ function selectWeek(w) {
   buildWorkoutList();
   buildWeightTracker();
   updateWeightStats();
+  buildMeasurements();
 }
 
 // ── Workout List ──────────────────────────────────────────────────────────────
@@ -2208,12 +2285,14 @@ function showDetail(wo) {
   document.getElementById('detail-pct').style.color = '#FF9F0A';
   document.getElementById('detail-progress-fill').style.background = 'linear-gradient(90deg,#FF9F0A,#CC7A00)';
 
+  resetWorkoutTimerUI();
   buildExerciseList(wo);
   updateDetailProgress(wo);
   loadCardio();
 }
 
 function showHome() {
+  stopWorkoutTimer();
   document.getElementById('screen-detail').classList.remove('active');
   document.getElementById('screen-home').classList.add('active');
   buildWorkoutList(); // refresh progress
@@ -3978,6 +4057,202 @@ async function loadDailyWeights() {
   if (data) {
     data.forEach(function(r) {
       if (r.weight) lsSet('dw_' + r.week + '_' + r.day_index, r.weight);
+    });
+  }
+}
+
+// ════════════════════════════════════════════════════════════
+// WORKOUT TIMER
+// ════════════════════════════════════════════════════════════
+
+var workoutTimerInterval = null;
+var workoutTimerStart = null;
+var workoutTimerPaused = false;
+var workoutTimerPausedElapsed = 0;
+
+function startWorkoutTimer() {
+  workoutTimerStart = Date.now();
+  workoutTimerPaused = false;
+  workoutTimerPausedElapsed = 0;
+  var startBtn = document.getElementById('workout-timer-start');
+  var timerEl = document.getElementById('workout-timer');
+  var dot = document.getElementById('timer-dot');
+  var pauseBtn = document.getElementById('timer-pause-btn');
+  if (startBtn) startBtn.style.display = 'none';
+  if (timerEl) timerEl.style.display = 'flex';
+  if (dot) { dot.style.animation = 'pulse 1.5s ease infinite'; dot.style.opacity = '1'; }
+  if (pauseBtn) pauseBtn.textContent = '❚❚';
+  if (workoutTimerInterval) clearInterval(workoutTimerInterval);
+  workoutTimerInterval = setInterval(updateWorkoutTimer, 1000);
+  updateWorkoutTimer();
+}
+
+function updateWorkoutTimer() {
+  if (!workoutTimerStart) return;
+  var elapsed = Math.floor((Date.now() - workoutTimerStart) / 1000);
+  var hrs = Math.floor(elapsed / 3600);
+  var mins = Math.floor((elapsed % 3600) / 60);
+  var secs = elapsed % 60;
+  var text = document.getElementById('workout-timer-text');
+  if (text) {
+    if (hrs > 0) {
+      text.textContent = hrs + ':' + (mins < 10 ? '0' : '') + mins + ':' + (secs < 10 ? '0' : '') + secs;
+    } else {
+      text.textContent = mins + ':' + (secs < 10 ? '0' : '') + secs;
+    }
+  }
+}
+
+function stopWorkoutTimer() {
+  if (workoutTimerInterval) clearInterval(workoutTimerInterval);
+  workoutTimerInterval = null;
+  workoutTimerStart = null;
+  workoutTimerPaused = false;
+  workoutTimerPausedElapsed = 0;
+  var timerEl = document.getElementById('workout-timer');
+  var startBtn = document.getElementById('workout-timer-start');
+  if (timerEl) timerEl.style.display = 'none';
+  if (startBtn) startBtn.style.display = 'inline-block';
+}
+
+function resetWorkoutTimerUI() {
+  if (workoutTimerInterval) clearInterval(workoutTimerInterval);
+  workoutTimerInterval = null;
+  workoutTimerStart = null;
+  workoutTimerPaused = false;
+  workoutTimerPausedElapsed = 0;
+  var timerEl = document.getElementById('workout-timer');
+  var startBtn = document.getElementById('workout-timer-start');
+  if (timerEl) timerEl.style.display = 'none';
+  if (startBtn) startBtn.style.display = 'inline-block';
+}
+
+function getWorkoutDuration() {
+  if (!workoutTimerStart) return '';
+  var elapsed = Math.floor((Date.now() - workoutTimerStart) / 1000);
+  var mins = Math.floor(elapsed / 60);
+  if (mins < 1) return '<1 min';
+  if (mins >= 60) return Math.floor(mins / 60) + 'h ' + (mins % 60) + 'm';
+  return mins + ' min';
+}
+
+function togglePauseTimer() {
+  var dot = document.getElementById('timer-dot');
+  var pauseBtn = document.getElementById('timer-pause-btn');
+  
+  if (!workoutTimerPaused) {
+    // Pause
+    workoutTimerPaused = true;
+    workoutTimerPausedElapsed = Math.floor((Date.now() - workoutTimerStart) / 1000);
+    if (workoutTimerInterval) clearInterval(workoutTimerInterval);
+    workoutTimerInterval = null;
+    if (dot) { dot.style.animation = 'none'; dot.style.opacity = '0.3'; }
+    if (pauseBtn) pauseBtn.textContent = '▶';
+  } else {
+    // Resume — adjust start time to account for paused duration
+    workoutTimerPaused = false;
+    workoutTimerStart = Date.now() - (workoutTimerPausedElapsed * 1000);
+    if (dot) { dot.style.animation = 'pulse 1.5s ease infinite'; dot.style.opacity = '1'; }
+    if (pauseBtn) pauseBtn.textContent = '❚❚';
+    workoutTimerInterval = setInterval(updateWorkoutTimer, 1000);
+    updateWorkoutTimer();
+  }
+}
+
+// Resume timer display when phone unlocks / tab refocuses
+document.addEventListener('visibilitychange', function() {
+  if (!document.hidden && workoutTimerStart && !workoutTimerPaused) {
+    updateWorkoutTimer();
+    if (!workoutTimerInterval) {
+      workoutTimerInterval = setInterval(updateWorkoutTimer, 1000);
+    }
+  }
+});
+
+// ════════════════════════════════════════════════════════════
+// BODY MEASUREMENTS
+// ════════════════════════════════════════════════════════════
+
+var MEAS_FIELDS = ['arms', 'chest', 'waist', 'hips', 'thighs'];
+
+function buildMeasurements() {
+  var container = document.getElementById('measurements-container');
+  if (!container) return;
+  container.innerHTML = '';
+  
+  var totalWeeks = getWeeks();
+  for (var i = 0; i < totalWeeks; i++) {
+    var w = weekOffset + i;
+    var isCur = w === selectedWeek;
+    
+    var section = document.createElement('div');
+    section.className = 'meas-section' + (isCur ? ' open' : '');
+    section.id = 'meas-section-' + w;
+    
+    var hasData = MEAS_FIELDS.some(function(f) { return lsGet('meas_' + w + '_' + f); });
+    var badge = hasData ? '✓' : '—';
+    
+    section.innerHTML =
+      '<div class="meas-header" onclick="document.getElementById(\'meas-section-' + w + '\').classList.toggle(\'open\')">' +
+        '<div class="meas-title">Week ' + (w + 1) + (isCur ? ' <span style="font-size:10px;background:rgba(255,159,10,0.15);padding:1px 6px;border-radius:4px;">now</span>' : '') + '</div>' +
+        '<div style="display:flex;align-items:center;gap:8px;">' +
+          '<span style="font-size:11px;color:' + (hasData ? '#FF9F0A' : 'var(--text-tertiary)') + ';">' + badge + '</span>' +
+          '<span class="meas-chevron">›</span>' +
+        '</div>' +
+      '</div>' +
+      '<div class="meas-body">' +
+        '<div class="meas-grid">' +
+          MEAS_FIELDS.map(function(f) {
+            var val = lsGet('meas_' + w + '_' + f) || '';
+            return '<div class="meas-field">' +
+              '<div class="meas-label">' + f.charAt(0).toUpperCase() + f.slice(1) + ' (in)</div>' +
+              '<input type="number" inputmode="decimal" class="meas-input" placeholder="—" value="' + val + '" data-week="' + w + '" data-field="' + f + '">' +
+            '</div>';
+          }).join('') +
+        '</div>' +
+        '<button class="meas-save-btn" onclick="saveMeasurements(' + w + ', this)">Save Measurements</button>' +
+      '</div>';
+    
+    container.appendChild(section);
+  }
+}
+
+async function saveMeasurements(week, btn) {
+  if (isGuest) return;
+  
+  var section = document.getElementById('meas-section-' + week);
+  var inputs = section.querySelectorAll('.meas-input');
+  var data = { user_id: currentUser.id, week: week };
+  
+  inputs.forEach(function(input) {
+    var field = input.getAttribute('data-field');
+    var val = input.value;
+    lsSet('meas_' + week + '_' + field, val);
+    data[field] = val ? parseFloat(val) : null;
+  });
+  
+  showSyncIndicator('saving');
+  await sb.from('body_measurements').upsert(data, { onConflict: 'user_id,week' });
+  hideSyncIndicator();
+  
+  btn.textContent = '✓ Saved';
+  btn.style.background = 'rgba(48,209,88,0.2)';
+  btn.style.color = '#30D158';
+  setTimeout(function() {
+    btn.textContent = 'Save Measurements';
+    btn.style.background = '';
+    btn.style.color = '';
+  }, 2000);
+}
+
+async function loadMeasurements() {
+  if (isGuest || !currentUser) return;
+  var { data } = await sb.from('body_measurements').select('*').eq('user_id', currentUser.id);
+  if (data) {
+    data.forEach(function(r) {
+      MEAS_FIELDS.forEach(function(f) {
+        if (r[f]) lsSet('meas_' + r.week + '_' + f, r[f]);
+      });
     });
   }
 }
