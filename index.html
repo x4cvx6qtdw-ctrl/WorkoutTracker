@@ -1347,15 +1347,15 @@
     background: #000; overflow-y: auto;
     padding: calc(var(--safe-top) + 20px) 24px calc(var(--safe-bottom) + 20px);
   }
-  .wizard-overlay.open { display: flex; flex-direction: column; animation: sheetUp 0.3s ease; }
+  .wizard-overlay.open { display: flex; flex-direction: column; align-items: center; animation: sheetUp 0.3s ease; }
   .wizard-dots { display: flex; gap: 8px; justify-content: center; margin-bottom: 28px; }
   .wizard-dot { width: 8px; height: 8px; border-radius: 50%; background: rgba(255,255,255,0.15); }
   .wizard-dot.active { background: #FF9F0A; width: 24px; border-radius: 4px; }
   .wizard-dot.done { background: rgba(255,159,10,0.4); }
-  .wizard-step-label { font-size: 10px; font-weight: 700; color: rgba(255,159,10,0.5); text-transform: uppercase; letter-spacing: 3px; margin-bottom: 8px; }
-  .wizard-title { font-size: 26px; font-weight: 900; color: #fff; line-height: 1.2; margin-bottom: 6px; }
+  .wizard-step-label { font-size: 10px; font-weight: 700; color: rgba(255,159,10,0.5); text-transform: uppercase; letter-spacing: 3px; margin-bottom: 8px; text-align: center; }
+  .wizard-title { font-size: 26px; font-weight: 900; color: #fff; line-height: 1.2; margin-bottom: 6px; text-align: center; }
   .wizard-title span { color: #FF9F0A; }
-  .wizard-sub { font-size: 14px; color: rgba(255,255,255,0.35); margin-bottom: 24px; line-height: 1.4; }
+  .wizard-sub { font-size: 14px; color: rgba(255,255,255,0.35); margin-bottom: 24px; line-height: 1.4; text-align: center; }
   .wizard-day-grid { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; margin-bottom: 24px; }
   .wizard-day-btn {
     width: 64px; height: 64px; border-radius: 16px;
@@ -1365,7 +1365,7 @@
     cursor: pointer; transition: all 0.2s; font-family: inherit;
   }
   .wizard-day-btn.selected { background: rgba(255,159,10,0.12); border-color: #FF9F0A; color: #FF9F0A; }
-  .wizard-equip-card {
+  .wizard-equip-card { max-width: 420px;
     padding: 20px; border-radius: 16px;
     background: rgba(255,255,255,0.04); border: 2px solid rgba(255,255,255,0.08);
     margin-bottom: 12px; cursor: pointer; transition: all 0.2s;
@@ -1386,7 +1386,7 @@
     font-size: 14px; color: #000;
   }
   .wizard-equip-card.selected .wizard-equip-check { background: #FF9F0A; border-color: #FF9F0A; }
-  .wizard-prog-card {
+  .wizard-prog-card { max-width: 420px;
     padding: 18px; border-radius: 16px;
     background: linear-gradient(135deg, rgba(255,159,10,0.08), rgba(255,159,10,0.03));
     border: 1.5px solid rgba(255,159,10,0.12); margin-bottom: 12px;
@@ -1399,7 +1399,7 @@
   .wizard-prog-days { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 8px; }
   .wizard-prog-tag { font-size: 11px; padding: 4px 10px; border-radius: 6px; background: rgba(255,255,255,0.06); color: rgba(255,255,255,0.4); font-weight: 600; }
   .wizard-prog-meta { font-size: 12px; color: rgba(255,255,255,0.3); margin-top: 8px; }
-  .wizard-next {
+  .wizard-next { max-width: 420px;
     width: 100%; padding: 16px; border-radius: 14px;
     background: linear-gradient(135deg, #FF9F0A, #CC7A00);
     color: #000; font-size: 16px; font-weight: 700;
@@ -1407,7 +1407,7 @@
   }
   .wizard-next:active { opacity: 0.8; }
   .wizard-next:disabled { opacity: 0.3; cursor: not-allowed; }
-  .wizard-skip { text-align: center; padding: 14px; color: rgba(255,255,255,0.2); font-size: 13px; font-weight: 600; cursor: pointer; }
+  .wizard-skip { text-align: center; padding: 14px; color: rgba(255,255,255,0.2); font-size: 13px; font-weight: 600; cursor: pointer; max-width: 420px; width: 100%; }
 
   /* ── Animations ── */
   @keyframes popIn {
@@ -1520,10 +1520,13 @@
   <div id="screen-detail" class="screen">
     <div id="detail-header">
       <button class="back-btn" onclick="showHome()">‹ Back</button>
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;">
-        <div></div>
+      <div class="detail-top">
+        <div>
+          <div class="detail-eyebrow" id="detail-eyebrow"></div>
+          <div class="detail-title" id="detail-title"></div>
+        </div>
         <div id="workout-timer-wrap">
-          <button class="workout-timer-start" id="workout-timer-start" onclick="startWorkoutTimer()">▶ Start Workout Timer</button>
+          <button class="workout-timer-start" id="workout-timer-start" onclick="startWorkoutTimer()">▶ Start Timer</button>
           <div class="workout-timer" id="workout-timer" style="display:none;">
             <div class="timer-dot" id="timer-dot"></div>
             <span id="workout-timer-text">0:00</span>
@@ -1532,15 +1535,9 @@
           </div>
         </div>
       </div>
-      <div class="detail-top">
-        <div>
-          <div class="detail-eyebrow" id="detail-eyebrow"></div>
-          <div class="detail-title" id="detail-title"></div>
-        </div>
-        <div class="pct-badge" id="detail-pct-badge">
-          <div class="pct-num" id="detail-pct">0%</div>
-          <div class="pct-label">done</div>
-        </div>
+      <div class="pct-badge" id="detail-pct-badge" style="display:none;">
+        <div class="pct-num" id="detail-pct">0%</div>
+        <div class="pct-label">done</div>
       </div>
       <div class="detail-progress-track">
         <div class="detail-progress-fill" id="detail-progress-fill"></div>
@@ -1642,8 +1639,8 @@
 
   <!-- ── Setup Wizard ── -->
   <div class="wizard-overlay" id="setup-wizard">
-    <div class="wizard-dots" id="wizard-dots"></div>
-    <div id="wizard-content"></div>
+    <div class="wizard-dots" id="wizard-dots" style="width:100%;"></div>
+    <div id="wizard-content" style="width:100%;max-width:420px;"></div>
   </div>
 
   <!-- ── Version Footer ── -->
@@ -2359,7 +2356,7 @@ function showDetail(wo) {
   document.getElementById('detail-title').textContent = wo.emoji + ' ' + wo.name;
 
   const badge = document.getElementById('detail-pct-badge');
-  badge.style.background = 'rgba(255,159,10,0.13)';
+  // badge hidden
   document.getElementById('detail-pct').style.color = '#FF9F0A';
   document.getElementById('detail-progress-fill').style.background = 'linear-gradient(90deg,#FF9F0A,#CC7A00)';
 
@@ -4178,6 +4175,26 @@ function closeWizard() {
   document.getElementById('setup-wizard').classList.remove('open');
 }
 
+function setWizardEquip(val) {
+  wizardData.equipment = val;
+  renderWizardStep();
+}
+
+function setWizardProgram(id) {
+  wizardData.programId = id;
+  renderWizardStep();
+}
+
+async function finishWizard() {
+  if (!wizardData.programId || isGuest) return;
+  showSyncIndicator('saving');
+  await sb.from('profiles').update({ program_id: wizardData.programId }).eq('id', currentUser.id);
+  hideSyncIndicator();
+  closeWizard();
+  await loadUserProgram();
+  buildWorkoutList();
+}
+
 function renderWizardStep() {
   var dots = document.getElementById('wizard-dots');
   dots.innerHTML = '';
@@ -4244,7 +4261,7 @@ function renderWizardStep() {
       '<div class="wizard-title">Pick a <span>program</span></div>' +
       '<div class="wizard-sub">Showing programs for ' + wizardData.days + ' days, ' + (wizardData.equipment === 'gym' ? 'full gym' : 'dumbbells & bodyweight') + '.</div>' +
       '<div id="wiz-prog-list"></div>' +
-      '<div style="padding:10px;text-align:center;color:rgba(255,255,255,0.2);font-size:13px;">Need something different?<br><span style="color:#FF9F0A;font-weight:600;">Ask your coach for a custom program</span></div>' +
+      '<div style="padding:10px;text-align:center;max-width:420px;color:rgba(255,255,255,0.2);font-size:13px;">Need something different?<br><span style="color:#FF9F0A;font-weight:600;">Ask your coach for a custom program</span></div>' +
       '<button class="wizard-next" id="wiz-next-2">Select Program \u2192</button>';
     
     var progList = document.getElementById('wiz-prog-list');
