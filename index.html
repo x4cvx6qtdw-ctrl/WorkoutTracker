@@ -2073,7 +2073,7 @@ async function loadAllData() {
       lsSet(rKey(r.workout_id, r.exercise_index, r.set_index, r.week), r.reps_done || '');
     });
 
-    const { data: bw } = await sb.from('body_weights').select('*');
+    const { data: bw } = await sb.from('body_weights').select('*').eq('user_id', currentUser.id);
     if (bw) bw.forEach(r => lsSet(bwKey(r.week), r.weight));
 
     const { data: food } = await sb.from('food_logs').select('*');
@@ -2091,13 +2091,13 @@ async function loadAllData() {
     if (targets) targets.forEach(r => lsSet('target_' + r.day_type, JSON.stringify(r)));
 
     // Load measurements
-    const { data: meas } = await sb.from('body_measurements').select('*');
+    const { data: meas } = await sb.from('body_measurements').select('*').eq('user_id', currentUser.id);
     if (meas) meas.forEach(r => {
       ['arms','chest','waist','hips','thighs'].forEach(f => { if (r[f]) lsSet('meas_' + r.week + '_' + f, r[f]); });
     });
 
     // Load daily weights
-    const { data: dailyW } = await sb.from('daily_weights').select('*');
+    const { data: dailyW } = await sb.from('daily_weights').select('*').eq('user_id', currentUser.id);
     if (dailyW) dailyW.forEach(r => { if (r.weight) lsSet('dw_' + r.week + '_' + r.day_index, r.weight); });
   } catch(e) { console.warn('Load error:', e); }
   hideSyncIndicator();
@@ -2790,9 +2790,9 @@ function updateWeightStats() {
     }
   }
   
-  // Use daily data if we have it, otherwise weekly
-  var chartWeights = dailyWeights.length >= 2 ? dailyWeights : weekWeights;
-  var chartLabels = dailyWeights.length >= 2 ? dailyLabels : weekLabels;
+  // Prioritize weekly trend when 2+ weeks exist, fall back to daily for single week
+  var chartWeights = weekWeights.length >= 2 ? weekWeights : (dailyWeights.length >= 2 ? dailyWeights : weekWeights);
+  var chartLabels = weekWeights.length >= 2 ? weekLabels : (dailyWeights.length >= 2 ? dailyLabels : weekLabels);
   
   // All weights for stats (combine all daily entries across weeks)
   var allWeights = [];
@@ -2816,7 +2816,7 @@ function updateWeightStats() {
   var change = (last - first).toFixed(1);
   var peak = Math.max.apply(null, allWeights).toFixed(1);
   var low = Math.min.apply(null, allWeights).toFixed(1);
-  var chartTitle = dailyWeights.length >= 2 ? 'Week ' + (selectedWeek + 1) + ' Daily Trend' : 'Weekly Trend';
+  var chartTitle = weekWeights.length >= 2 ? 'Weekly Trend' : (dailyWeights.length >= 2 ? 'Week ' + (selectedWeek + 1) + ' Daily Trend' : 'Weekly Trend');
   
   statsEl.innerHTML =
     '<div class="section-label" style="padding-bottom:8px">' + chartTitle + '</div>' +
@@ -4114,7 +4114,10 @@ var wizardData = { days: 0, equipment: '', programId: '' };
 var wizardPrograms = [];
 
 async function checkShowWizard() {
-  if (isGuest) return;
+  if (isGuest) {
+    showWizard();
+    return;
+  }
   if (!currentUser) return;
   var { data: profile } = await sb.from('profiles').select('program_id').eq('id', currentUser.id).single();
   // Only show wizard if no program AND no logged data (truly new user)
@@ -4186,7 +4189,12 @@ function setWizardProgram(id) {
 }
 
 async function finishWizard() {
-  if (!wizardData.programId || isGuest) return;
+  if (!wizardData.programId) return;
+  if (isGuest) {
+    closeWizard();
+    showGuestUpgrade('Full Program');
+    return;
+  }
   showSyncIndicator('saving');
   await sb.from('profiles').update({ program_id: wizardData.programId }).eq('id', currentUser.id);
   hideSyncIndicator();
