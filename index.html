@@ -1231,7 +1231,7 @@
     background: rgba(255,159,10,0.03);
     border-top: 1px solid var(--separator);
   }
-  .daily-grid.open { display: block; animation: slideIn 0.2s ease; }
+  .daily-grid.open { display: block; }
   .daily-grid-title {
     font-size: 10px; font-weight: 600; color: var(--text-tertiary);
     text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 8px;
@@ -1338,6 +1338,77 @@
   }
   .meas-save-btn:active { opacity: 0.7; }
 
+  .meas-detail-collapse { display: none; }
+  .meas-detail-collapse.open { display: block; animation: slideIn 0.2s ease; }
+
+  /* ── Setup Wizard ── */
+  .wizard-overlay {
+    display: none; position: fixed; inset: 0; z-index: 550;
+    background: #000; overflow-y: auto;
+    padding: calc(var(--safe-top) + 20px) 24px calc(var(--safe-bottom) + 20px);
+  }
+  .wizard-overlay.open { display: flex; flex-direction: column; animation: sheetUp 0.3s ease; }
+  .wizard-dots { display: flex; gap: 8px; justify-content: center; margin-bottom: 28px; }
+  .wizard-dot { width: 8px; height: 8px; border-radius: 50%; background: rgba(255,255,255,0.15); }
+  .wizard-dot.active { background: #FF9F0A; width: 24px; border-radius: 4px; }
+  .wizard-dot.done { background: rgba(255,159,10,0.4); }
+  .wizard-step-label { font-size: 10px; font-weight: 700; color: rgba(255,159,10,0.5); text-transform: uppercase; letter-spacing: 3px; margin-bottom: 8px; }
+  .wizard-title { font-size: 26px; font-weight: 900; color: #fff; line-height: 1.2; margin-bottom: 6px; }
+  .wizard-title span { color: #FF9F0A; }
+  .wizard-sub { font-size: 14px; color: rgba(255,255,255,0.35); margin-bottom: 24px; line-height: 1.4; }
+  .wizard-day-grid { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; margin-bottom: 24px; }
+  .wizard-day-btn {
+    width: 64px; height: 64px; border-radius: 16px;
+    background: rgba(255,255,255,0.05); border: 2px solid rgba(255,255,255,0.1);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 24px; font-weight: 800; color: rgba(255,255,255,0.3);
+    cursor: pointer; transition: all 0.2s; font-family: inherit;
+  }
+  .wizard-day-btn.selected { background: rgba(255,159,10,0.12); border-color: #FF9F0A; color: #FF9F0A; }
+  .wizard-equip-card {
+    padding: 20px; border-radius: 16px;
+    background: rgba(255,255,255,0.04); border: 2px solid rgba(255,255,255,0.08);
+    margin-bottom: 12px; cursor: pointer; transition: all 0.2s;
+    display: flex; align-items: center; gap: 16px;
+  }
+  .wizard-equip-card.selected { background: rgba(255,159,10,0.08); border-color: #FF9F0A; }
+  .wizard-equip-icon {
+    width: 48px; height: 48px; border-radius: 14px;
+    background: rgba(255,159,10,0.1); display: flex; align-items: center;
+    justify-content: center; font-size: 24px; flex-shrink: 0;
+  }
+  .wizard-equip-name { font-size: 16px; font-weight: 700; color: #fff; }
+  .wizard-equip-desc { font-size: 12px; color: rgba(255,255,255,0.35); margin-top: 2px; }
+  .wizard-equip-check {
+    margin-left: auto; width: 24px; height: 24px; border-radius: 50%;
+    border: 2px solid rgba(255,255,255,0.15); flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 14px; color: #000;
+  }
+  .wizard-equip-card.selected .wizard-equip-check { background: #FF9F0A; border-color: #FF9F0A; }
+  .wizard-prog-card {
+    padding: 18px; border-radius: 16px;
+    background: linear-gradient(135deg, rgba(255,159,10,0.08), rgba(255,159,10,0.03));
+    border: 1.5px solid rgba(255,159,10,0.12); margin-bottom: 12px;
+    cursor: pointer; transition: all 0.2s;
+  }
+  .wizard-prog-card.selected { border-color: #FF9F0A; background: linear-gradient(135deg, rgba(255,159,10,0.15), rgba(255,159,10,0.08)); }
+  .wizard-prog-name { font-size: 17px; font-weight: 800; color: #fff; }
+  .wizard-prog-card.selected .wizard-prog-name { color: #FF9F0A; }
+  .wizard-prog-badge { font-size: 11px; font-weight: 700; padding: 3px 10px; border-radius: 8px; background: rgba(255,159,10,0.1); color: #FF9F0A; }
+  .wizard-prog-days { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 8px; }
+  .wizard-prog-tag { font-size: 11px; padding: 4px 10px; border-radius: 6px; background: rgba(255,255,255,0.06); color: rgba(255,255,255,0.4); font-weight: 600; }
+  .wizard-prog-meta { font-size: 12px; color: rgba(255,255,255,0.3); margin-top: 8px; }
+  .wizard-next {
+    width: 100%; padding: 16px; border-radius: 14px;
+    background: linear-gradient(135deg, #FF9F0A, #CC7A00);
+    color: #000; font-size: 16px; font-weight: 700;
+    font-family: inherit; cursor: pointer; margin-top: 20px; text-align: center;
+  }
+  .wizard-next:active { opacity: 0.8; }
+  .wizard-next:disabled { opacity: 0.3; cursor: not-allowed; }
+  .wizard-skip { text-align: center; padding: 14px; color: rgba(255,255,255,0.2); font-size: 13px; font-weight: 600; cursor: pointer; }
+
   /* ── Animations ── */
   @keyframes popIn {
     from { opacity: 0; transform: scale(0.95) translateY(8px); }
@@ -1396,7 +1467,7 @@
     <button class="auth-guest-btn" onclick="guestLogin()">Continue as Guest</button>
     <div style="font-size:11px;color:var(--text-tertiary);text-align:center;margin-top:8px;">Try 1 workout day free · Sign up for full access</div>
     <div id="auth-version" style="margin-top:24px;font-size:10px;color:rgba(255,255,255,0.12);text-align:center;">
-      <span style="background:rgba(255,255,255,0.06);padding:2px 8px;border-radius:6px;font-weight:600;letter-spacing:0.5px;">v1.8.5</span>
+      <span style="background:rgba(255,255,255,0.06);padding:2px 8px;border-radius:6px;font-weight:600;letter-spacing:0.5px;">v1.8.9</span>
       <div style="margin-top:4px;">MackTrak · Built with 🦾</div>
     </div>
   </div>
@@ -1533,7 +1604,7 @@
     <div style="padding:0 16px 12px;margin-top:4px;">
       <div class="section-label">Weekly Weigh-Ins</div>
     </div>
-    <div class="wt-list" id="wt-list"></div>
+    <div class="wt-list" id="wt-list" style="display:none;"></div>
     <div style="height:20px;"></div>
   </div>
 
@@ -1569,12 +1640,18 @@
     <div class="photo-viewer-label" id="photo-viewer-label"></div>
   </div>
 
+  <!-- ── Setup Wizard ── -->
+  <div class="wizard-overlay" id="setup-wizard">
+    <div class="wizard-dots" id="wizard-dots"></div>
+    <div id="wizard-content"></div>
+  </div>
+
   <!-- ── Version Footer ── -->
   <div class="version-footer" id="version-footer" style="position:fixed;bottom:60px;left:50%;transform:translateX(-50%);z-index:0;width:100%;max-width:430px;display:none;">
-    <div class="version-tag" onclick="document.getElementById('changelog').classList.toggle('open')" style="background:rgba(255,159,10,0.15);color:#FF9F0A;">v1.8.5</div>
+    <div class="version-tag" onclick="document.getElementById('changelog').classList.toggle('open')" style="background:rgba(255,159,10,0.15);color:#FF9F0A;">v1.8.9</div>
     <div>MackTrak · Built with 🦾</div>
     <div class="version-changelog" id="changelog">
-      <strong>v1.8.5</strong> — Program Builder + Images<br>
+      <strong>v1.8.9</strong> — Program Builder + Images<br>
       • Admin program builder (create/edit/delete programs)<br>
       • Day editor with emoji and color picker<br>
       • Inline exercise editor with image URL support<br>
@@ -1973,6 +2050,7 @@ async function showApp() {
 
   await loadUserProgram();
   if (weekOffset > 0 && selectedWeek < weekOffset) selectedWeek = weekOffset;
+  checkShowWizard();
   buildWeekScroller();
   buildWorkoutList();
   buildWeightTracker();
@@ -2595,7 +2673,7 @@ function buildWeightTracker() {
       <input type="number" inputmode="decimal" class="wt-input"
         placeholder="— lbs" value="${val}"
         data-week="${w}"
-        oninput="saveBodyWeight(this)"
+        oninput="saveBodyWeight(this); updateWeightDeltas(); updateWeightStats(); drawBodyWeightChart();"
       >
       <input type="checkbox" class="wt-check" id="wt-check-${w}" onchange="confirmSaveWeight(this, ${w})" ${val ? 'checked' : ''}>
 
@@ -2616,10 +2694,14 @@ function buildWeightTracker() {
         var dVal = lsGet('dw_' + w + '_' + di) || '';
         return '<div class="daily-row">' +
           '<div class="daily-label">' + dl + '</div>' +
-          '<input type="number" inputmode="decimal" class="daily-input" placeholder="— lbs" value="' + dVal + '" data-week="' + w + '" data-day="' + di + '">' +
+          '<input type="number" inputmode="decimal" class="daily-input" placeholder="— lbs" value="' + dVal + '" data-week="' + w + '" data-day="' + di + '" oninput="onDailyWeightInput(' + w + ')">' +
           '<input type="checkbox" class="wt-check" onchange="saveDailyWeight(' + w + ',' + di + ',this)" ' + (dVal ? 'checked' : '') + '>' +
         '</div>';
       }).join('');
+    // Auto-expand daily grid for current week
+    dailyGrid.classList.add('open');
+    var expandBtn = document.getElementById('expand-btn-' + w);
+    if (expandBtn) { expandBtn.classList.add('open'); expandBtn.textContent = '▴'; }
     el.appendChild(dailyGrid);
 
     // Pose grid (hidden by default)
@@ -2692,8 +2774,8 @@ function updateWeightStats() {
   const statsEl  = document.getElementById('wt-stats');
   const cardsEl  = document.getElementById('wt-stat-cards');
 
-  if (weights.length < 2) {
-    statsEl.innerHTML = `<div class="section-label" style="padding-bottom:8px">Log 2+ weeks to see stats</div>`;
+  if (weights.length < 1) {
+    statsEl.innerHTML = `<div class="section-label" style="padding-bottom:8px">Log your first weigh-in</div>`;
     cardsEl.style.display = 'none';
     document.getElementById('wt-chart-wrap').style.display = 'none';
     return;
@@ -2814,6 +2896,8 @@ function drawLineChart(canvas, labels, data, color, unit) {
 }
 
 function drawBodyWeightChart() {
+  var chartWrap = document.getElementById('wt-chart-wrap');
+  if (chartWrap) chartWrap.style.display = 'block';
   const canvas = document.getElementById('wt-chart-canvas');
   if (!canvas) return;
   const data = Array.from({length: getWeeks()}, (_, i) => {
@@ -3982,6 +4066,186 @@ function getOverloadSuggestion(wid, ei, si, week) {
 }
 
 // ════════════════════════════════════════════════════════════
+// SETUP WIZARD
+// ════════════════════════════════════════════════════════════
+
+var wizardStep = 0;
+var wizardData = { days: 0, equipment: '', programId: '' };
+var wizardPrograms = [];
+
+async function checkShowWizard() {
+  if (isGuest) return;
+  if (!currentUser) return;
+  var { data: profile } = await sb.from('profiles').select('program_id').eq('id', currentUser.id).single();
+  if (!profile || !profile.program_id) {
+    showWizard();
+  }
+}
+
+async function showWizard() {
+  wizardStep = 0;
+  wizardData = { days: 0, equipment: '', programId: '' };
+  
+  // Load all programs
+  var { data } = await sb.from('workout_programs').select('id, name, description, weeks');
+  if (data) {
+    // Load day counts for each program
+    for (var i = 0; i < data.length; i++) {
+      var { data: days } = await sb.from('program_days')
+        .select('name, is_rest')
+        .eq('program_id', data[i].id)
+        .order('day_number');
+      data[i].days = days || [];
+      data[i].totalDays = days ? days.filter(function(d) { return !d.is_rest; }).length : 0;
+      
+      var { count } = await sb.from('program_exercises')
+        .select('*', { count: 'exact', head: true })
+        .in('day_id', (days || []).map(function(d) { return d.id; }));
+    }
+    // Get exercise counts via program_days
+    for (var j = 0; j < data.length; j++) {
+      var { data: pDays } = await sb.from('program_days')
+        .select('id')
+        .eq('program_id', data[j].id);
+      if (pDays) {
+        var dayIds = pDays.map(function(d) { return d.id; });
+        var { data: exs } = await sb.from('program_exercises')
+          .select('id')
+          .in('day_id', dayIds);
+        data[j].exerciseCount = exs ? exs.length : 0;
+      }
+    }
+    wizardPrograms = data;
+  }
+  
+  // Detect equipment from program names
+  wizardPrograms.forEach(function(p) {
+    p.isDBBW = p.name.toLowerCase().includes('db/bw') || p.name.toLowerCase().includes('dumbbell') || p.name.toLowerCase().includes('bodyweight');
+  });
+  
+  renderWizardStep();
+  document.getElementById('setup-wizard').classList.add('open');
+}
+
+function closeWizard() {
+  document.getElementById('setup-wizard').classList.remove('open');
+}
+
+function renderWizardStep() {
+  var dots = document.getElementById('wizard-dots');
+  dots.innerHTML = '';
+  for (var di = 0; di < 4; di++) {
+    var d = document.createElement('div');
+    d.className = 'wizard-dot' + (di === wizardStep ? ' active' : di < wizardStep ? ' done' : '');
+    dots.appendChild(d);
+  }
+  
+  var el = document.getElementById('wizard-content');
+  el.innerHTML = '';
+  
+  if (wizardStep === 0) {
+    el.innerHTML = '<div class="wizard-step-label">Build Your Program</div>' +
+      '<div class="wizard-title">How many days can you <span>train?</span></div>' +
+      '<div class="wizard-sub">Pick the number of days per week you want to work out.</div>' +
+      '<div class="wizard-day-grid" id="wiz-day-grid"></div>' +
+      '<button class="wizard-next" id="wiz-next-0">Next \u2192</button>' +
+      '<div class="wizard-skip" onclick="closeWizard()">Skip setup \u2014 use default program</div>';
+    
+    var grid = document.getElementById('wiz-day-grid');
+    [3,4,5,6,7].forEach(function(n) {
+      var btn = document.createElement('button');
+      btn.className = 'wizard-day-btn' + (wizardData.days === n ? ' selected' : '');
+      btn.textContent = n;
+      btn.onclick = function() { wizardData.days = n; renderWizardStep(); };
+      grid.appendChild(btn);
+    });
+    
+    var nextBtn = document.getElementById('wiz-next-0');
+    nextBtn.disabled = wizardData.days === 0;
+    nextBtn.onclick = function() { wizardStep = 1; renderWizardStep(); };
+  
+  } else if (wizardStep === 1) {
+    el.innerHTML = '<div class="wizard-step-label">Equipment Check</div>' +
+      '<div class="wizard-title">What do you have <span>access to?</span></div>' +
+      '<div class="wizard-sub">We will match you with the right exercises.</div>' +
+      '<div id="wiz-equip-list"></div>' +
+      '<button class="wizard-next" id="wiz-next-1">Next \u2192</button>';
+    
+    var equipList = document.getElementById('wiz-equip-list');
+    [{key:'gym', icon:'\ud83c\udfcb\ufe0f', name:'Full Gym', desc:'Barbells, machines, cables, dumbbells'},
+     {key:'dbbw', icon:'\ud83d\udcaa', name:'Dumbbells & Bodyweight', desc:'Home gym, no machines needed'}
+    ].forEach(function(eq) {
+      var card = document.createElement('div');
+      card.className = 'wizard-equip-card' + (wizardData.equipment === eq.key ? ' selected' : '');
+      card.innerHTML = '<div class="wizard-equip-icon">' + eq.icon + '</div>' +
+        '<div><div class="wizard-equip-name">' + eq.name + '</div><div class="wizard-equip-desc">' + eq.desc + '</div></div>' +
+        '<div class="wizard-equip-check">' + (wizardData.equipment === eq.key ? '\u2713' : '') + '</div>';
+      card.onclick = function() { wizardData.equipment = eq.key; renderWizardStep(); };
+      equipList.appendChild(card);
+    });
+    
+    var nextBtn1 = document.getElementById('wiz-next-1');
+    nextBtn1.disabled = !wizardData.equipment;
+    nextBtn1.onclick = function() { wizardStep = 2; renderWizardStep(); };
+  
+  } else if (wizardStep === 2) {
+    var filtered = wizardPrograms.filter(function(p) {
+      return wizardData.equipment === 'dbbw' ? p.isDBBW : !p.isDBBW;
+    });
+    
+    el.innerHTML = '<div class="wizard-step-label">Choose Your Program</div>' +
+      '<div class="wizard-title">Pick a <span>program</span></div>' +
+      '<div class="wizard-sub">Showing programs for ' + wizardData.days + ' days, ' + (wizardData.equipment === 'gym' ? 'full gym' : 'dumbbells & bodyweight') + '.</div>' +
+      '<div id="wiz-prog-list"></div>' +
+      '<div style="padding:10px;text-align:center;color:rgba(255,255,255,0.2);font-size:13px;">Need something different?<br><span style="color:#FF9F0A;font-weight:600;">Ask your coach for a custom program</span></div>' +
+      '<button class="wizard-next" id="wiz-next-2">Select Program \u2192</button>';
+    
+    var progList = document.getElementById('wiz-prog-list');
+    if (filtered.length === 0) {
+      progList.innerHTML = '<div style="text-align:center;color:var(--text-tertiary);padding:20px;font-size:14px;">No matching programs found.<br><span style="color:#FF9F0A;">Ask your coach for a custom program.</span></div>';
+    }
+    filtered.forEach(function(p) {
+      var card = document.createElement('div');
+      card.className = 'wizard-prog-card' + (wizardData.programId === p.id ? ' selected' : '');
+      var dayTags = p.days.map(function(d) { return '<span class="wizard-prog-tag">' + d.name + '</span>'; }).join('');
+      card.innerHTML = '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">' +
+        '<div class="wizard-prog-name">' + p.name + '</div>' +
+        '<div class="wizard-prog-badge">' + p.totalDays + ' days</div></div>' +
+        '<div class="wizard-prog-days">' + dayTags + '</div>' +
+        '<div class="wizard-prog-meta">' + (p.exerciseCount || 0) + ' exercises</div>';
+      card.onclick = function() { wizardData.programId = p.id; renderWizardStep(); };
+      progList.appendChild(card);
+    });
+    
+    var nextBtn2 = document.getElementById('wiz-next-2');
+    nextBtn2.disabled = !wizardData.programId;
+    nextBtn2.onclick = function() { wizardStep = 3; renderWizardStep(); };
+  
+  } else if (wizardStep === 3) {
+    var selected = wizardPrograms.find(function(p) { return p.id === wizardData.programId; });
+    el.innerHTML = '<div style="text-align:center;padding-top:40px;">' +
+      '<div style="width:80px;height:80px;border-radius:50%;background:linear-gradient(135deg,#FF9F0A,#CC7A00);display:flex;align-items:center;justify-content:center;font-size:40px;margin:0 auto 20px;box-shadow:0 8px 30px rgba(255,159,10,0.3);">\u2713</div>' +
+      '<div style="font-size:28px;font-weight:900;">You are <span style="color:#FF9F0A;">all set!</span></div>' +
+      '<div style="font-size:14px;color:rgba(255,255,255,0.4);margin:8px 0;">Your program is ready to go.</div>' +
+      '<div style="font-size:16px;font-weight:700;color:#FF9F0A;margin-bottom:24px;">' + (selected ? selected.name : '') + '</div>' +
+      '<div style="display:flex;gap:12px;justify-content:center;margin-bottom:30px;">' +
+        '<div style="background:rgba(255,159,10,0.08);border:1px solid rgba(255,159,10,0.15);border-radius:14px;padding:14px 20px;text-align:center;">' +
+          '<div style="font-size:24px;font-weight:800;color:#FF9F0A;">' + (selected ? selected.totalDays : 0) + '</div>' +
+          '<div style="font-size:10px;color:rgba(255,255,255,0.35);text-transform:uppercase;letter-spacing:0.8px;margin-top:2px;">Days</div></div>' +
+        '<div style="background:rgba(255,159,10,0.08);border:1px solid rgba(255,159,10,0.15);border-radius:14px;padding:14px 20px;text-align:center;">' +
+          '<div style="font-size:24px;font-weight:800;color:#FF9F0A;">' + (selected ? selected.exerciseCount : 0) + '</div>' +
+          '<div style="font-size:10px;color:rgba(255,255,255,0.35);text-transform:uppercase;letter-spacing:0.8px;margin-top:2px;">Exercises</div></div>' +
+        '<div style="background:rgba(255,159,10,0.08);border:1px solid rgba(255,159,10,0.15);border-radius:14px;padding:14px 20px;text-align:center;">' +
+          '<div style="font-size:24px;font-weight:800;color:#FF9F0A;">12</div>' +
+          '<div style="font-size:10px;color:rgba(255,255,255,0.35);text-transform:uppercase;letter-spacing:0.8px;margin-top:2px;">Weeks</div></div>' +
+      '</div>' +
+      '<button class="wizard-next" id="wiz-finish">Start Training \u2192</button></div>';
+    
+    document.getElementById('wiz-finish').onclick = finishWizard;
+  }
+}
+
+// ════════════════════════════════════════════════════════════
 // DAILY WEIGH-INS
 // ════════════════════════════════════════════════════════════
 
@@ -3993,6 +4257,52 @@ function toggleDailyGrid(week) {
   btn.classList.toggle('open', isOpen);
   btn.textContent = isOpen ? '▴' : '▾';
   if (isOpen) updateDailyAvg(week);
+}
+
+function onDailyWeightInput(week) {
+  var grid = document.getElementById('daily-grid-' + week);
+  if (!grid) return;
+  var inputs = grid.querySelectorAll('.daily-input');
+  var vals = [];
+  
+  // Save each input value to localStorage and queue remote save
+  inputs.forEach(function(inp, idx) {
+    var v = inp.value;
+    lsSet('dw_' + week + '_' + idx, v);
+    if (parseFloat(v) > 0) vals.push(parseFloat(v));
+    // Debounced remote save
+    clearTimeout(inp._saveTimer);
+    inp._saveTimer = setTimeout(function() {
+      saveDailyWeightRemote(week, idx, v);
+    }, 800);
+  });
+  
+  // Real-time average
+  var avgEl = document.getElementById('daily-avg-' + week);
+  if (avgEl) {
+    if (vals.length > 0) {
+      var avg = (vals.reduce(function(a,b) { return a+b; }, 0) / vals.length).toFixed(1);
+      avgEl.textContent = 'avg: ' + avg + ' lbs';
+      // Auto-update weekly weight
+      lsSet(bwKey(week), avg);
+      var row = document.getElementById('wt-row-' + week);
+      if (row) {
+        var weekInput = row.querySelector('.wt-input');
+        if (weekInput) weekInput.value = avg;
+      }
+      // Update measurement card display
+      var measAvg = document.getElementById('meas-week-avg-' + week);
+      if (measAvg) measAvg.innerHTML = avg + ' <span style="font-size:13px;color:rgba(255,159,10,0.4);font-weight:600;">lbs</span>';
+      saveBodyWeightRemote(week, avg);
+    } else {
+      avgEl.textContent = 'avg: —';
+    }
+  }
+  
+  // Live stat + chart refresh
+  updateWeightDeltas();
+  updateWeightStats();
+  drawBodyWeightChart();
 }
 
 function saveDailyWeight(week, dayIdx, cb) {
@@ -4008,6 +4318,9 @@ function saveDailyWeight(week, dayIdx, cb) {
   lsSet('dw_' + week + '_' + dayIdx, val);
   saveDailyWeightRemote(week, dayIdx, val);
   updateDailyAvg(week);
+  updateWeightDeltas();
+  updateWeightStats();
+  drawBodyWeightChart();
 }
 
 function updateDailyAvg(week) {
@@ -4181,40 +4494,90 @@ function buildMeasurements() {
   container.innerHTML = '';
   
   var totalWeeks = getWeeks();
+  var dayLabels = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+  
   for (var i = 0; i < totalWeeks; i++) {
     var w = weekOffset + i;
     var isCur = w === selectedWeek;
+    var hasData = MEAS_FIELDS.some(function(f) { return lsGet('meas_' + w + '_' + f); });
+    var weekWeight = lsGet(bwKey(w)) || '';
+    
+    // Calculate daily average
+    var dailyVals = [];
+    for (var d = 0; d < 7; d++) {
+      var dv = lsGet('dw_' + w + '_' + d);
+      if (dv && parseFloat(dv) > 0) dailyVals.push(parseFloat(dv));
+    }
+    var avgStr = dailyVals.length > 0 ? (dailyVals.reduce(function(a,b){return a+b;},0) / dailyVals.length).toFixed(1) : '';
     
     var section = document.createElement('div');
     section.className = 'meas-section' + (isCur ? ' open' : '');
     section.id = 'meas-section-' + w;
     
-    var hasData = MEAS_FIELDS.some(function(f) { return lsGet('meas_' + w + '_' + f); });
-    var badge = hasData ? '✓' : '—';
+    // Build daily rows
+    var dailyHtml = dayLabels.map(function(dl, di) {
+      var dVal = lsGet('dw_' + w + '_' + di) || '';
+      return '<div class="daily-row">' +
+        '<div class="daily-label">' + dl + '</div>' +
+        '<input type="number" inputmode="decimal" class="daily-input" placeholder="— lbs" value="' + dVal + '" data-week="' + w + '" data-day="' + di + '" oninput="onDailyWeightInput(' + w + ')">' +
+      '</div>';
+    }).join('');
     
     section.innerHTML =
       '<div class="meas-header" onclick="document.getElementById(\'meas-section-' + w + '\').classList.toggle(\'open\')">' +
         '<div class="meas-title">Week ' + (w + 1) + (isCur ? ' <span style="font-size:10px;background:rgba(255,159,10,0.15);padding:1px 6px;border-radius:4px;">now</span>' : '') + '</div>' +
         '<div style="display:flex;align-items:center;gap:8px;">' +
-          '<span style="font-size:11px;color:' + (hasData ? '#FF9F0A' : 'var(--text-tertiary)') + ';">' + badge + '</span>' +
-          '<span class="meas-chevron">›</span>' +
+          '<span style="font-size:13px;font-weight:700;color:' + (weekWeight ? '#FF9F0A' : 'var(--text-tertiary)') + ';">' + (weekWeight ? weekWeight + ' lbs' : '—') + '</span>' +
+          '<span class="meas-chevron">\u203A</span>' +
         '</div>' +
       '</div>' +
       '<div class="meas-body">' +
-        '<div class="meas-grid">' +
-          MEAS_FIELDS.map(function(f) {
-            var val = lsGet('meas_' + w + '_' + f) || '';
-            return '<div class="meas-field">' +
-              '<div class="meas-label">' + f.charAt(0).toUpperCase() + f.slice(1) + ' (in)</div>' +
-              '<input type="number" inputmode="decimal" class="meas-input" placeholder="—" value="' + val + '" data-week="' + w + '" data-field="' + f + '">' +
-            '</div>';
-          }).join('') +
+        '<div style="margin-bottom:14px;">' +
+          '<div class="daily-grid-title"><span style="color:#FF9F0A;">Daily Weigh-Ins</span><span class="daily-avg" id="daily-avg-' + w + '">avg: ' + (avgStr ? avgStr + ' lbs' : '—') + '</span></div>' +
+          dailyHtml +
         '</div>' +
-        '<button class="meas-save-btn" onclick="saveMeasurements(' + w + ', this)">Save Measurements</button>' +
+        '<div style="margin-bottom:14px;padding:12px;background:rgba(255,159,10,0.06);border-radius:12px;border:1px solid rgba(255,159,10,0.15);">' +
+          '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;">' +
+            '<div style="font-size:11px;font-weight:700;color:#FF9F0A;text-transform:uppercase;letter-spacing:1px;">Weekly Average</div>' +
+            '<div style="font-size:20px;font-weight:800;color:#fff;" id="meas-week-avg-' + w + '">' + (avgStr || weekWeight || '—') + ' <span style="font-size:13px;color:rgba(255,159,10,0.4);font-weight:600;">lbs</span></div>' +
+          '</div>' +
+        '</div>' +
+        '<div style="margin-bottom:10px;">' +
+          '<div onclick="this.nextElementSibling.classList.toggle(\'open\')" style="display:flex;align-items:center;justify-content:space-between;cursor:pointer;padding:8px 0;">' +
+            '<span style="font-size:12px;color:var(--text-tertiary);font-weight:600;">\ud83d\udccf Body Measurements (optional)</span>' +
+            '<span style="font-size:12px;color:var(--text-tertiary);">+</span>' +
+          '</div>' +
+          '<div class="meas-detail-collapse">' +
+            '<div class="meas-grid" style="margin-top:8px;">' +
+              MEAS_FIELDS.map(function(f) {
+                var val = lsGet('meas_' + w + '_' + f) || '';
+                return '<div class="meas-field">' +
+                  '<div class="meas-label">' + f.charAt(0).toUpperCase() + f.slice(1) + ' (in)</div>' +
+                  '<input type="number" inputmode="decimal" class="meas-input" placeholder="—" value="' + val + '" data-week="' + w + '" data-field="' + f + '">' +
+                '</div>';
+              }).join('') +
+            '</div>' +
+          '</div>' +
+        '</div>' +
+        '<button class="meas-save-btn" onclick="saveMeasurements(' + w + ', this)">Save All</button>' +
       '</div>';
     
     container.appendChild(section);
   }
+}
+
+function quickSaveWeight(week, val) {
+  lsSet(bwKey(week), val);
+  saveBodyWeightRemote(week, val);
+  // Update the weight tracker row too
+  var row = document.getElementById('wt-row-' + week);
+  if (row) {
+    var input = row.querySelector('.wt-input');
+    if (input) input.value = val;
+  }
+  updateWeightDeltas();
+  updateWeightStats();
+  drawBodyWeightChart();
 }
 
 async function saveMeasurements(week, btn) {
