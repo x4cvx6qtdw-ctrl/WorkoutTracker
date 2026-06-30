@@ -1483,7 +1483,7 @@
     </div>
     <div style="font-size:11px;color:var(--text-tertiary);text-align:center;margin-top:8px;">Try 1 workout day free · Sign up for full access</div>
     <div id="auth-version" style="margin-top:24px;font-size:10px;color:rgba(255,255,255,0.12);text-align:center;">
-      <span style="background:rgba(255,255,255,0.06);padding:2px 8px;border-radius:6px;font-weight:600;letter-spacing:0.5px;">v2.0.2</span>
+      <span style="background:rgba(255,255,255,0.06);padding:2px 8px;border-radius:6px;font-weight:600;letter-spacing:0.5px;">v2.0.3</span>
       <div style="margin-top:4px;">MackTrak · Built with 🦾</div>
     </div>
   </div>
@@ -1683,10 +1683,10 @@
 
   <!-- ── Version Footer ── -->
   <div class="version-footer" id="version-footer" style="position:fixed;bottom:60px;left:50%;transform:translateX(-50%);z-index:0;width:100%;max-width:430px;display:none;">
-    <div class="version-tag" onclick="document.getElementById('changelog').classList.toggle('open')" style="background:rgba(255,159,10,0.15);color:#FF9F0A;">v2.0.2</div>
+    <div class="version-tag" onclick="document.getElementById('changelog').classList.toggle('open')" style="background:rgba(255,159,10,0.15);color:#FF9F0A;">v2.0.3</div>
     <div>MackTrak · Built with 🦾</div>
     <div class="version-changelog" id="changelog">
-      <strong>v2.0.2</strong> — Program Builder + Images<br>
+      <strong>v2.0.3</strong> — Program Builder + Images<br>
       • Admin program builder (create/edit/delete programs)<br>
       • Day editor with emoji and color picker<br>
       • Inline exercise editor with image URL support<br>
@@ -2085,6 +2085,22 @@ async function showApp() {
 
   await loadUserProgram();
   if (weekOffset > 0 && selectedWeek < weekOffset) selectedWeek = weekOffset;
+  
+  // Auto-detect current week from logged data
+  if (!isGuest && currentUser) {
+    try {
+      var { data: latestSet } = await sb.from('workout_sets')
+        .select('week')
+        .eq('user_id', currentUser.id)
+        .order('week', { ascending: false })
+        .limit(1);
+      if (latestSet && latestSet.length > 0) {
+        var latestWeek = latestSet[0].week;
+        // If they completed all sets for that week, move to next week
+        selectedWeek = Math.min(latestWeek, 11);
+      }
+    } catch(e) { /* keep default */ }
+  }
   checkInviteToken();
   checkShowWizard();
   buildWeekScroller();
