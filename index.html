@@ -7,6 +7,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="MackTrak">
 <meta name="theme-color" content="#000000">
+<link rel="manifest" href="manifest.json">
 <title>MackTrak</title>
 <style>
   :root {
@@ -1409,6 +1410,16 @@
   .wizard-next:disabled { opacity: 0.3; cursor: not-allowed; }
   .wizard-skip { text-align: center; padding: 14px; color: rgba(255,255,255,0.2); font-size: 13px; font-weight: 600; cursor: pointer; max-width: 420px; width: 100%; }
 
+  .set-save-btn {
+    width: 36px; height: 36px; border-radius: 10px;
+    background: rgba(255,159,10,0.12); border: 1px solid rgba(255,159,10,0.25);
+    color: #FF9F0A; font-size: 16px; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    font-family: inherit; transition: all 0.2s; flex-shrink: 0;
+  }
+  .set-save-btn:active { opacity: 0.7; }
+  .set-save-btn.saved { background: rgba(48,209,88,0.15); border-color: rgba(48,209,88,0.3); color: #30D158; }
+
   /* ── Animations ── */
   @keyframes popIn {
     from { opacity: 0; transform: scale(0.95) translateY(8px); }
@@ -1465,9 +1476,14 @@
       <div class="auth-error" id="auth-error"></div>
     </div>
     <button class="auth-guest-btn" onclick="guestLogin()">Continue as Guest</button>
+    <div style="text-align:center;margin-top:16px;font-size:11px;color:rgba(255,255,255,0.2);line-height:1.5;">
+      By signing up you agree to our<br>
+      <span onclick="document.getElementById('tos-modal').classList.add('open')" style="color:rgba(255,159,10,0.5);cursor:pointer;text-decoration:underline;">Terms of Service</span> &
+      <span onclick="document.getElementById('tos-modal').classList.add('open')" style="color:rgba(255,159,10,0.5);cursor:pointer;text-decoration:underline;">Privacy Policy</span>
+    </div>
     <div style="font-size:11px;color:var(--text-tertiary);text-align:center;margin-top:8px;">Try 1 workout day free · Sign up for full access</div>
     <div id="auth-version" style="margin-top:24px;font-size:10px;color:rgba(255,255,255,0.12);text-align:center;">
-      <span style="background:rgba(255,255,255,0.06);padding:2px 8px;border-radius:6px;font-weight:600;letter-spacing:0.5px;">v1.9.0</span>
+      <span style="background:rgba(255,255,255,0.06);padding:2px 8px;border-radius:6px;font-weight:600;letter-spacing:0.5px;">v2.0.2</span>
       <div style="margin-top:4px;">MackTrak · Built with 🦾</div>
     </div>
   </div>
@@ -1643,12 +1659,34 @@
     <div id="wizard-content" style="width:100%;max-width:420px;"></div>
   </div>
 
+  <!-- ── Terms of Service ── -->
+  <div id="tos-modal" style="display:none;position:fixed;inset:0;z-index:600;background:rgba(0,0,0,0.95);overflow-y:auto;padding:60px 24px 40px;">
+    <div style="max-width:600px;margin:0 auto;">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;">
+        <div style="font-size:22px;font-weight:800;color:#FF9F0A;">Terms of Service</div>
+        <div onclick="document.getElementById('tos-modal').classList.remove('open')" style="font-size:28px;color:var(--text-tertiary);cursor:pointer;">&#x2715;</div>
+      </div>
+      <div style="color:rgba(255,255,255,0.6);font-size:13px;line-height:1.8;">
+        <p><strong style="color:#FF9F0A;">1. Acceptance</strong><br>By using MackTrak, you agree to these terms. If you do not agree, do not use the service.</p>
+        <p><strong style="color:#FF9F0A;">2. Service</strong><br>MackTrak provides workout tracking, body weight logging, and fitness program management. The service is provided as-is.</p>
+        <p><strong style="color:#FF9F0A;">3. Accounts</strong><br>You are responsible for maintaining the security of your account credentials. You must provide accurate information when creating an account.</p>
+        <p><strong style="color:#FF9F0A;">4. Data</strong><br>Your workout data, body measurements, and progress photos are stored securely. We do not sell your personal data to third parties.</p>
+        <p><strong style="color:#FF9F0A;">5. Trainers</strong><br>If you are assigned to a trainer, they can view your workout progress, weight data, and measurements to provide coaching guidance.</p>
+        <p><strong style="color:#FF9F0A;">6. Privacy</strong><br>We collect only the data necessary to provide the service: email, workout logs, body weight, measurements, and progress photos. Data is stored in secure cloud infrastructure.</p>
+        <p><strong style="color:#FF9F0A;">7. Termination</strong><br>We reserve the right to terminate accounts that violate these terms. You may delete your account at any time by contacting support.</p>
+        <p><strong style="color:#FF9F0A;">8. Disclaimer</strong><br>MackTrak is not a substitute for professional medical advice. Consult a physician before starting any exercise program.</p>
+        <p style="margin-top:20px;color:var(--text-tertiary);font-size:11px;">Last updated: June 2026</p>
+      </div>
+    </div>
+  </div>
+  <style>.tos-open, #tos-modal.open { display: block !important; }</style>
+
   <!-- ── Version Footer ── -->
   <div class="version-footer" id="version-footer" style="position:fixed;bottom:60px;left:50%;transform:translateX(-50%);z-index:0;width:100%;max-width:430px;display:none;">
-    <div class="version-tag" onclick="document.getElementById('changelog').classList.toggle('open')" style="background:rgba(255,159,10,0.15);color:#FF9F0A;">v1.9.0</div>
+    <div class="version-tag" onclick="document.getElementById('changelog').classList.toggle('open')" style="background:rgba(255,159,10,0.15);color:#FF9F0A;">v2.0.2</div>
     <div>MackTrak · Built with 🦾</div>
     <div class="version-changelog" id="changelog">
-      <strong>v1.9.0</strong> — Program Builder + Images<br>
+      <strong>v2.0.2</strong> — Program Builder + Images<br>
       • Admin program builder (create/edit/delete programs)<br>
       • Day editor with emoji and color picker<br>
       • Inline exercise editor with image URL support<br>
@@ -2047,6 +2085,7 @@ async function showApp() {
 
   await loadUserProgram();
   if (weekOffset > 0 && selectedWeek < weekOffset) selectedWeek = weekOffset;
+  checkInviteToken();
   checkShowWizard();
   buildWeekScroller();
   buildWorkoutList();
@@ -2110,6 +2149,10 @@ async function loadUserProgram() {
     // Get user's program_id from profile
     const { data: profile } = await sb.from('profiles').select('program_id,week_offset').eq('id', currentUser.id).single();
     weekOffset = (profile && profile.week_offset) ? profile.week_offset : 0;
+    if (currentUser && profile) {
+      currentUser.role = profile.role || 'client';
+      currentUser.trainer_id = profile.trainer_id || null;
+    }
     if (!profile || !profile.program_id) return; // Use default
 
     // Load program days
@@ -2363,6 +2406,7 @@ function showDetail(wo) {
   resetWorkoutTimerUI();
   buildExerciseList(wo);
   updateDetailProgress(wo);
+  setTimeout(function() { restoreSetsFromCache(wo); }, 100);
   loadCardio();
 }
 
@@ -2421,7 +2465,7 @@ function buildExerciseList(wo) {
                 placeholder="${wPlaceholder}"
                 value="${storedWeight}"
                 data-wid="${wo.id}" data-ei="${ei}" data-si="${si}" data-type="weight"
-                onchange="saveSetField(this)" onblur="saveSetField(this)"
+                oninput="saveSetField(this)"
               >
               <div class="input-label">lbs</div>
             </div>
@@ -2430,11 +2474,12 @@ function buildExerciseList(wo) {
                 placeholder="${rPlaceholder}"
                 value="${storedReps}"
                 data-wid="${wo.id}" data-ei="${ei}" data-si="${si}" data-type="reps"
-                onchange="saveSetField(this)" onblur="saveSetField(this)"
+                oninput="saveSetField(this)"
               >
               <div class="input-label">reps</div>
             </div>
             <button class="set-timer-btn" onclick="startSetTimer(${ei})" title="Start rest timer">⏱️</button>
+            <button class="set-save-btn" id="save-btn-${wo.id}-${ei}-${si}" onclick="saveSetBtn(this, '${wo.id}', ${ei}, ${si})" title="Save set">✓</button>
           </div>
         </div>`;
     }
@@ -2555,30 +2600,139 @@ function toggleExercise(btn) {
   card.classList.toggle('open');
 }
 
+function saveSetBtn(btn, wid, ei, si) {
+  var row = btn.closest('.set-row');
+  var inputs = row.querySelectorAll('.weight-input');
+  inputs.forEach(function(inp) { saveSetField(inp); });
+  btn.classList.add('saved');
+  btn.textContent = '✓';
+  setTimeout(function() {
+    btn.classList.remove('saved');
+    btn.textContent = '✓';
+  }, 2000);
+}
+
 function saveSetField(input) {
-  const wid   = input.getAttribute('data-wid');
-  const ei    = parseInt(input.getAttribute('data-ei'));
-  const si    = parseInt(input.getAttribute('data-si'));
-  const type  = input.getAttribute('data-type');
-  const val   = input.value;
-
-  if (type === 'weight') lsSet(wKey(wid, ei, si, selectedWeek), val);
-  else                   lsSet(rKey(wid, ei, si, selectedWeek), val);
-
-  // Always save both fields together
-  const weight   = lsGet(wKey(wid, ei, si, selectedWeek)) || '';
-  const repsDone = lsGet(rKey(wid, ei, si, selectedWeek)) || '';
-  saveSetRemote(wid, ei, si, selectedWeek, weight, repsDone);
-
-  // Check for PR
-  if (type === 'weight' && weight) {
-    checkForPR(wid, ei, si, selectedWeek, weight);
+  var wid = input.dataset.wid;
+  var ei = parseInt(input.dataset.ei);
+  var si = parseInt(input.dataset.si);
+  var type = input.dataset.type;
+  var val = input.value;
+  
+  // LAYER 1: Instant localStorage save (survives page kill)
+  var lsKey = 'set_' + wid + '_' + ei + '_' + si + '_' + type + '_w' + selectedWeek;
+  localStorage.setItem(lsKey, val);
+  
+  // LAYER 2: Queue debounced Supabase sync
+  queueSetSync(wid, ei, si, selectedWeek);
+  
+  // Update UI (check completion)
+  var row = input.closest('.set-row');
+  var inputs = row.querySelectorAll('.weight-input');
+  var w = inputs[0]?.value;
+  var r = inputs[1]?.value;
+  if (w && r) {
+    row.classList.add('done-set');
+    row.classList.remove('active-set');
   }
+  updateDetailProgress(currentDetailWorkout);
+}
 
-  if (currentWorkout) {
-    updateDetailProgress(currentWorkout);
-    refreshExerciseProgress(input);
+// Pending sync queue
+var pendingSyncs = {};
+var syncTimers = {};
+
+function queueSetSync(wid, ei, si, week) {
+  var key = wid + '_' + ei + '_' + si + '_' + week;
+  pendingSyncs[key] = { wid: wid, ei: ei, si: si, week: week };
+  
+  // Debounce: sync 500ms after last keystroke
+  if (syncTimers[key]) clearTimeout(syncTimers[key]);
+  syncTimers[key] = setTimeout(function() {
+    flushSetSync(key);
+  }, 500);
+}
+
+async function flushSetSync(key) {
+  var s = pendingSyncs[key];
+  if (!s || isGuest) return;
+  
+  var wKey = 'set_' + s.wid + '_' + s.ei + '_' + s.si + '_weight_w' + s.week;
+  var rKey = 'set_' + s.wid + '_' + s.ei + '_' + s.si + '_reps_w' + s.week;
+  var weight = localStorage.getItem(wKey) || '';
+  var reps = localStorage.getItem(rKey) || '';
+  
+  try {
+    await sb.from('workout_sets').upsert({
+      user_id: currentUser.id,
+      workout_id: s.wid,
+      exercise_index: s.ei,
+      set_index: s.si,
+      week: s.week,
+      weight: weight,
+      reps_done: reps
+    }, { onConflict: 'user_id,workout_id,exercise_index,set_index,week' });
+    
+    showSyncIndicator('saved');
+  } catch(e) {
+    console.warn('Sync failed, will retry:', e);
+    // Keep in pendingSyncs for retry on visibilitychange
+    return;
   }
+  
+  delete pendingSyncs[key];
+  delete syncTimers[key];
+}
+
+// Flush ALL pending saves (called before page dies)
+async function flushAllPending() {
+  var keys = Object.keys(pendingSyncs);
+  if (keys.length === 0) return;
+  
+  var promises = keys.map(function(key) {
+    if (syncTimers[key]) clearTimeout(syncTimers[key]);
+    return flushSetSync(key);
+  });
+  
+  await Promise.all(promises);
+}
+
+// LAYER 2: Save before page dies (visibilitychange + beforeunload)
+document.addEventListener('visibilitychange', function() {
+  if (document.hidden) {
+    flushAllPending();
+  }
+});
+
+window.addEventListener('beforeunload', function() {
+  flushAllPending();
+});
+
+window.addEventListener('pagehide', function() {
+  flushAllPending();
+});
+
+// Restore set values from localStorage on exercise open
+function restoreSetsFromCache(wo) {
+  if (!wo || !wo.exercises) return;
+  wo.exercises.forEach(function(ex, ei) {
+    for (var si = 0; si < ex.sets; si++) {
+      var wKey = 'set_' + wo.id + '_' + ei + '_' + si + '_weight_w' + selectedWeek;
+      var rKey = 'set_' + wo.id + '_' + ei + '_' + si + '_reps_w' + selectedWeek;
+      var cachedW = localStorage.getItem(wKey);
+      var cachedR = localStorage.getItem(rKey);
+      
+      // Only use cache if we have a value and the DB value is empty
+      if (cachedW !== null) {
+        var input = document.querySelector('[data-wid="' + wo.id + '"][data-ei="' + ei + '"][data-si="' + si + '"][data-type="weight"]');
+        if (input && !input.value && cachedW) input.value = cachedW;
+      }
+      if (cachedR !== null) {
+        var input2 = document.querySelector('[data-wid="' + wo.id + '"][data-ei="' + ei + '"][data-si="' + si + '"][data-type="reps"]');
+        if (input2 && !input2.value && cachedR) input2.value = cachedR;
+      }
+    }
+  });
 }
 
 function refreshExerciseProgress(input) {
@@ -3291,6 +3445,71 @@ async function saveTargetsRemote(t) {
 const AVATAR_COLORS = ['#0A84FF','#FF9F0A','#30D158','#BF5AF2','#FF375F','#FF6B35','#5E5CE6','#AC8E68'];
 const ADMIN_UID = 'f815eed6-f723-4658-81af-77528378361b';
 
+// ════════════════════════════════════════════════════════════
+// PASSWORD RESET
+// ════════════════════════════════════════════════════════════
+
+async function showResetPassword() {
+  var email = document.getElementById('auth-email').value.trim();
+  if (!email) { alert('Enter your email address first.'); return; }
+  try {
+    var { error } = await sb.auth.resetPasswordForEmail(email, {
+      redirectTo: window.location.origin + window.location.pathname
+    });
+    if (error) { alert('Error: ' + error.message); return; }
+    alert('Password reset email sent! Check your inbox.');
+  } catch(e) { alert('Error sending reset email.'); }
+}
+
+// ════════════════════════════════════════════════════════════
+// CLIENT INVITE SYSTEM
+// ════════════════════════════════════════════════════════════
+
+async function generateInviteLink() {
+  if (!currentUser) return;
+  var token = Math.random().toString(36).substr(2) + Date.now().toString(36);
+  showSyncIndicator('saving');
+  var { error } = await sb.from('invite_tokens').insert({
+    token: token, trainer_id: currentUser.id
+  });
+  hideSyncIndicator();
+  if (error) { alert('Error creating invite.'); return; }
+  var link = window.location.origin + window.location.pathname + '?invite=' + token;
+  
+  if (navigator.clipboard) {
+    navigator.clipboard.writeText(link);
+    alert('Invite link copied to clipboard!\n\nShare this with your client:\n' + link);
+  } else {
+    prompt('Share this invite link with your client:', link);
+  }
+}
+
+async function checkInviteToken() {
+  var params = new URLSearchParams(window.location.search);
+  var token = params.get('invite');
+  if (!token || !currentUser || currentUser.role === 'master_admin' || currentUser.role === 'trainer') return;
+  
+  var { data } = await sb.from('invite_tokens')
+    .select('trainer_id,used,expires_at')
+    .eq('token', token)
+    .single();
+  
+  if (!data || data.used) return;
+  if (new Date(data.expires_at) < new Date()) return;
+  
+  // Assign client to trainer
+  await sb.from('profiles').update({ trainer_id: data.trainer_id }).eq('id', currentUser.id);
+  await sb.from('invite_tokens').update({ used: true }).eq('token', token);
+  
+  // Clean URL
+  window.history.replaceState({}, '', window.location.pathname);
+  currentUser.trainer_id = data.trainer_id;
+}
+
+// ════════════════════════════════════════════════════════════
+// MULTI-TENANT ADMIN
+// ════════════════════════════════════════════════════════════
+
 async function loadAdminData() {
   const listEl     = document.getElementById('admin-user-list');
   const archListEl = document.getElementById('admin-archived-list');
@@ -3306,8 +3525,13 @@ async function loadAdminData() {
     const { data: allFood } = await sb.from('food_logs').select('user_id,day_key,meal_idx,calories,protein');
 
     const all = profiles || [];
-    const active = all.filter(p => !p.archived_at);
-    const archived = all.filter(p => p.archived_at);
+    allUsersCache = all;
+    var filtered = all;
+    if (currentUser.role === 'trainer') {
+      filtered = all.filter(function(u) { return u.trainer_id === currentUser.id || u.id === currentUser.id; });
+    }
+    const active = filtered.filter(p => !p.archived_at);
+    const archived = filtered.filter(p => p.archived_at);
 
     // Auto-purge users archived > 30 days
     for (const au of archived) {
@@ -3399,6 +3623,11 @@ function buildUserCard(profile, idx, allSets, allBW, allFood, isArchived) {
       '<select style="width:100%;height:38px;border-radius:10px;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.15);color:#fff;font-size:13px;padding:0 10px;font-family:inherit;outline:none;" onchange="assignProgram(\'' + uid + '\', this.value)" id="prog-select-' + uid + '">' +
       '<option value="">Default (hardcoded)</option>' +
       '</select></div>' +
+      (currentUser.role === 'master_admin' ? 
+        '<div style="margin-bottom:10px;display:flex;gap:8px;">' +
+          '<button onclick="promoteToTrainer(\'' + uid + '\')" style="flex:1;padding:8px;border-radius:8px;background:rgba(255,159,10,0.08);border:1px solid rgba(255,159,10,0.2);color:#FF9F0A;font-size:11px;font-weight:600;font-family:inherit;cursor:pointer;">' + (u.role === 'trainer' ? 'Demote to Client' : 'Promote to Trainer') + '</button>' +
+          '<button onclick="assignToTrainer(\'' + uid + '\')" style="flex:1;padding:8px;border-radius:8px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);color:var(--text-secondary);font-size:11px;font-weight:600;font-family:inherit;cursor:pointer;">Assign Trainer</button>' +
+        '</div>' : '') +
       '<button class="archive-user-btn" onclick="confirmArchive(\'' + uid + '\')">Archive User</button>' +
       '<div class="archive-confirm-bar" id="archive-' + uid + '">' +
         '<div class="archive-confirm-text">Archive <strong>' + email + '</strong>? Held 30 days before deletion.</div>' +
@@ -3497,6 +3726,32 @@ async function populateProgramDropdowns() {
     var progId = card ? card.getAttribute('data-program-id') : '';
     if (progId) sel.value = progId;
   });
+}
+
+var allUsersCache = [];
+
+async function promoteToTrainer(uid) {
+  var user = allUsersCache.find(function(u) { return u.id === uid; });
+  if (!user) return;
+  var newRole = user.role === 'trainer' ? 'client' : 'trainer';
+  showSyncIndicator('saving');
+  await sb.from('profiles').update({ role: newRole }).eq('id', uid);
+  hideSyncIndicator();
+  loadAdminData();
+}
+
+async function assignToTrainer(uid) {
+  var trainers = allUsersCache.filter(function(u) { return u.role === 'trainer'; });
+  if (trainers.length === 0) { alert('No trainers available. Promote a user first.'); return; }
+  var msg = 'Assign to trainer:\n\n' + trainers.map(function(t, i) { return (i+1) + '. ' + (t.email || 'Unknown'); }).join('\n') + '\n\nEnter number:';
+  var pick = prompt(msg);
+  if (!pick) return;
+  var idx = parseInt(pick) - 1;
+  if (idx < 0 || idx >= trainers.length) return;
+  showSyncIndicator('saving');
+  await sb.from('profiles').update({ trainer_id: trainers[idx].id }).eq('id', uid);
+  hideSyncIndicator();
+  loadAdminData();
 }
 
 async function assignProgram(uid, programId) {
@@ -4922,6 +5177,16 @@ function closePhotoViewer(e) {
   if (!e || e.target === document.getElementById('photo-viewer') || e.target.closest('.photo-viewer-close')) {
     document.getElementById('photo-viewer').classList.remove('open');
   }
+}
+
+
+// Register Service Worker
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('sw.js').then(function(reg) {
+    console.log('SW registered:', reg.scope);
+  }).catch(function(e) {
+    console.log('SW registration failed:', e.message);
+  });
 }
 
 </script>
