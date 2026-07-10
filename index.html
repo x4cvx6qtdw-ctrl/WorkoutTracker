@@ -2257,6 +2257,7 @@ function hideSyncIndicator() {
 
 // ── State ─────────────────────────────────────────────────────────────────────
 let selectedWeek   = 0;
+var currentDetailWorkout = null;
 let weekOffset     = 0;
 let currentTab     = 'workouts';
 let currentWorkout = null;
@@ -2410,6 +2411,7 @@ function showDetail(wo) {
   document.getElementById('screen-home').classList.remove('active');
   document.getElementById('screen-detail').classList.add('active');
 
+  currentDetailWorkout = wo;
   document.getElementById('detail-eyebrow').textContent = `Week ${selectedWeek + 1}`;
   document.getElementById('detail-eyebrow').style.color = '#FF9F0A';
   document.getElementById('detail-title').textContent = wo.emoji + ' ' + wo.name;
@@ -2635,9 +2637,16 @@ function saveSetField(input) {
   var type = input.dataset.type;
   var val = input.value;
   
-  // LAYER 1: Instant localStorage save (survives page kill)
-  var lsKey = 'set_' + wid + '_' + ei + '_' + si + '_' + type + '_w' + selectedWeek;
-  localStorage.setItem(lsKey, val);
+  // Update in-memory cache (for progress tracking)
+  if (type === 'weight') {
+    lsSet(wKey(wid, ei, si, selectedWeek), val);
+  } else {
+    lsSet(rKey(wid, ei, si, selectedWeek), val);
+  }
+  
+  // LAYER 1: Persist to real localStorage (survives page kill)
+  var persistKey = 'set_' + wid + '_' + ei + '_' + si + '_' + type + '_w' + selectedWeek;
+  localStorage.setItem(persistKey, val);
   
   // LAYER 2: Queue debounced Supabase sync
   queueSetSync(wid, ei, si, selectedWeek);
@@ -2650,6 +2659,8 @@ function saveSetField(input) {
   if (w && r) {
     row.classList.add('done-set');
     row.classList.remove('active-set');
+  } else {
+    row.classList.remove('done-set');
   }
   updateDetailProgress(currentDetailWorkout);
 }
@@ -2733,22 +2744,26 @@ function restoreSetsFromCache(wo) {
   if (!wo || !wo.exercises) return;
   wo.exercises.forEach(function(ex, ei) {
     for (var si = 0; si < ex.sets; si++) {
-      var wKey = 'set_' + wo.id + '_' + ei + '_' + si + '_weight_w' + selectedWeek;
-      var rKey = 'set_' + wo.id + '_' + ei + '_' + si + '_reps_w' + selectedWeek;
-      var cachedW = localStorage.getItem(wKey);
-      var cachedR = localStorage.getItem(rKey);
+      var pWKey = 'set_' + wo.id + '_' + ei + '_' + si + '_weight_w' + selectedWeek;
+      var pRKey = 'set_' + wo.id + '_' + ei + '_' + si + '_reps_w' + selectedWeek;
+      var cachedW = localStorage.getItem(pWKey);
+      var cachedR = localStorage.getItem(pRKey);
       
-      // Only use cache if we have a value and the DB value is empty
-      if (cachedW !== null) {
+      if (cachedW !== null && cachedW) {
         var input = document.querySelector('[data-wid="' + wo.id + '"][data-ei="' + ei + '"][data-si="' + si + '"][data-type="weight"]');
-        if (input && !input.value && cachedW) input.value = cachedW;
+        if (input && !input.value) input.value = cachedW;
+        // Also restore to in-memory cache for progress
+        lsSet(wKey(wo.id, ei, si, selectedWeek), cachedW);
       }
-      if (cachedR !== null) {
+      if (cachedR !== null && cachedR) {
         var input2 = document.querySelector('[data-wid="' + wo.id + '"][data-ei="' + ei + '"][data-si="' + si + '"][data-type="reps"]');
-        if (input2 && !input2.value && cachedR) input2.value = cachedR;
+        if (input2 && !input2.value) input2.value = cachedR;
+        lsSet(rKey(wo.id, ei, si, selectedWeek), cachedR);
       }
     }
   });
+  // Update progress after restore
+  updateDetailProgress(wo);
 }
 
 function refreshExerciseProgress(input) {
