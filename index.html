@@ -1483,7 +1483,7 @@
     </div>
     <div style="font-size:11px;color:var(--text-tertiary);text-align:center;margin-top:8px;">Try 1 workout day free · Sign up for full access</div>
     <div id="auth-version" style="margin-top:24px;font-size:10px;color:rgba(255,255,255,0.12);text-align:center;">
-      <span style="background:rgba(255,255,255,0.06);padding:2px 8px;border-radius:6px;font-weight:600;letter-spacing:0.5px;">v2.0.3</span>
+      <span style="background:rgba(255,255,255,0.06);padding:2px 8px;border-radius:6px;font-weight:600;letter-spacing:0.5px;">v2.0.4</span>
       <div style="margin-top:4px;">MackTrak · Built with 🦾</div>
     </div>
   </div>
@@ -1683,10 +1683,10 @@
 
   <!-- ── Version Footer ── -->
   <div class="version-footer" id="version-footer" style="position:fixed;bottom:60px;left:50%;transform:translateX(-50%);z-index:0;width:100%;max-width:430px;display:none;">
-    <div class="version-tag" onclick="document.getElementById('changelog').classList.toggle('open')" style="background:rgba(255,159,10,0.15);color:#FF9F0A;">v2.0.3</div>
+    <div class="version-tag" onclick="document.getElementById('changelog').classList.toggle('open')" style="background:rgba(255,159,10,0.15);color:#FF9F0A;">v2.0.4</div>
     <div>MackTrak · Built with 🦾</div>
     <div class="version-changelog" id="changelog">
-      <strong>v2.0.3</strong> — Program Builder + Images<br>
+      <strong>v2.0.4</strong> — Program Builder + Images<br>
       • Admin program builder (create/edit/delete programs)<br>
       • Day editor with emoji and color picker<br>
       • Inline exercise editor with image URL support<br>
@@ -2122,7 +2122,7 @@ async function loadAllData() {
   if (isGuest) return;
   showSyncIndicator('loading');
   try {
-    const { data: sets } = await sb.from('workout_sets').select('*');
+    const { data: sets } = await sb.from('workout_sets').select('*').eq('user_id', currentUser.id);
     if (sets) sets.forEach(r => {
       lsSet(wKey(r.workout_id, r.exercise_index, r.set_index, r.week), r.weight || '');
       lsSet(rKey(r.workout_id, r.exercise_index, r.set_index, r.week), r.reps_done || '');
@@ -2131,7 +2131,7 @@ async function loadAllData() {
     const { data: bw } = await sb.from('body_weights').select('*').eq('user_id', currentUser.id);
     if (bw) bw.forEach(r => lsSet(bwKey(r.week), r.weight));
 
-    const { data: food } = await sb.from('food_logs').select('*');
+    const { data: food } = await sb.from('food_logs').select('*').eq('user_id', currentUser.id);
     if (food) food.forEach(r => {
       lsSet(foodKey(r.day_key, r.meal_idx), JSON.stringify({
         name: r.food_name, cal: r.calories, protein: r.protein,
@@ -2139,10 +2139,10 @@ async function loadAllData() {
       }));
     });
 
-    const { data: water } = await sb.from('water_logs').select('*');
+    const { data: water } = await sb.from('water_logs').select('*').eq('user_id', currentUser.id);
     if (water) water.forEach(r => lsSet(waterKey(r.day_key), r.cups));
 
-    const { data: targets } = await sb.from('macro_targets').select('*');
+    const { data: targets } = await sb.from('macro_targets').select('*').eq('user_id', currentUser.id);
     if (targets) targets.forEach(r => lsSet('target_' + r.day_type, JSON.stringify(r)));
 
     // Load measurements
@@ -2621,7 +2621,8 @@ function toggleExercise(btn) {
 function saveSetBtn(btn, wid, ei, si) {
   var row = btn.closest('.set-row');
   var inputs = row.querySelectorAll('.weight-input');
-  inputs.forEach(function(inp) { saveSetField(inp); });
+  var lastInput = null;
+  inputs.forEach(function(inp) { saveSetField(inp); lastInput = inp; });
   btn.classList.add('saved');
   btn.textContent = '✓';
   setTimeout(function() {
@@ -2663,6 +2664,7 @@ function saveSetField(input) {
     row.classList.remove('done-set');
   }
   updateDetailProgress(currentDetailWorkout);
+  refreshExerciseProgress(input);
 }
 
 // Pending sync queue
@@ -2684,11 +2686,12 @@ async function flushSetSync(key) {
   var s = pendingSyncs[key];
   if (!s || isGuest) return;
   
-  var wKey = 'set_' + s.wid + '_' + s.ei + '_' + s.si + '_weight_w' + s.week;
-  var rKey = 'set_' + s.wid + '_' + s.ei + '_' + s.si + '_reps_w' + s.week;
-  var weight = localStorage.getItem(wKey) || '';
-  var reps = localStorage.getItem(rKey) || '';
+  var persistW = 'set_' + s.wid + '_' + s.ei + '_' + s.si + '_weight_w' + s.week;
+  var persistR = 'set_' + s.wid + '_' + s.ei + '_' + s.si + '_reps_w' + s.week;
+  var weight = localStorage.getItem(persistW) || '';
+  var reps = localStorage.getItem(persistR) || '';
   
+  if (!currentUser || !currentUser.id) return;
   try {
     await sb.from('workout_sets').upsert({
       user_id: currentUser.id,
@@ -2702,7 +2705,7 @@ async function flushSetSync(key) {
     
     showSyncIndicator('saved');
   } catch(e) {
-    console.warn('Sync failed, will retry:', e);
+    console.error('Sync failed:', e.message, 'Data:', {wid: s.wid, ei: s.ei, si: s.si, week: s.week, weight, reps});
     // Keep in pendingSyncs for retry on visibilitychange
     return;
   }
@@ -2767,7 +2770,7 @@ function restoreSetsFromCache(wo) {
 }
 
 function refreshExerciseProgress(input) {
-  const wo = currentWorkout;
+  const wo = currentDetailWorkout;
   const ei = parseInt(input.getAttribute('data-ei'));
   const ex = wo.exercises[ei];
   const { completed } = getExProgress(wo.id, ei, ex.sets, selectedWeek);
