@@ -2114,7 +2114,7 @@ async function showApp() {
   updateWeightStats();
   buildMeasurements();
   loadAllPhotoThumbs();
-  if (currentWorkout) buildExerciseList(currentWorkout);
+  if (currentDetailWorkout) buildExerciseList(currentDetailWorkout);
 }
 
 // ── Load all data from Supabase into cache ────────────────────────────────────
@@ -2260,7 +2260,7 @@ let selectedWeek   = 0;
 var currentDetailWorkout = null;
 let weekOffset     = 0;
 let currentTab     = 'workouts';
-let currentWorkout = null;
+// currentWorkout merged into currentDetailWorkout
 
 // ── Init ──────────────────────────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', async () => {
@@ -2407,7 +2407,7 @@ function buildWorkoutList() {
 
 // ── Detail Screen ─────────────────────────────────────────────────────────────
 function showDetail(wo) {
-  currentWorkout = wo;
+  currentDetailWorkout = wo;
   document.getElementById('screen-home').classList.remove('active');
   document.getElementById('screen-detail').classList.add('active');
 
@@ -2770,44 +2770,63 @@ function restoreSetsFromCache(wo) {
 }
 
 function refreshExerciseProgress(input) {
-  const wo = currentDetailWorkout;
-  const ei = parseInt(input.getAttribute('data-ei'));
-  const ex = wo.exercises[ei];
-  const { completed } = getExProgress(wo.id, ei, ex.sets, selectedWeek);
-  const allDone = completed === ex.sets;
-  const card = input.closest('.exercise-card');
-  card.classList.toggle('all-done', allDone);
-  const pill = card.querySelector('.ex-progress-pill');
-  pill.textContent = `${completed}/${ex.sets}`;
-  if (allDone) {
-    pill.classList.add('done');
-    pill.style.color = '#FF9F0A';
-    pill.style.background = 'rgba(255,159,10,0.13)';
-  } else {
-    pill.classList.remove('done');
-    pill.style.color = '';
-    pill.style.background = '';
-  }
-
-  // Re-highlight active set within this card
-  const rows = card.querySelectorAll('.set-row');
-  let foundNext = false;
-  rows.forEach((row, si) => {
-    const hasW = lsGet(wKey(wo.id, ei, si, selectedWeek));
-    const hasR = lsGet(rKey(wo.id, ei, si, selectedWeek));
-    const isDone = hasW && hasR;
+  var card = input.closest('.exercise-card');
+  if (!card) return;
+  
+  // Count completed sets directly from DOM inputs
+  var setRows = card.querySelectorAll('.set-row');
+  var totalSets = setRows.length;
+  var completed = 0;
+  var foundNext = false;
+  
+  setRows.forEach(function(row) {
+    var inputs = row.querySelectorAll('.weight-input');
+    var hasW = inputs[0] && inputs[0].value && inputs[0].value !== '';
+    var hasR = inputs[1] && inputs[1].value && inputs[1].value !== '';
+    var isDone = hasW && hasR;
+    
     row.classList.remove('active-set', 'done-set');
     if (isDone) {
+      completed++;
       row.classList.add('done-set');
     } else if (!foundNext) {
       row.classList.add('active-set');
       foundNext = true;
     }
   });
+  
+  var allDone = completed === totalSets;
+  var pill = card.querySelector('.ex-progress-pill');
+  if (pill) {
+    pill.textContent = completed + '/' + totalSets;
+    if (allDone) {
+      pill.style.color = '#FF9F0A';
+      pill.style.background = 'rgba(255,159,10,0.13)';
+      card.classList.add('all-done');
+    } else {
+      pill.style.color = '';
+      pill.style.background = '';
+      card.classList.remove('all-done');
+    }
+  }
 }
 
 function updateDetailProgress(wo) {
-  const { total, completed } = getProgress(wo, selectedWeek);
+  // Count from DOM for real-time accuracy
+  var allSetRows = document.querySelectorAll('#screen-detail .set-row');
+  var total = allSetRows.length;
+  var completed = 0;
+  allSetRows.forEach(function(row) {
+    var inputs = row.querySelectorAll('.weight-input');
+    var hasW = inputs[0] && inputs[0].value && inputs[0].value !== '';
+    var hasR = inputs[1] && inputs[1].value && inputs[1].value !== '';
+    if (hasW && hasR) completed++;
+  });
+  if (total === 0 && wo) {
+    var prog = getProgress(wo, selectedWeek);
+    total = prog.total;
+    completed = prog.completed;
+  }
   const pct = total > 0 ? Math.round(completed / total * 100) : 0;
   document.getElementById('detail-pct').textContent = pct + '%';
   document.getElementById('detail-progress-fill').style.width = pct + '%';
@@ -4357,8 +4376,8 @@ function cancelRestTimer() {
 }
 
 function startSetTimer(ei) {
-  if (!currentWorkout || !currentWorkout.exercises) return;
-  var ex = currentWorkout.exercises[ei];
+  if (!currentDetailWorkout || !currentDetailWorkout.exercises) return;
+  var ex = currentDetailWorkout.exercises[ei];
   var restSecs = detectRestTime(ex ? ex.note : '');
   startRestTimer(restSecs);
 }
@@ -5003,7 +5022,7 @@ function selectCardioType(btn, type) {
 }
 
 async function loadCardio() {
-  if (!currentWorkout || isGuest) return;
+  if (!currentDetailWorkout || isGuest) return;
   selectedCardioType = '';
   document.getElementById('cardio-duration').value = '';
   document.getElementById('cardio-intensity').value = '';
@@ -5014,7 +5033,7 @@ async function loadCardio() {
   var { data } = await sb.from('cardio_logs')
     .select('*')
     .eq('user_id', currentUser.id)
-    .eq('workout_id', currentWorkout.id)
+    .eq('workout_id', currentDetailWorkout.id)
     .eq('week', selectedWeek)
     .single();
 
@@ -5043,7 +5062,7 @@ function updateCardioBadge(mins) {
 }
 
 async function saveCardio() {
-  if (!currentWorkout || isGuest) return;
+  if (!currentDetailWorkout || isGuest) return;
   var duration = document.getElementById('cardio-duration').value;
   var intensity = document.getElementById('cardio-intensity').value;
   var notes = document.getElementById('cardio-notes').value;
@@ -5051,7 +5070,7 @@ async function saveCardio() {
   showSyncIndicator('saving');
   await sb.from('cardio_logs').upsert({
     user_id: currentUser.id,
-    workout_id: currentWorkout.id,
+    workout_id: currentDetailWorkout.id,
     week: selectedWeek,
     cardio_type: selectedCardioType,
     duration_mins: duration ? parseInt(duration) : null,
