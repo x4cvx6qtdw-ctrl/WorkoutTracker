@@ -1483,7 +1483,7 @@
     </div>
     <div style="font-size:11px;color:var(--text-tertiary);text-align:center;margin-top:8px;">Try 1 workout day free · Sign up for full access</div>
     <div id="auth-version" style="margin-top:24px;font-size:10px;color:rgba(255,255,255,0.12);text-align:center;">
-      <span style="background:rgba(255,255,255,0.06);padding:2px 8px;border-radius:6px;font-weight:600;letter-spacing:0.5px;">v2.0.4</span>
+      <span style="background:rgba(255,255,255,0.06);padding:2px 8px;border-radius:6px;font-weight:600;letter-spacing:0.5px;">v2.0.5</span>
       <div style="margin-top:4px;">MackTrak · Built with 🦾</div>
     </div>
   </div>
@@ -1683,10 +1683,10 @@
 
   <!-- ── Version Footer ── -->
   <div class="version-footer" id="version-footer" style="position:fixed;bottom:60px;left:50%;transform:translateX(-50%);z-index:0;width:100%;max-width:430px;display:none;">
-    <div class="version-tag" onclick="document.getElementById('changelog').classList.toggle('open')" style="background:rgba(255,159,10,0.15);color:#FF9F0A;">v2.0.4</div>
+    <div class="version-tag" onclick="document.getElementById('changelog').classList.toggle('open')" style="background:rgba(255,159,10,0.15);color:#FF9F0A;">v2.0.5</div>
     <div>MackTrak · Built with 🦾</div>
     <div class="version-changelog" id="changelog">
-      <strong>v2.0.4</strong> — Program Builder + Images<br>
+      <strong>v2.0.5</strong> — Program Builder + Images<br>
       • Admin program builder (create/edit/delete programs)<br>
       • Day editor with emoji and color picker<br>
       • Inline exercise editor with image URL support<br>
@@ -2162,8 +2162,9 @@ async function loadAllData() {
 async function loadUserProgram() {
   if (isGuest) return;
   try {
+    // Note: select('*') used so missing columns don't crash the query
     // Get user's program_id from profile
-    const { data: profile } = await sb.from('profiles').select('program_id,week_offset').eq('id', currentUser.id).single();
+    const { data: profile } = await sb.from('profiles').select('*').eq('id', currentUser.id).single();
     weekOffset = (profile && profile.week_offset) ? profile.week_offset : 0;
     if (currentUser && profile) {
       currentUser.role = profile.role || 'client';
@@ -3810,7 +3811,7 @@ async function assignToTrainer(uid) {
 async function assignProgram(uid, programId) {
   showSyncIndicator('saving');
   // Get current week_offset for this user
-  var { data: prof } = await sb.from('profiles').select('week_offset').eq('id', uid).single();
+  var { data: prof } = await sb.from('profiles').select('*').eq('id', uid).single();
   var currentOffset = (prof && prof.week_offset) ? prof.week_offset : 0;
 
   // Ask admin if this is a continuation (extend weeks) or fresh start
@@ -4427,7 +4428,7 @@ async function checkShowWizard() {
     return;
   }
   if (!currentUser) return;
-  var { data: profile } = await sb.from('profiles').select('program_id').eq('id', currentUser.id).single();
+  var { data: profile } = await sb.from('profiles').select('*').eq('id', currentUser.id).single();
   // Only show wizard if no program AND no logged data (truly new user)
   if (!profile || !profile.program_id) {
     var { data: sets } = await sb.from('workout_sets').select('id').eq('user_id', currentUser.id).limit(1);
