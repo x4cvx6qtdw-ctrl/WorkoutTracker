@@ -1483,7 +1483,7 @@
     </div>
     <div style="font-size:11px;color:var(--text-tertiary);text-align:center;margin-top:8px;">Try 1 workout day free · Sign up for full access</div>
     <div id="auth-version" style="margin-top:24px;font-size:10px;color:rgba(255,255,255,0.12);text-align:center;">
-      <span style="background:rgba(255,255,255,0.06);padding:2px 8px;border-radius:6px;font-weight:600;letter-spacing:0.5px;">v2.0.5</span>
+      <span style="background:rgba(255,255,255,0.06);padding:2px 8px;border-radius:6px;font-weight:600;letter-spacing:0.5px;">v2.0.6</span>
       <div style="margin-top:4px;">MackTrak · Built with 🦾</div>
     </div>
   </div>
@@ -1683,10 +1683,10 @@
 
   <!-- ── Version Footer ── -->
   <div class="version-footer" id="version-footer" style="position:fixed;bottom:60px;left:50%;transform:translateX(-50%);z-index:0;width:100%;max-width:430px;display:none;">
-    <div class="version-tag" onclick="document.getElementById('changelog').classList.toggle('open')" style="background:rgba(255,159,10,0.15);color:#FF9F0A;">v2.0.5</div>
+    <div class="version-tag" onclick="document.getElementById('changelog').classList.toggle('open')" style="background:rgba(255,159,10,0.15);color:#FF9F0A;">v2.0.6</div>
     <div>MackTrak · Built with 🦾</div>
     <div class="version-changelog" id="changelog">
-      <strong>v2.0.5</strong> — Program Builder + Images<br>
+      <strong>v2.0.6</strong> — Program Builder + Images<br>
       • Admin program builder (create/edit/delete programs)<br>
       • Day editor with emoji and color picker<br>
       • Inline exercise editor with image URL support<br>
@@ -3652,9 +3652,11 @@ function buildUserCard(profile, idx, allSets, allBW, allFood, isArchived) {
   if (uid === ADMIN_UID) {
     actionsHtml =
       '<div style="margin-bottom:12px;"><div class="user-detail-label">Assign Program</div>' +
-      '<select style="width:100%;height:38px;border-radius:10px;background:rgba(255,159,10,0.08);border:1px solid rgba(255,159,10,0.2);color:#FF9F0A;font-size:13px;padding:0 10px;font-family:inherit;outline:none;" onchange="assignProgram(\'' + uid + '\', this.value)" id="prog-select-' + uid + '">' +
+      '<select style="width:100%;height:38px;border-radius:10px;background:rgba(255,159,10,0.08);border:1px solid rgba(255,159,10,0.2);color:#FF9F0A;font-size:13px;padding:0 10px;font-family:inherit;outline:none;" id="prog-select-' + uid + '">' +
       '<option value="">Default (hardcoded)</option>' +
-      '</select></div>' +
+      '</select>' +
+      '<button onclick="assignProgram(\'' + uid + '\', document.getElementById(\'prog-select-' + uid + '\').value)" style="margin-top:8px;width:100%;padding:10px;border-radius:10px;background:linear-gradient(135deg,#FF9F0A,#CC7A00);color:#000;font-size:13px;font-weight:700;font-family:inherit;cursor:pointer;border:none;">Save Program</button>' +
+      '</div>' +
       '<div style="margin-top:8px;font-size:12px;color:rgba(255,159,10,0.4);text-align:center;">This is you</div>';
   } else if (isArchived) {
     actionsHtml =
@@ -3674,9 +3676,11 @@ function buildUserCard(profile, idx, allSets, allBW, allFood, isArchived) {
     // Program assignment
     actionsHtml =
       '<div style="margin-bottom:12px;"><div class="user-detail-label">Assign Program</div>' +
-      '<select style="width:100%;height:38px;border-radius:10px;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.15);color:#fff;font-size:13px;padding:0 10px;font-family:inherit;outline:none;" onchange="assignProgram(\'' + uid + '\', this.value)" id="prog-select-' + uid + '">' +
+      '<select style="width:100%;height:38px;border-radius:10px;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.15);color:#fff;font-size:13px;padding:0 10px;font-family:inherit;outline:none;" id="prog-select-' + uid + '">' +
       '<option value="">Default (hardcoded)</option>' +
-      '</select></div>' +
+      '</select>' +
+      '<button onclick="assignProgram(\'' + uid + '\', document.getElementById(\'prog-select-' + uid + '\').value)" style="margin-top:8px;width:100%;padding:10px;border-radius:10px;background:linear-gradient(135deg,#FF9F0A,#CC7A00);color:#000;font-size:13px;font-weight:700;font-family:inherit;cursor:pointer;border:none;">Save Program</button>' +
+      '</div>' +
       (currentUser.role === 'master_admin' ? 
         '<div style="margin-bottom:10px;display:flex;gap:8px;">' +
           '<button onclick="promoteToTrainer(\'' + uid + '\')" style="flex:1;padding:8px;border-radius:8px;background:rgba(255,159,10,0.08);border:1px solid rgba(255,159,10,0.2);color:#FF9F0A;font-size:11px;font-weight:600;font-family:inherit;cursor:pointer;">' + (profile.role === 'trainer' ? 'Demote to Client' : 'Promote to Trainer') + '</button>' +
@@ -3769,7 +3773,7 @@ async function populateProgramDropdowns() {
     var uid = sel.id.replace('prog-select-', '');
     // Keep the first option (default)
     while (sel.options.length > 1) sel.remove(1);
-    allPrograms.forEach(function(p) {
+    allPrograms.sort(function(a,b) { return (a.name||'').localeCompare(b.name||''); }).forEach(function(p) {
       var opt = document.createElement('option');
       opt.value = p.id;
       opt.textContent = p.name;
@@ -3810,25 +3814,32 @@ async function assignToTrainer(uid) {
 
 async function assignProgram(uid, programId) {
   showSyncIndicator('saving');
-  // Get current week_offset for this user
-  var { data: prof } = await sb.from('profiles').select('*').eq('id', uid).single();
-  var currentOffset = (prof && prof.week_offset) ? prof.week_offset : 0;
-
-  // Ask admin if this is a continuation (extend weeks) or fresh start
-  var newOffset = currentOffset;
-  if (programId) {
-    var extend = confirm('Continue from Week ' + (currentOffset + 13) + '?\n\nOK = Continue (weeks ' + (currentOffset + 13) + '-' + (currentOffset + 24) + ')\nCancel = Start fresh (weeks 1-12)');
-    if (extend) {
-      newOffset = currentOffset + 12;
-    } else {
-      newOffset = 0;
-    }
-  } else {
-    newOffset = 0;
-  }
-
-  await sb.from('profiles').update({ program_id: programId || null, week_offset: newOffset }).eq('id', uid);
+  
+  var updateData = { program_id: programId || null, week_offset: 0 };
+  
+  var { error } = await sb.from('profiles').update(updateData).eq('id', uid);
+  
   hideSyncIndicator();
+  
+  if (error) {
+    alert('Error assigning program: ' + error.message);
+    return;
+  }
+  
+  // Visual confirmation
+  var btn = event.target;
+  btn.textContent = '✓ Saved';
+  btn.style.background = 'rgba(48,209,88,0.8)';
+  setTimeout(function() {
+    btn.textContent = 'Save Program';
+    btn.style.background = 'linear-gradient(135deg,#FF9F0A,#CC7A00)';
+  }, 2000);
+  
+  // If assigning to self, reload program
+  if (uid === currentUser.id) {
+    await loadUserProgram();
+    buildWorkoutList();
+  }
 }
 
 function confirmArchive(uid) {
